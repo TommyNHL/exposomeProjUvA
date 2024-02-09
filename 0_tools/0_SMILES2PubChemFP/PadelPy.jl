@@ -123,7 +123,6 @@ for i = 1:32
     CSV.write(path[1:end-4]*"_part_$i.csv",set)
 end
 
-
 #backward
 # for i = 858:-1:1
 #     path = "/home/emcms/Data/Denice/CompTox FP/CompTox.csv"
