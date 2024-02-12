@@ -94,8 +94,14 @@ end
 inputDB = CSV.read("D:\\0_data\\databaseOfMassBankEUMoNA.csv", DataFrame)
 
 # filtering in positive ionization mode -> 36372 x 4
-inputData = inputDB[inputDB.ION_MODE .== "POSITIVE", ["SMILES", "INCHIKEY", 
-    "PRECURSOR_ION", "MZ_VALUES"]]
+# filtering in precusor ion with measured m/z -> 36355 x 4
+# filtering in precusor ion with m/z <= 1000 -> 36250 x 4
+inputData = inputDB[inputDB.ION_MODE .== "POSITIVE", 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
+inputData = inputData[inputData.PRECURSOR_ION .!== NaN, 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
+inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 
 inputData[!, "CNLmasses"] .= String[string("")]
 size(inputData)
@@ -120,6 +126,6 @@ for i in 1:size(inputData,1)
 end
 
 # save
-# output csv is a 36372 x 7 df
+# output csv is a 36250 x 5 df
 savePath = "D:\\0_data\\databaseOfMassBankEUMoNA_withNLs.csv"
 CSV.write(savePath, inputData)
