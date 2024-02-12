@@ -103,29 +103,37 @@ inputData = inputData[inputData.PRECURSOR_ION .!== NaN,
 inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 
+inputData[!, "binedPRECURSOR_ION"] .= Float64[0]
 inputData[!, "CNLmasses"] .= String[string("")]
 size(inputData)
 
 #arrNL_col = String[]
-for i in 1:size(inputData,1)
+for i in 1:size(inputData, 1)
     println(i)
     fragIons = getVec(inputData[i,"MZ_VALUES"])
     arrNL = string("")
     for frag in fragIons
         if arrNL == string("")
-          NL = inputData[i,"PRECURSOR_ION"] - frag
+          NL = round((round(inputData[i,"PRECURSOR_ION"], 
+                RoundDown, digits = 3) - round(frag, 
+                RoundDown, digits = 3)), 
+                RoundDown, digits = 2)
           arrNL = string(arrNL, string(NL))
         else
-          NL = inputData[i,"PRECURSOR_ION"] - frag
+          NL = round((round(inputData[i,"PRECURSOR_ION"], 
+                RoundDown, digits = 3) - round(frag, 
+                RoundDown, digits = 3)), 
+                RoundDown, digits = 2)
           arrNL = string(arrNL, ", ", string(NL))
           #println(arrNL)
         end
     end
     #append!(arrNL_col, arrNL)
-    inputData[i,"CNLmasses"] = arrNL
+    inputData[i, "binedPRECURSOR_ION"] = round(inputData[i, "PRECURSOR_ION"], RoundDown, digits = 2)
+    inputData[i, "CNLmasses"] = arrNL
 end
 
 # save
-# output csv is a 36250 x 5 df
+# output csv is a 36250 x 6 df
 savePath = "D:\\0_data\\databaseOfMassBankEUMoNA_withNLs.csv"
 CSV.write(savePath, inputData)
