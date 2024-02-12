@@ -31,10 +31,20 @@
 ### MergingNLs2CNLsMasses.jl
 #### - step 8: merge NLs into list for each ID copound
 ####           -> new .csv
+### CNLsFeaturingWithoutTol.jl
 #### - step 9: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
-### Df4CNLmodeling.jl
-#### - step 10: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
+### CNLsFeaturingWithTol.jl
+#### - step 10: condense column(CNLs masses)
+####           -> new .csv
+### ScoresCNLsCalculation.jl
+#### - step 11: calculate SUM(P(TP)) for each CNL
+#### - step 12: calculate SUM(P(TN)) for each CNL
+#### - step 13: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
+#### - step 14: filter in CNL with Score(CNL) >= 0.0
+####           -> new .csv
+### Dfs4CNLmodeling.jl
+#### - step 15: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel
