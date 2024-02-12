@@ -25,13 +25,16 @@
 #### - step 4: bin the m/z domain with bin size 0.01 Da (steps)
 #### - step 5: calculate NLs by m/z(precusor ion) - m/z(fragment ions)
 ####           -> new .csv
+### JoiningInternalDB.jl
+#### - step 6: repeat steps 1-5
+#### - step 7: join with Cocamide MS2 spectra DB
 ### MergingNLs2CNLsMasses.jl
-#### - step 6: merge NLs into list for each ID copound
+#### - step 8: merge NLs into list for each ID copound
 ####           -> new .csv
-#### - step 7: transform table as row(ID copounds) x column(CNLs masses)
+#### - step 9: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
 ### Df4CNLmodeling.jl
-#### - step 8: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
+#### - step 10: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel
