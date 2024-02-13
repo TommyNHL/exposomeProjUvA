@@ -56,14 +56,33 @@ for i in 1:size(inputDB, 1)
     if (i == 1 && count == 1)
         massesArr = getMasses(i, massesArr)
         #println(massesArr)
+    elseif (i == size(inputDB, 1) && newRowOrNot(inputDB[i-1, "INCHIKEY"], inputDB[i, "INCHIKEY"]) == true)
+        massesArr = getMasses(i, massesArr)
+        append!(mergedDf, DataFrame(
+                  SMILES = [inputDB[i, "SMILES"]], 
+                  INCHIKEY = [inputDB[i, "INCHIKEY"]], 
+                  binedPRECURSOR_ION = [inputDB[i, "binedPRECURSOR_ION"]], 
+                  CNLmasses = [sort!(collect(setArr(massesArr)))]
+                  ))
+        count += 1
+    elseif (i == size(inputDB, 1) && newRowOrNot(inputDB[i-1, "INCHIKEY"], inputDB[i, "INCHIKEY"]) == false)
+        massesArr = []
+        massesArr = getMasses(i, massesArr)
+        append!(mergedDf, DataFrame(
+                  SMILES = [inputDB[i, "SMILES"]], 
+                  INCHIKEY = [inputDB[i, "INCHIKEY"]], 
+                  binedPRECURSOR_ION = [inputDB[i, "binedPRECURSOR_ION"]], 
+                  CNLmasses = [sort!(collect(setArr(massesArr)))]
+                  ))
+        count += 1
     elseif (i > 1 && newRowOrNot(inputDB[i-1, "INCHIKEY"], inputDB[i, "INCHIKEY"]) == true)
         massesArr = getMasses(i, massesArr)
         #println(massesArr)
     elseif (i > 1 && newRowOrNot(inputDB[i-1, "INCHIKEY"], inputDB[i, "INCHIKEY"]) == false)
         append!(mergedDf, DataFrame(
-                  SMILES = [inputDB[i, "SMILES"]], 
-                  INCHIKEY = [inputDB[i, "INCHIKEY"]], 
-                  binedPRECURSOR_ION = [inputDB[i, "binedPRECURSOR_ION"]], 
+                  SMILES = [inputDB[i-1, "SMILES"]], 
+                  INCHIKEY = [inputDB[i-1, "INCHIKEY"]], 
+                  binedPRECURSOR_ION = [inputDB[i-1, "binedPRECURSOR_ION"]], 
                   CNLmasses = [sort!(collect(setArr(massesArr)))]
                   ))
         count += 1
@@ -75,6 +94,6 @@ end
 
 mergedDf
 
-# ouputing df 2521 x 4
+# ouputing df 2522 x 4
 savePath = "D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv"
 CSV.write(savePath, mergedDf)

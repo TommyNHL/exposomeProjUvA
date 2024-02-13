@@ -11,7 +11,7 @@ pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
 jl = pyimport("joblib")
 
-# inputing 2521 x 4 df
+# inputing 2522 x 4 df
 # columns: SMILES, INCHIKEY, binedPRECURSOR_ION, CNLmasses
 inputDB = CSV.read("D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv", DataFrame)
 sort!(inputDB, :INCHIKEY)
@@ -115,7 +115,6 @@ function dfFilling1or0(i, columnsCNLs)
         end
     end
     push!(df, tempTP)
-
     ## TN
     tempTN = []
     push!(tempTN, inputDB[i, "SMILES"])

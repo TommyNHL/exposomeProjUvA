@@ -34,17 +34,20 @@
 ### CNLsFeaturingWithoutTol.jl
 #### - step 9: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
-### CNLsFeaturingWithTol.jl
+### CNLsFeaturingWithTol.jl ***workingOn***
 #### - step 10: condense column(CNLs masses)
 ####           -> new .csv
-### ScoresCNLsCalculation.jl
+### ScoresCNLsCalculation.jl ***pending***
 #### - step 11: calculate SUM(P(TP)) for each CNL
 #### - step 12: calculate SUM(P(TN)) for each CNL
 #### - step 13: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
 #### - step 14: filter in CNL with Score(CNL) >= 0.0
 ####           -> new .csv
-### Dfs4CNLmodeling.jl
-#### - step 15: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
+### MatchingCNLsOfInterest.jl ***pending***
+#### - step 15: filter in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
+### Dfs4CNLmodeling.jl ***pending***
+####           -> new .csv
+#### - step 16: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
 ####           -> new .csv
 
-## 3_trainTestCNLmodel
+## 3_trainTestCNLmodel ***pending***
