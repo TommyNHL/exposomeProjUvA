@@ -147,3 +147,38 @@ dfCNLs
 # ouputing df 5042 x 20496
 savePath = "D:\\0_data\\dataframeCNLsTPTN_withoutTolerance.csv"
 CSV.write(savePath, dfCNLs)
+
+### dummy ###
+dfCNLs = CSV.read("D:\\0_data\\dataframeCNLsTPTN.csv", DataFrame)
+#############
+
+desStat = describe(dfCNLs)  # 20496 x 7
+desStat[3,:]
+
+sumUp = []
+push!(sumUp, "summation")
+push!(sumUp, "summation")
+for col in names(dfCNLs)[3:end]
+    count = 0
+    for i in 1:size(dfCNLs, 1)
+        count += dfCNLs[i, col]
+    end
+    push!(sumUp, count)
+end
+push!(dfCNLs, sumUp)
+# 5042 -> 5043 rows
+dfCNLs[5043,:]
+
+# bar plot for the distribution
+using DataSci4Chem
+names(dfCNLs)[3:end]
+Vector(dfCNLs[end, 3:end])
+massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end, 3:end]), 
+    label = false,
+    margin = (5, :mm), 
+    size = (1000,800), 
+    dpi = 300)
+    xlabel!("CNLs features")
+    ylabel!("Summation")
+    # Saving
+    savefig(massesCNLsDistrution, "D:\\2_output\\massesCNLsDistrution.png")
