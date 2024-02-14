@@ -1,5 +1,5 @@
 VERSION
-#using Pkg
+using Pkg
 #Pkg.add("PyCall")
 import Conda
 Conda.PYTHONDIR
@@ -47,5 +47,5 @@ inputAll[!, "predictRi"] = predictedRi
 # output csv is a 30684 x 791 df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
-savePath = "D:\\0_data\\dataAllFP_withPredictedRi.csv"
+savePath = "D:\\0_data\\dataAllFP_withNewPredictedRi.csv"
 CSV.write(savePath, inputAll)

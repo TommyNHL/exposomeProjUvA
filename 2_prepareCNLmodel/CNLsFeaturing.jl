@@ -3,18 +3,18 @@ using Pkg
 #Pkg.add(PackageSpec(url=""))
 #using BSON
 using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
-Conda.add("pubchempy")
-Conda.add("padelpy")
-Conda.add("joblib")
+#Conda.add("pubchempy")
+#Conda.add("padelpy")
+#Conda.add("joblib")
 ## import packages ##
 pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
 jl = pyimport("joblib")
 
-# inputing 2522 x 4 df
+# inputing 28181 x 4 df
 # columns: SMILES, INCHIKEY, binedPRECURSOR_ION, CNLmasses
 inputDB = CSV.read("D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv", DataFrame)
-sort!(inputDB, :INCHIKEY)
+sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION])
 
 #inputDB[1,4]
 
@@ -66,8 +66,9 @@ for i in 1:size(inputDB, 1)
         push!(featuresCNLs, massesCNLs)
     end
 end
+size(featuresCNLs)
 
-# 21010 features -> 20494 features
+# 5778676 features -> 75470 features
 distinctFeaturesCNLs = Set()
 for featuresCNL in featuresCNLs
     if (featuresCNL > -0.005)
@@ -87,10 +88,10 @@ dfCNLs = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
 for col in columnsCNLs
     dfCNLs[:, col] = []
 end
-size(dfCNLs)  # 0 x (2+20494)
+size(dfCNLs)  # 0 x (2+75470)
 
-# filling table without tolerance
-function dfFilling1or0(i, columnsCNLs)
+# filling table
+function dfTFTNFilling1or0(i, columnsCNLs)
     ## TP
     df = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
     df2 = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
@@ -103,10 +104,10 @@ function dfFilling1or0(i, columnsCNLs)
     push!(tempTP, inputDB[i, "INCHIKEY"])
     for col in columnsCNLs
         if (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) 
-            && Float64[BigFloat(col)][1] <= inputDB[i, "binedPRECURSOR_ION"])
+            && Float64[BigFloat(col)][1] <= inputDB[i, "PRECURSOR_ION"])
             push!(tempTP, 2)
         elseif (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) 
-            && Float64[BigFloat(col)][1] > inputDB[i, "binedPRECURSOR_ION"])
+            && Float64[BigFloat(col)][1] > inputDB[i, "PRECURSOR_ION"])
             push!(tempTP, -2)
         elseif (!(Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"])))
             push!(tempTP, 0)
@@ -121,10 +122,10 @@ function dfFilling1or0(i, columnsCNLs)
     push!(tempTN, inputDB[i, "INCHIKEY"])
     for col in columnsCNLs
         if (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) 
-            && Float64[BigFloat(col)][1] <= inputDB[i, "binedPRECURSOR_ION"])
+            && Float64[BigFloat(col)][1] <= inputDB[i, "PRECURSOR_ION"])
             push!(tempTN, 1)
         elseif (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) 
-            && Float64[BigFloat(col)][1] > inputDB[i, "binedPRECURSOR_ION"])
+            && Float64[BigFloat(col)][1] > inputDB[i, "PRECURSOR_ION"])
             push!(tempTN, -2)
         elseif (!(Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"])))
             push!(tempTN, 0)
@@ -137,15 +138,37 @@ function dfFilling1or0(i, columnsCNLs)
     return df
 end
 
+function df1RowFilling1or0(i, columnsCNLs)
+    ## 1 row
+    df = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
+    for col in columnsCNLs
+        df[:, col] = []
+    end
+    temp = []
+    push!(temp, inputDB[i, "SMILES"])
+    push!(temp, inputDB[i, "INCHIKEY"])
+    for col in columnsCNLs
+        if (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) && Float64[BigFloat(col)][1] <= inputDB[i, "PRECURSOR_ION"])
+            push!(temp, 1)
+        elseif (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) && Float64[BigFloat(col)][1] > inputDB[i, "PRECURSOR_ION"])
+            push!(temp, -1)
+        elseif (!(Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"])))
+            push!(temp, 0)
+        end
+    end
+    push!(df, temp)
+    return df
+end
+
 dfCNLs
 for i in 1:size(inputDB, 1)
     println(i)
-    append!(dfCNLs, dfFilling1or0(i, columnsCNLs))
+    append!(dfCNLs, df1RowFilling1or0(i, columnsCNLs))
 end
 dfCNLs
 
-# ouputing df 5042 x 20496
-savePath = "D:\\0_data\\dataframeCNLsTPTN_withoutTolerance.csv"
+# ouputing df 0 x 75472
+savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
 ### dummy ###
@@ -155,30 +178,48 @@ dfCNLs = CSV.read("D:\\0_data\\dataframeCNLsTPTN.csv", DataFrame)
 desStat = describe(dfCNLs)  # 20496 x 7
 desStat[3,:]
 
-sumUp = []
-push!(sumUp, "summation")
-push!(sumUp, "summation")
+sumUpTP = []
+sumUpTN = []
+push!(sumUpTP, "summationTP")
+push!(sumUpTP, "summationTP")
+push!(sumUpTN, "summationTN")
+push!(sumUpTN, "summationTN")
 for col in names(dfCNLs)[3:end]
-    count = 0
+    countTP = 0
+    countTN = 0
     for i in 1:size(dfCNLs, 1)
-        count += dfCNLs[i, col]
+        if (i % 2 == 1)
+            countTP += dfCNLs[i, col]
+        elseif (i % 2 == 0)
+            countTN += dfCNLs[i, col]
+        end
     end
-    push!(sumUp, count)
+    push!(sumUpTP, countTP)
+    push!(sumUpTN, countTN)
 end
-push!(dfCNLs, sumUp)
-# 5042 -> 5043 rows
+push!(dfCNLs, sumUpTP)
+push!(dfCNLs, sumUpTN)
+# 5042 -> 5044 rows
 dfCNLs[5043,:]
+dfCNLs[5044,:]
 
 # bar plot for the distribution
 using DataSci4Chem
-names(dfCNLs)[3:end]
-Vector(dfCNLs[end, 3:end])
-massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end, 3:end]), 
-    label = false,
+#names(dfCNLs)[3:end]
+#Vector(dfCNLs[end, 3:end])
+massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end-1, 3:end]), 
+    label = "TP", 
+    lc = "skyblue", 
     margin = (5, :mm), 
     size = (1000,800), 
     dpi = 300)
     xlabel!("CNLs features")
     ylabel!("Summation")
+bar!(names(dfCNLs)[3:end], Vector(dfCNLs[end, 3:end]), 
+    label = "TN", 
+    lc = "orange", 
+    margin = (5, :mm), 
+    size = (1000,800), 
+    dpi = 300)
     # Saving
     savefig(massesCNLsDistrution, "D:\\2_output\\massesCNLsDistrution.png")

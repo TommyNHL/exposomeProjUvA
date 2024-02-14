@@ -3,9 +3,9 @@ using Pkg
 #Pkg.add(PackageSpec(url=""))
 #using BSON
 using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
-Conda.add("pubchempy")
-Conda.add("padelpy")
-Conda.add("joblib")
+#Conda.add("pubchempy")
+#Conda.add("padelpy")
+#Conda.add("joblib")
 ## import packages ##
 pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
@@ -51,17 +51,20 @@ end
 # inputing 1095389 x 31 df
 inputDB = CSV.read("D:\\0_data\\Database_INTERNAL_2022-11-17.csv", DataFrame)
 
-# filtering in positive ionization mode -> 52132 x 4
-# filtering in precusor ion with measured m/z -> 52033 x 4
-# filtering in precusor ion with m/z <= 1000 -> 51871 x 4
-inputData = inputDB[inputDB.ION_MODE .== "POSITIVE", 
+# filtering out NEGATIVE ionization mode -> 1078844 x 4
+# filtering out NEGATIVE ionization mode -> 834057 x 4
+# filtering in precusor ion with measured m/z -> 833958 x 4
+# filtering in precusor ion with m/z <= 1000 -> 828535 x 4
+inputData = inputDB[inputDB.ION_MODE .!= "NEGATIVE", 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
+inputData = inputDB[inputDB.ION_MODE .!= "N", 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 inputData = inputData[inputData.PRECURSOR_ION .!== NaN, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 
-# initialization for 2 more columns -> 51871 x 6
+# initialization for 2 more columns -> 828535 x 6
 inputData[!, "binedPRECURSOR_ION"] .= Float64[0]
 inputData[!, "CNLmasses"] .= String[string("")]
 size(inputData)
@@ -86,12 +89,12 @@ for i in 1:size(inputData, 1)
 end
 
 # save
-# output csv is a 51871 x 6 df
+# output csv is a 828535 x 6 df
 savePath = "D:\\0_data\\databaseOfInternal_withNLs.csv"
 CSV.write(savePath, inputData)
 
-# concating with the Cocamide MS2 spectra DB and outputing, 51871 + 36250 = 88121 x 6
+# concating with the Cocamide MS2 spectra DB and outputing, 828535 + 51868 = 880403 x 6
 savePath = "D:\\0_data\\databaseOfAllMS2_withNLs.csv"
-inputDBcocamide = CSV.read("D:\\0_data\\databaseOfMassBankEUMoNA_withNLs.csv", DataFrame)
+inputDBcocamide = CSV.read("D:\\0_data\\databaseOfMassBankEUMoNAdeletedNA_withNLs.csv", DataFrame)
 outputDB = vcat(inputData, inputDBcocamide)
 CSV.write(savePath, outputDB)

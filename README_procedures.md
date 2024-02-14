@@ -35,16 +35,17 @@
 #### - step 9: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
 ####           -> new .png
-### ScoresCNLsCalculation.jl ***workingOn***
+### ScoresCNLsCalculation.jl ***re-run overnight later***
 #### - step 10: calculate SUM(P(TP)) for each CNL
 #### - step 11: calculate SUM(P(TN)) for each CNL
+####           -> new .csv
 #### - step 12: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
-#### - step 13: filter in CNL with Score(CNL) >= 0.0
 ####           -> new .csv
-### MatchingCNLsOfInterest.jl ***pending***
-#### - step 14: filter in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
+### MatchingCNLsOfInterest.jl ***workingOn***
+#### - step 13: filter in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
+#### - step 14: filter in CNL with Score(CNL) >= 0.0
+####           -> new .csv
 ### Dfs4CNLmodeling.jl ***pending***
-####           -> new .csv
 #### - step 15: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
 ####           -> new .csv
 
