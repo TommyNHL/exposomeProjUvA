@@ -30,7 +30,7 @@
 ### MergingNLs2CNLsMasses.jl
 #### - step 7: merge NLs into list for each ID copound
 ####           -> new .csv
-### CNLsFeaturing.jl
+### CNLsFeaturing.jl ***re-run overnight***
 #### - step 8: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
 ####           -> new .csv
 #### - step 9: transform table as row(ID copounds) x column(CNLs masses)
@@ -43,12 +43,11 @@
 #### - step --: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
 ####           -> new .csv
 ### Dfs4CNLmodeling.jl ***working***
-#### - step 10: load the pre-train RF-based model- CocamideExtended.joblib
-#### - step 11: split the table with only the cocamides
+#### - step 10: split the table with only the cocamides
 ####           -> new .csv
-#### - step 12: merge the table with only the cocamides with the FP-based Ri
+#### - step 11: merge the table with only the cocamides with the FP-based Ri
 ####           -> new .csv
-#### - step 13: split the table without the cocamides
+#### - step 12: split the table without the cocamides
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel ***pending***

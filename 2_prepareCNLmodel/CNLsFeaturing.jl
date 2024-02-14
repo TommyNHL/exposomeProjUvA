@@ -184,7 +184,7 @@ function df1RowFilling1or0(i, columnsCNLs)
 end
 
 dfCNLs
-for i in 1:size(inputDB, 1)
+for i in size(inputDB, 1)-35:size(inputDB, 1)
     println(i)
     append!(dfCNLs, df1RowFilling1or0(i, columnsCNLs))
 end
@@ -255,7 +255,7 @@ for col in names(dfCNLs)[3:end]
 end
 push!(dfCNLs, sumUp)
 # 28302 -> 28303 rows
-dfCNLs[28303,:]
+dfCNLs[35,:]
 
 using DataSci4Chem
 massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end-1, 3:end]), 
