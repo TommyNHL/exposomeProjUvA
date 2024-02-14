@@ -6,6 +6,7 @@ Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
+#Pkg.add("MLJ")
 #Pkg.add("JLD")
 #Pkg.add("HDF5")
 #Pkg.add("PyCallJLD")
@@ -14,11 +15,11 @@ Pkg.status()
 #Pkg.add(PackageSpec(url=""))
 #Pkg.add("MLDataUtils")
 #Pkg.add(PackageSpec(url=""))
-#using BSON
 using Random
 using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
+#using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
 #Conda.add("joblib")
@@ -31,7 +32,9 @@ jl = pyimport("joblib")             # used for loading models
 using ScikitLearn: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: RandomForestClassifier
-using ScikitLearn.GridSearch: RandomizedSearchCV
+#using ScikitLearn.GridSearch: RandomizedSearchCV
+using ScikitLearn.CrossValidation: cross_val_score
+using ScikitLearn.GridSearch: GridSearchCV
 
 # inputing 28302 x (2+15977+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
@@ -76,16 +79,16 @@ for i in record
         input2[findall(input2.SMILES .== inputDB1[i, "SMILES"]), "RI"])
 end =#
 
-function partitionTrainVal(data, at = 0.7)
-    n = nrow(data)
-    idx = shuffle(1:n)
-    train_idx = view(idx, 1:floor(Int, at*n))
-    test_idx = view(idx, (floor(Int, at*n)+1):n)
-    data[train_idx,:], data[test_idx,:]
+function partitionTrainVal(df, ratio = 0.7)
+    noOfRow = nrow(df)
+    idx = shuffle(1:noOfRow)
+    train_idx = view(idx, 1:floor(Int, ratio*noOfRow))
+    test_idx = view(idx, (floor(Int, ratio*noOfRow)+1):noOfRow)
+    df[train_idx,:], df[test_idx,:]
 end
 
 # give 2+15979+1 = 15980 columns
-trainSet, valSet = partitionTrainVal(inputDB, 0.7) # 70% train
+trainSet, valSet = partitionTrainVal(inputDB, 0.7)  # 70% train 30% Val/Test
 size(trainSet)
 size(valSet)
 
@@ -97,52 +100,57 @@ CSV.write(savePath, trainSet)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal.csv"
 CSV.write(savePath, valSet)
 
-x = deepcopy(inputDB)
-select!(x, Not([:predictRi]));
-x_test = deepcopy(trainSet)
-y_train = deepcopy(valSet)
+# 15980 -> 15977 columns
+## data for model training
+x_train = deepcopy(trainSet)
+select!(x_train, Not([:SMILES, :INCHIKEY, :predictRi]));
+size(x_train)
+y_train = deepcopy(trainSet[:, end])
+size(y_train)
+## data for internal model validation
+x_val = deepcopy(valSet)
+select!(x_val, Not([:SMILES, :INCHIKEY, :predictRi]));
+size(x_val)
+y_val = deepcopy(valSet[:, end])
+size(y_val)
 
-x_test = reshape(x_test, 1,length(x_test))
+# modeling
+model = RandomForestRegressor()
+param_dist = Dict(
+      "n_estimators" => 50:50:300, 
+      "max_depth" => 2:2:10, 
+      "min_samples_leaf" => 8:8:32, 
+      "max_features" => [Int64(ceil(size(x_train,2)/3))], 
+      "n_jobs" => [-1], 
+      "oob_score" => [true], 
+      "random_state" => [1]
+      )
+gridsearch = GridSearchCV(model, param_dist)
+@time fit!(gridsearch, Matrix(x_train), Vector(y_train))
+println("Best parameters: $(gridsearch.best_params_)")
 
-mod = RandomForestRegressor()
-param_dist = Dict("n_estimators"=>[50 , 100, 200, 300],
-                  "max_depth"=> [3, 5, 6 ,8 , 9 ,10])
-model = RandomizedSearchCV(mod, param_dist, n_iter=10, cv=5)
+model = RandomForestRegressor(
+      n_estimators = 100, 
+      max_depth = 10, 
+      min_samples_leaf = 8, 
+      max_features = Int64(ceil(size(x_train,2)/3)), 
+      n_jobs = -1, 
+      oob_score = true, 
+      random_state = 1
+      )
+fit!(model, Matrix(x_train), Vector(y_train))
+cross_val_score(model, Matrix(x_train), Vector(y_train); cv = 5)
 
-fit!(model, Matrix(x), Matrix(DataFrames.dropmissing(y_train)))
+# model validation
+predictedRi = predict(model, Matrix(x_val))
+# CNL-predictedRi vs. FP-predictedRi
 
-predict(model, x_test)
-
- # Create a random forest model
-model = RandomForestClassifier(n_subfeatures = 3, n_trees = 50, partial_sampling=0.7, max_depth = 4)
-
-# Train the model on the dataset 
-DecisionTree.fit!(model, x_train, y_train)
-
-# Apply the trained model to the test features data set 
-prediction = convert(Array{Int64,1}, DecisionTree.predict(model, x_test))
-
-
-for i in 1:size(inputDB, 1)
-  if (cocamidesOrNot(i) == true)
-      tempRow = dfExtract(i, names(inputDB)[3:end])
-      push!(tempRow, inputDBcocamide[findRowNumber(i)[end:end], "predictRi"][1])
-      push!(dfOnlyCocamides, tempRow)
-  else
-      tempRow = dfExtract(i, names(inputDB)[3:end])
-      push!(tempRow, Float64(0))
-      push!(dfWithoutCocamides, tempRow)
-  end
+# performace
+## error calculation
+for i = 1:size(predictedRi, 1)
+    println(predictedRi[i], ", ", y_val[i])
 end
 
-# df with 30684 x 2+15977+1
-dfOnlyCocamides
-# ouputing df 28302 x (2+15977)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv"
-CSV.write(savePath, dfOnlyCocamides)
-
-# df with 28302 or less x 2+15977+1
-dfWithoutCocamides
-# ouputing df 28302 x (2+15977)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfWithoutCocamides.csv"
-CSV.write(savePath, dfWithoutCocamides)
+# saving model
+modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi.joblib"
+jl.dump(model, modelSavePath, compress = 5)
