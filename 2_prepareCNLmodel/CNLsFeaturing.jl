@@ -91,6 +91,7 @@ for candidate in candidatesList
 end
 size(finalCNLs)
 size(whatAreMissed)
+
 dfMissed = DataFrame([[]], ["whatAreMissed"])
 for miss in whatAreMissed
     list = [miss]
@@ -99,7 +100,7 @@ end
 savePath = "D:\\0_data\\CNLs_10mDa_missed.csv"
 CSV.write(savePath, dfMissed)
 
-# creating a table with 90112 columns features with CNLs masses > 0 Da
+# creating a table with 2+15977 columns features CNLs
 columnsCNLs = []
 #for distinctFeaturesCNL in distinctFeaturesCNLs
 for distinctFeaturesCNL in finalCNLs
@@ -163,10 +164,6 @@ end =#
 
 function df1RowFilling1or0(i, columnsCNLs)
     ## 1 row
-    df = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
-    for col in columnsCNLs
-        df[:, col] = []
-    end
     temp = []
     push!(temp, inputDB[i, "SMILES"])
     push!(temp, inputDB[i, "INCHIKEY"])
@@ -179,14 +176,13 @@ function df1RowFilling1or0(i, columnsCNLs)
             push!(temp, 0)
         end
     end
-    push!(df, temp)
-    return df
+    return temp
 end
 
 dfCNLs
-for i in size(inputDB, 1)-35:size(inputDB, 1)
+for i in 1:size(inputDB, 1)
     println(i)
-    append!(dfCNLs, df1RowFilling1or0(i, columnsCNLs))
+    push!(dfCNLs, df1RowFilling1or0(i, columnsCNLs))
 end
 dfCNLs
 
@@ -255,7 +251,7 @@ for col in names(dfCNLs)[3:end]
 end
 push!(dfCNLs, sumUp)
 # 28302 -> 28303 rows
-dfCNLs[35,:]
+dfCNLs[37,:]
 
 using DataSci4Chem
 massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end-1, 3:end]), 

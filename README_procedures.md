@@ -42,7 +42,7 @@
 ####           -> new .csv
 #### - step --: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
 ####           -> new .csv
-### Dfs4CNLmodeling.jl ***working***
+### Dfs4CNLmodeling.jl ***re-run overnight***
 #### - step 10: split the table with only the cocamides
 ####           -> new .csv
 #### - step 11: merge the table with only the cocamides with the FP-based Ri
@@ -50,7 +50,8 @@
 #### - step 12: split the table without the cocamides
 ####           -> new .csv
 
-## 3_trainTestCNLmodel ***pending***
+## 3_trainTestCNLmodel
+### CNLmodelTrainVal.jl ***working***
 #### - step 1: split the table with only the cocamides for train & test according to the .csv files "CocamideExt_Fingerprints_train.csv" and "CocamideExt_Fingerprints_test.csv"
 ####           -> new .csv
 ####           -> new .csv

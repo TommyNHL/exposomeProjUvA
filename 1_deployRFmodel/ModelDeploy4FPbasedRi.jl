@@ -27,7 +27,7 @@ using ScikitLearn: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestClassifier
 
 #import csv
-# input csv is a 30684 x 790 df, columns include 
+# input csv is a 30684 x (2+790) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs
 inputAll = CSV.read("D:\\0_data\\dataAllFingerprinter_4RiPredict.csv", DataFrame)
 inputData = Matrix(inputAll[:, 3:end])
@@ -44,7 +44,7 @@ inputAll[!, "predictRi"] = predictedRi
 #fit!(modelRF, inputData)
 
 # save
-# output csv is a 30684 x 791 df, columns include 
+# output csv is a 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
 savePath = "D:\\0_data\\dataAllFP_withNewPredictedRi.csv"
