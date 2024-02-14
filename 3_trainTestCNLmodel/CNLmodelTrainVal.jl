@@ -98,6 +98,7 @@ savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal.csv"
 CSV.write(savePath, valSet)
 
 x = deepcopy(inputDB)
+select!(x, Not([:predictRi]));
 x_test = deepcopy(trainSet)
 y_train = deepcopy(valSet)
 
