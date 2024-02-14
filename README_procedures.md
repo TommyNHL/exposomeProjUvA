@@ -44,7 +44,6 @@
 ####           -> new .csv
 ### Dfs4CNLmodeling.jl ***re-run overnight***
 #### - step 10: split the table with only the cocamides
-####           -> new .csv
 #### - step 11: merge the table with only the cocamides with the FP-based Ri
 ####           -> new .csv
 #### - step 12: split the table without the cocamides
@@ -52,7 +51,7 @@
 
 ## 3_trainTestCNLmodel
 ### CNLmodelTrainVal.jl ***working***
-#### - step 1: split the table with only the cocamides for train & test according to the .csv files "CocamideExt_Fingerprints_train.csv" and "CocamideExt_Fingerprints_test.csv"
+#### - step 1: split the table with only the cocamides for train & test
 ####           -> new .csv
 ####           -> new .csv
 #### - step 2: tune hyper-parameters
