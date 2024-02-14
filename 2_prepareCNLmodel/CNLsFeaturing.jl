@@ -11,13 +11,16 @@ pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
 jl = pyimport("joblib")
 
-# inputing 28181 x 4 df
-# columns: SMILES, INCHIKEY, binedPRECURSOR_ION, CNLmasses
+# inputing 28302 x 4 df
+# columns: SMILES, INCHIKEY, CNLmasses, PRECURSOR_ION
 inputDB = CSV.read("D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv", DataFrame)
 sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION])
 
-#inputDB[1,4]
+# filtering in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
+# inputing 16022 candidates
+candidatesList = Array(CSV.read("D:\\0_data\\CNLs_10mDa.csv", DataFrame)[:,1])
 
+#inputDB[1,4]
 function getVec(matStr)
   if matStr[1] .== '['
       if contains(matStr, ", ")
@@ -54,7 +57,6 @@ function getVec(matStr)
       return str
   end
 end
-
 #test = getVec(inputDB[1,4])
 
 # defining features without tolerance
@@ -68,30 +70,51 @@ for i in 1:size(inputDB, 1)
 end
 size(featuresCNLs)
 
-# 5778676 features -> 75470 features
+# 5863157 features -> 90112 features
 distinctFeaturesCNLs = Set()
 for featuresCNL in featuresCNLs
-    if (featuresCNL > -0.005)
+    if (featuresCNL >= -0.005)
         push!(distinctFeaturesCNLs, featuresCNL)
     end
 end
 distinctFeaturesCNLs = sort!(collect(distinctFeaturesCNLs))
 
-# creating a table with 20493 columns features with CNLs masses > 0 Da
+# 16022 candidates -> 15977 candidates
+finalCNLs = []
+whatAreMissed = []
+for candidate in candidatesList
+    if (candidate in distinctFeaturesCNLs)
+        push!(finalCNLs, candidate)
+    else
+        push!(whatAreMissed, candidate)
+    end
+end
+size(finalCNLs)
+size(whatAreMissed)
+dfMissed = DataFrame([[]], ["whatAreMissed"])
+for miss in whatAreMissed
+    list = [miss]
+    push!(dfMissed, list)
+end
+savePath = "D:\\0_data\\CNLs_10mDa_missed.csv"
+CSV.write(savePath, dfMissed)
+
+# creating a table with 90112 columns features with CNLs masses > 0 Da
 columnsCNLs = []
-for distinctFeaturesCNL in distinctFeaturesCNLs
+#for distinctFeaturesCNL in distinctFeaturesCNLs
+for distinctFeaturesCNL in finalCNLs
     push!(columnsCNLs, string(distinctFeaturesCNL))
 end
-size(distinctFeaturesCNLs)
+size(columnsCNLs)
 
 dfCNLs = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
 for col in columnsCNLs
     dfCNLs[:, col] = []
 end
-size(dfCNLs)  # 0 x (2+75470)
+size(dfCNLs)  # 0 x (2+15977)
 
 # filling table
-function dfTFTNFilling1or0(i, columnsCNLs)
+#= function dfTFTNFilling1or0(i, columnsCNLs)
     ## TP
     df = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
     df2 = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
@@ -136,7 +159,7 @@ function dfTFTNFilling1or0(i, columnsCNLs)
     push!(df2, tempTN)
     append!(df, df2)
     return df
-end
+end =#
 
 function df1RowFilling1or0(i, columnsCNLs)
     ## 1 row
@@ -167,18 +190,14 @@ for i in 1:size(inputDB, 1)
 end
 dfCNLs
 
-# ouputing df 0 x 75472
+# ouputing df 28302 x (2+15977)
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
-### dummy ###
-dfCNLs = CSV.read("D:\\0_data\\dataframeCNLsTPTN.csv", DataFrame)
-#############
-
-desStat = describe(dfCNLs)  # 20496 x 7
+desStat = describe(dfCNLs)  # 15979 x 7
 desStat[3,:]
 
-sumUpTP = []
+#= sumUpTP = []
 sumUpTN = []
 push!(sumUpTP, "summationTP")
 push!(sumUpTP, "summationTP")
@@ -201,10 +220,10 @@ push!(dfCNLs, sumUpTP)
 push!(dfCNLs, sumUpTN)
 # 5042 -> 5044 rows
 dfCNLs[5043,:]
-dfCNLs[5044,:]
+dfCNLs[5044,:] =#
 
 # bar plot for the distribution
-using DataSci4Chem
+#= using DataSci4Chem
 #names(dfCNLs)[3:end]
 #Vector(dfCNLs[end, 3:end])
 massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end-1, 3:end]), 
@@ -221,5 +240,31 @@ bar!(names(dfCNLs)[3:end], Vector(dfCNLs[end, 3:end]),
     margin = (5, :mm), 
     size = (1000,800), 
     dpi = 300)
+    # Saving
+    savefig(massesCNLsDistrution, "D:\\2_output\\massesCNLsDistrution.png") =#
+
+sumUp = []
+push!(sumUp, "summation")
+push!(sumUp, "summation")
+for col in names(dfCNLs)[3:end]
+    count = 0
+    for i in 1:size(dfCNLs, 1)
+        count += dfCNLs[i, col]
+    end
+    push!(sumUp, count)
+end
+push!(dfCNLs, sumUp)
+# 28302 -> 28303 rows
+dfCNLs[28303,:]
+
+using DataSci4Chem
+massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end-1, 3:end]), 
+    label = false, 
+    lc = "skyblue", 
+    margin = (5, :mm), 
+    size = (1000,800), 
+    dpi = 300)
+    xlabel!("CNLs features")
+    ylabel!("Summation")
     # Saving
     savefig(massesCNLsDistrution, "D:\\2_output\\massesCNLsDistrution.png")

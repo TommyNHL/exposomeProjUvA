@@ -57,16 +57,14 @@ inputDB = CSV.read("D:\\0_data\\databaseOfMassBankEUMoNAdeletedNA.csv", DataFram
 
 # filtering in positive ionization mode -> 52129 x 4
 # filtering in precusor ion with measured m/z -> 52030 x 4
-# filtering in precusor ion with m/z <= 1e000 -> 51868 x 4
 inputData = inputDB[inputDB.ION_MODE .== "POSITIVE", 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 inputData = inputData[inputData.PRECURSOR_ION .!== NaN, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
-inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
-    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
+#= inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]] =#
 
-# initialization for 2 more columns -> 51868 x 6
-inputData[!, "binedPRECURSOR_ION"] .= Float64[0]
+# initialization for 2 more columns -> 52030 x 5
 inputData[!, "CNLmasses"] .= String[string("")]
 size(inputData)
 
@@ -77,19 +75,18 @@ for i in 1:size(inputData, 1)
     arrNL = string("")
     for frag in fragIons
         if arrNL == string("")
-          NL = round((inputData[i,"PRECURSOR_ION"] - frag), RoundDown, digits = 2)
+          NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
           arrNL = string(arrNL, string(NL))
         else
-          NL = round((inputData[i,"PRECURSOR_ION"] - frag), RoundDown, digits = 2)
+          NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
           arrNL = string(arrNL, ", ", string(NL))
           #println(arrNL)
         end
     end
-    inputData[i, "binedPRECURSOR_ION"] = round(inputData[i, "PRECURSOR_ION"], RoundDown, digits = 2)
     inputData[i, "CNLmasses"] = arrNL
 end
 
 # save
-# output csv is a 51868 x 6 df
+# output csv is a 52030 x 5 df
 savePath = "D:\\0_data\\databaseOfMassBankEUMoNAdeletedNA_withNLs.csv"
 CSV.write(savePath, inputData)

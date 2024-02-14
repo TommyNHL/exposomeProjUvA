@@ -58,7 +58,6 @@ function convertPubChemFPs(ACfp::DataFrame, PCfp::DataFrame)
 end
 
 
-
 #load all data
 amtr = CSV.read("C:\\Users\\dherwer\\OneDrive - UvA\\Projects\\Alex\\New approach\\Amide_Fingerprints_train.csv",DataFrame)
 amte = CSV.read("C:\\Users\\dherwer\\OneDrive - UvA\\Projects\\Alex\\New approach\\Amide_Fingerprints_test.csv",DataFrame)
@@ -74,7 +73,6 @@ coctr = CSV.read("C:\\Users\\dherwer\\OneDrive - UvA\\Projects\\Alex\\New approa
 cocte = CSV.read("C:\\Users\\dherwer\\OneDrive - UvA\\Projects\\Alex\\New approach\\Cocamide_Fingerprints_test.csv",DataFrame)
 FPctr = Matrix(convertPubChemFPs(coctr[:,9:9+779], coctr[:,9+780:end]))
 FPcte = Matrix(convertPubChemFPs(cocte[:,9:9+779], cocte[:,9+780:end]))
-
 
 
 ## Plot of Series vs series

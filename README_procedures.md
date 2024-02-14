@@ -21,32 +21,40 @@
 ### Filtering4NLsCalculation.jl
 #### - step 1: filter in positive ionization mode
 #### - step 2: filter in precusor ion with measured m/z
-#### - step 3: filter in precusor ion with m/z <= 1000
-#### - step 4: bin the m/z domain with bin size 0.01 Da (steps)
-#### - step 5: calculate NLs by m/z(precusor ion) - m/z(fragment ions)
+#### - step 3: bin the m/z domain with bin size 0.01 Da (steps)
+#### - step 4: calculate NLs by m/z(precusor ion) - m/z(fragment ions)
 ####           -> new .csv
 ### JoiningInternalDB.jl
-#### - step 6: repeat steps 1-5
-#### - step 7: join with Cocamide MS2 spectra DB
+#### - step 5: repeat steps 1-4
+#### - step 6: join with Cocamide MS2 spectra DB
 ### MergingNLs2CNLsMasses.jl
-#### - step 8: merge NLs into list for each ID copound
+#### - step 7: merge NLs into list for each ID copound
 ####           -> new .csv
-### CNLsFeaturing.jl ***re-run overnight later***
+### CNLsFeaturing.jl
+#### - step 8: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
+####           -> new .csv
 #### - step 9: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
 ####           -> new .png
-### ScoresCNLsCalculation.jl ***re-run overnight later***
-#### - step 10: calculate SUM(P(TP)) for each CNL
-#### - step 11: calculate SUM(P(TN)) for each CNL
+### ScoresCNLsCalculation.jl ***wasted***
+#### - step --: calculate SUM(P(TP)) for each CNL
+#### - step --: calculate SUM(P(TN)) for each CNL
 ####           -> new .csv
-#### - step 12: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
+#### - step --: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
 ####           -> new .csv
-### MatchingCNLsOfInterest.jl ***workingOn***
-#### - step 13: filter in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
-#### - step 14: filter in CNL with Score(CNL) >= 0.0
+### Dfs4CNLmodeling.jl ***working***
+#### - step 10: load the pre-train RF-based model- CocamideExtended.joblib
+#### - step 11: split the table with only the cocamides
 ####           -> new .csv
-### Dfs4CNLmodeling.jl ***pending***
-#### - step 15: join the table with the FP-derived Ri values by keys SMILES || INCHIKEY
+#### - step 12: merge the table with only the cocamides with the FP-based Ri
+####           -> new .csv
+#### - step 13: split the table without the cocamides
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel ***pending***
+#### - step 1: split the table with only the cocamides for train & test according to the .csv files "CocamideExt_Fingerprints_train.csv" and "CocamideExt_Fingerprints_test.csv"
+####           -> new .csv
+####           -> new .csv
+#### - step 2: tune hyper-parameters
+#### - step 3: train model
+#### - step 4: precdict CNL-derived Ri values for the table without the cocamides 

@@ -11,15 +11,15 @@ pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
 jl = pyimport("joblib")
 
-# inputing 880403 x 6 df
-# columns: SMILES, INCHIKEY, PRECURSOR_ION, MZ_VALUES, binedPRECURSOR_ION, CNLmasses
+# inputing 885988 x 5 df
+# columns: SMILES, INCHIKEY, PRECURSOR_ION, MZ_VALUES, CNLmasses
 inputDB = CSV.read("D:\\0_data\\databaseOfAllMS2_withNLs.csv", DataFrame)
 sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION])
 
 # merging all CNLmasses of 1 compounds from different sources into a list of set
 # while filtering out NA or N/A IDs
 mergedDf = DataFrame([[],[],[],[]], 
-    ["SMILES", "INCHIKEY", "CNLmasses", "PRECURSOR_ION"])
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "CNLmasses"])
 
 function getFrags(str)
     masses = split(str, ", ")
@@ -92,7 +92,7 @@ for i in 1:size(inputDB, 1)
                 append!(mergedDf, DataFrame(
                     SMILES = [inputDB[i-1, "SMILES"]], 
                     INCHIKEY = [inputDB[i-1, "INCHIKEY"]], 
-                    PRECURSOR_ION = [inputDB[i, "PRECURSOR_ION"]], 
+                    PRECURSOR_ION = [inputDB[i-1, "PRECURSOR_ION"]], 
                     CNLmasses = [sort!(collect(setArr(massesArr)))]
                     ))
             end
@@ -110,7 +110,7 @@ for i in 1:size(inputDB, 1)
             append!(mergedDf, DataFrame(
                         SMILES = [inputDB[i-1, "SMILES"]], 
                         INCHIKEY = [inputDB[i-1, "INCHIKEY"]], 
-                        PRECURSOR_ION = [inputDB[i, "PRECURSOR_ION"]], 
+                        PRECURSOR_ION = [inputDB[i-1, "PRECURSOR_ION"]], 
                         CNLmasses = [sort!(collect(setArr(massesArr)))]
                         ))
         end
@@ -138,7 +138,7 @@ for i in 1:size(inputDB, 1)
                 append!(mergedDf, DataFrame(
                         SMILES = [inputDB[i-1, "SMILES"]], 
                         INCHIKEY = [inputDB[i-1, "INCHIKEY"]], 
-                        PRECURSOR_ION = [inputDB[i, "PRECURSOR_ION"]], 
+                        PRECURSOR_ION = [inputDB[i-1, "PRECURSOR_ION"]], 
                         CNLmasses = [sort!(collect(setArr(massesArr)))]
                         ))
             end
@@ -150,7 +150,7 @@ for i in 1:size(inputDB, 1)
                 append!(mergedDf, DataFrame(
                         SMILES = [inputDB[i-1, "SMILES"]], 
                         INCHIKEY = [inputDB[i-1, "INCHIKEY"]], 
-                        PRECURSOR_ION = [inputDB[i, "PRECURSOR_ION"]], 
+                        PRECURSOR_ION = [inputDB[i-1, "PRECURSOR_ION"]], 
                         CNLmasses = [sort!(collect(setArr(massesArr)))]
                         ))
             end
@@ -161,7 +161,7 @@ for i in 1:size(inputDB, 1)
             append!(mergedDf, DataFrame(
                     SMILES = [inputDB[i-1, "SMILES"]], 
                     INCHIKEY = [inputDB[i-1, "INCHIKEY"]], 
-                    PRECURSOR_ION = [inputDB[i, "PRECURSOR_ION"]], 
+                    PRECURSOR_ION = [inputDB[i-1, "PRECURSOR_ION"]], 
                     CNLmasses = [sort!(collect(setArr(massesArr)))]
                     ))
         end
@@ -175,6 +175,6 @@ end
 
 mergedDf
 
-# ouputing df 28181 x 4
+# ouputing df 28302 x 4
 savePath = "D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv"
 CSV.write(savePath, mergedDf)

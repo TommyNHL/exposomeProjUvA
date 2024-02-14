@@ -54,18 +54,16 @@ inputDB = CSV.read("D:\\0_data\\Database_INTERNAL_2022-11-17.csv", DataFrame)
 # filtering out NEGATIVE ionization mode -> 1078844 x 4
 # filtering out NEGATIVE ionization mode -> 834057 x 4
 # filtering in precusor ion with measured m/z -> 833958 x 4
-# filtering in precusor ion with m/z <= 1000 -> 828535 x 4
 inputData = inputDB[inputDB.ION_MODE .!= "NEGATIVE", 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 inputData = inputDB[inputDB.ION_MODE .!= "N", 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 inputData = inputData[inputData.PRECURSOR_ION .!== NaN, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
-inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
-    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
+#= inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]] =#
 
-# initialization for 2 more columns -> 828535 x 6
-inputData[!, "binedPRECURSOR_ION"] .= Float64[0]
+# initialization for 2 more columns -> 833958 x 5
 inputData[!, "CNLmasses"] .= String[string("")]
 size(inputData)
 
@@ -76,24 +74,23 @@ for i in 1:size(inputData, 1)
     arrNL = string("")
     for frag in fragIons
         if arrNL == string("")
-          NL = round((inputData[i,"PRECURSOR_ION"] - frag), RoundDown, digits = 2)
+          NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
           arrNL = string(arrNL, string(NL))
         else
-          NL = round((inputData[i,"PRECURSOR_ION"] - frag), RoundDown, digits = 2)
+          NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
           arrNL = string(arrNL, ", ", string(NL))
           #println(arrNL)
         end
     end
-    inputData[i, "binedPRECURSOR_ION"] = round(inputData[i, "PRECURSOR_ION"], RoundDown, digits = 2)
     inputData[i, "CNLmasses"] = arrNL
 end
 
 # save
-# output csv is a 828535 x 6 df
+# output csv is a 833958 x 5 df
 savePath = "D:\\0_data\\databaseOfInternal_withNLs.csv"
 CSV.write(savePath, inputData)
 
-# concating with the Cocamide MS2 spectra DB and outputing, 828535 + 51868 = 880403 x 6
+# concating with the Cocamide MS2 spectra DB and outputing, 833958 + 52030 = 885988 x 5
 savePath = "D:\\0_data\\databaseOfAllMS2_withNLs.csv"
 inputDBcocamide = CSV.read("D:\\0_data\\databaseOfMassBankEUMoNAdeletedNA_withNLs.csv", DataFrame)
 outputDB = vcat(inputData, inputDBcocamide)

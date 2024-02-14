@@ -1,8 +1,10 @@
 using Pkg
 Pkg.add("BSON")
-Pkg.add(PackageSpec(url=""))
+#Pkg.add(PackageSpec(url=""))
 using BSON
 using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
+Conda.add("pubchempy")
+Conda.add("padelpy")
 Conda.add("joblib")
 ## import packages ##
 pcp = pyimport("pubchempy")
@@ -55,7 +57,15 @@ end
 
 
 #load all data
+# original input csv has 31402 rows (column header exclusive)
+# 717 compound entries have no SMILES id -> conversion failed
+# 1 compound entry has an invalid SMILES id -> conversion failed
+# so the updated csv input is a 30684 x 150 df, columns include 
+        #SMILES, INCHIKEY, and 148 Pubchem FPs, 148 -> 10 columns after operation
 input = CSV.read("D:\\0_data\\dataPubchemFingerprinter.csv", DataFrame)
 output = convertPubChemFPs(input[:,1:150], input[:,3:150])
+# output csv is a 30684 x 160 df, columns include 
+        #SMILES, INCHIKEY, 148 Pubchem FPs, and 10 newly added columns
+
 savePath = "D:\\0_data\\dataPubchemFingerprinter_converted.csv"
 CSV.write(savePath, output)
