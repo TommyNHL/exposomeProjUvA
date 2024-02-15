@@ -2,25 +2,32 @@ using Pkg
 #Pkg.add("BSON")
 #Pkg.add(PackageSpec(url=""))
 #using BSON
-using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
+using CSV, DataFrames  #, PyCall, Conda, LinearAlgebra, Statistics
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
 #Conda.add("joblib")
 ## import packages ##
-pcp = pyimport("pubchempy")
-pd = pyimport("padelpy")
-jl = pyimport("joblib")
+#pcp = pyimport("pubchempy")
+#pd = pyimport("padelpy")
+#jl = pyimport("joblib")
 
 # inputing 833958 x 5 df
 # columns: SMILES, INCHIKEY, PRECURSOR_ION, MZ_VALUES, CNLmasses
 inputDB = CSV.read("D:\\0_data\\databaseOfInternal_withNLs.csv", DataFrame)
 sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION])
 
+# imputing 30684 x (2+791) df, columns include 
+        #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
+        #and newly added one (FP-derived predicted Ri)
+inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
+sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
+
 # filtering in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
 # inputing 16022 candidates
 candidatesList = Array(CSV.read("D:\\0_data\\CNLs_10mDa.csv", DataFrame)[:,1])
 
 inputDB[1,5]
+
 function getFrags(str)
     masses = split(str, ", ")
 end
@@ -34,6 +41,7 @@ function getMasses(i, arr)
     end
     return massesArr
 end
+
 test = getMasses(1, arr)
 test
 
@@ -72,12 +80,21 @@ for miss in whatAreMissed
     list = [miss]
     push!(dfMissed, list)
 end
+
 savePath = "D:\\0_data\\CNLs_10mDa_missed.csv"
 CSV.write(savePath, dfMissed)
 
+# filtering in row entries according to the presence of FPs in .csv DB
+function haveFPRiOrNot(DB, i)
+    if (DB[i, "INCHIKEY"] in Array(inputAllFPDB[:, "INCHIKEY"]) || DB[i, "SMILES"] in Array(inputAllFPDB[:, "SMILES"]))
+        return true
+    else 
+        return false
+    end
+end
+
 # creating a table with 3+15994 columns features CNLs
 columnsCNLs = []
-#for distinctFeaturesCNL in distinctFeaturesCNLs
 for distinctFeaturesCNL in finalCNLs
     push!(columnsCNLs, string(distinctFeaturesCNL))
 end
@@ -110,36 +127,39 @@ function df1RowFilling1or0(count, i, columnsCNLs)
     return temp
 end
 
-function determineNA(i)
+#= function determineNA(i)
     return (
         ("NA" in inputDB[i:i,"SMILES"] || "N/A" in inputDB[i:i,"SMILES"]) == true
         ) && (
             ("NA" in inputDB[i:i,"INCHIKEY"] || "N/A" in inputDB[i:i,"INCHIKEY"]) == true
             )
-end
+end =#
 
 dfCNLs
+
 count = 0
-for i in 1:1000 #size(inputDB, 1)  #999
+for i in 1:5000 #size(inputDB, 1)  #2000
     println(i)
-    if (determineNA(i) == false)
+    if (haveFPRiOrNot(inputDB, i) == true)
         count += 1
         push!(dfCNLs, df1RowFilling1or0(count, i, columnsCNLs))
     end
 end
+
 dfCNLs
 
-# ouputing df 28302 x (2+15977)
+# ouputing df 28302 x (3+15994)
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
 desStat = describe(dfCNLs)  # 15979 x 7
-desStat[3,:]
+desStat[4,:]
 
 sumUp = []
+push!(sumUp, 888888)
 push!(sumUp, "summation")
 push!(sumUp, "summation")
-for col in names(dfCNLs)[3:end]
+for col in names(dfCNLs)[4:end]
     count = 0
     for i in 1:size(dfCNLs, 1)
         count += dfCNLs[i, col]
@@ -148,10 +168,10 @@ for col in names(dfCNLs)[3:end]
 end
 push!(dfCNLs, sumUp)
 # 28302 -> 28303 rows
-dfCNLs[1000,:]  #1001
+dfCNLs[5001,:]  #5001
 
 using DataSci4Chem
-massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[1000, 3:end]),  #1000
+massesCNLsDistrution = bar(names(dfCNLs)[4:end], Vector(dfCNLs[5001, 4:end]),  #1000
     label = false, 
     lc = "skyblue", 
     margin = (5, :mm), 

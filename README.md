@@ -25,17 +25,18 @@
 #### - step 4: calculate NLs by m/z(precusor ion) - m/z(fragment ions)
 ####           -> new .csv
 ### JoiningInternalDB.jl
-#### - step 5: repeat steps 1-4 ***done***
-#### - step 6: join with Cocamide MS2 spectra DB ***ignored***
+#### - step --: repeat steps 1-4 ***done***
+#### - step --: join with Cocamide MS2 spectra DB ***ignored***
 ### MergingNLs2CNLsMasses.jl  ***wasted***
-#### - step 7: merge NLs into list for each ID copound
+#### - step --: merge NLs into list for each ID copound
 ####           -> new .csv
 ### CNLsFeaturing.jl ***wasted***
-#### - step 8: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
-### CNLsFeaturingCopy.jl ***working***
-#### - step 8: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
+#### - step --: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
+### CNLsFeaturingCopy.jl ***done***
+#### - step 5: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
 ####           -> new .csv
-#### - step 9: transform table as row(ID copounds) x column(CNLs masses)
+#### - step 6: collect Entry-of-interest according to the presence of FPs in .csv DB
+#### - step 7: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
 ####           -> new .png
 ### ScoresCNLsCalculation.jl ***wasted***
@@ -45,10 +46,10 @@
 #### - step --: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
 ####           -> new .csv
 ### Dfs4CNLmodeling.jl ***re-run overnight***
-#### - step 10: split the table with only the cocamides
-#### - step 11: merge the table with only the cocamides with the FP-based Ri
+#### - step 8: split the table with only the cocamides
+#### - step 9: merge the table with only the cocamides with the FP-based Ri
 ####           -> new .csv
-#### - step 12: split the table without the cocamides
+#### - step 10: split the table without the cocamides
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel
@@ -58,4 +59,10 @@
 ####           -> new .csv
 #### - step 2: tune hyper-parameters
 #### - step 3: train model
-#### - step 4: precdict CNL-derived Ri values for the table without the cocamides 
+#### - step 4: precdict CNL-based Ri values for the internally split cocamides val set
+#### - step 5: analyze model predictive power
+####           -> new performance metrics
+####           -> new .png
+#### - step 6: precdict CNL-based Ri values for the non-cocamides test set
+####           -> new performance metrics
+####           -> new .png
