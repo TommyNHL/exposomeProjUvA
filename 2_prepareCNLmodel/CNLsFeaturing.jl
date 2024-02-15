@@ -168,11 +168,16 @@ function df1RowFilling1or0(i, columnsCNLs)
     push!(temp, inputDB[i, "SMILES"])
     push!(temp, inputDB[i, "INCHIKEY"])
     for col in columnsCNLs
-        if (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) && Float64[BigFloat(col)][1] <= inputDB[i, "PRECURSOR_ION"])
+        colCNL = Float64[BigFloat(col)][1]
+        arr = getVec(inputDB[i, "CNLmasses"])
+        mumIon = inputDB[i, "PRECURSOR_ION"]
+        if (colCNL in arr && colCNL <= mumIon)
             push!(temp, 1)
-        elseif (Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"]) && Float64[BigFloat(col)][1] > inputDB[i, "PRECURSOR_ION"])
+        elseif (colCNL in arr && colCNL > mumIon)
             push!(temp, -1)
-        elseif (!(Float64[BigFloat(col)][1] in getVec(inputDB[i, "CNLmasses"])))
+#=         elseif (!(colCNL in arr))
+            push!(temp, 0) =#
+        else
             push!(temp, 0)
         end
     end
@@ -251,7 +256,7 @@ for col in names(dfCNLs)[3:end]
 end
 push!(dfCNLs, sumUp)
 # 28302 -> 28303 rows
-dfCNLs[37,:]
+dfCNLs[28303,:]
 
 using DataSci4Chem
 massesCNLsDistrution = bar(names(dfCNLs)[3:end], Vector(dfCNLs[end-1, 3:end]), 
