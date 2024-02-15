@@ -138,7 +138,7 @@ end =#
 dfCNLs
 
 count = 0
-for i in 1:5000 #size(inputDB, 1)  #2000
+for i in 1:5000 #size(inputDB, 1)  #5000
     println(i)
     if (haveFPRiOrNot(inputDB, i) == true)
         count += 1
@@ -152,7 +152,7 @@ dfCNLs
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
-desStat = describe(dfCNLs)  # 15979 x 7
+desStat = describe(dfCNLs)  # 15997 x 7
 desStat[4,:]
 
 sumUp = []
@@ -168,10 +168,10 @@ for col in names(dfCNLs)[4:end]
 end
 push!(dfCNLs, sumUp)
 # 28302 -> 28303 rows
-dfCNLs[5001,:]  #5001
+dfCNLs[end,:]  #4891
 
 using DataSci4Chem
-massesCNLsDistrution = bar(names(dfCNLs)[4:end], Vector(dfCNLs[5001, 4:end]),  #1000
+massesCNLsDistrution = bar(names(dfCNLs)[4:end], Vector(dfCNLs[end, 4:end]),  #4891
     label = false, 
     lc = "skyblue", 
     margin = (5, :mm), 

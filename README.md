@@ -45,7 +45,7 @@
 ####           -> new .csv
 #### - step --: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
 ####           -> new .csv
-### Dfs4CNLmodeling.jl ***re-run overnight***
+### Dfs4CNLmodeling.jl ***done***
 #### - step 8: split the table with only the cocamides
 #### - step 9: merge the table with only the cocamides with the FP-based Ri
 ####           -> new .csv
@@ -53,7 +53,7 @@
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel
-### CNLmodelTrainVal.jl ***working***
+### CNLmodelTrainVal.jl ***done***
 #### - step 1: split the table with only the cocamides for train & test
 ####           -> new .csv
 ####           -> new .csv
@@ -63,6 +63,8 @@
 #### - step 5: analyze model predictive power
 ####           -> new performance metrics
 ####           -> new .png
-#### - step 6: precdict CNL-based Ri values for the non-cocamides test set
+### CNLmodelTest.jl ***done***
+#### - step 6: load the pre-train CNL-based model- CocamideExtended_CNLsRi.joblib
+#### - step 7: precdict CNL-based Ri values for the non-cocamides test set
 ####           -> new performance metrics
 ####           -> new .png

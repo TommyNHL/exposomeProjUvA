@@ -11,55 +11,41 @@ pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
 jl = pyimport("joblib")
 
-# inputing 28302 x 4 df
-# columns: SMILES, INCHIKEY, CNLmasses, PRECURSOR_ION
+# inputing 28302 x (3+15994) df
+# columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
-sort!(inputDB, [:INCHIKEY, :SMILES])
 
-# input csv is a 30684 x 793 df, columns include 
+# imputing 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
-inputDBcocamide = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
-sort!(inputDBcocamide, [:INCHIKEY, :SMILES])
-
-# other input 
-inputAllMS2DB = CSV.read("D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv", DataFrame)
-sort!(inputAllMS2DB, [:INCHIKEY, :SMILES])
-
 inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
 sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
 
+# inputing dfs for separation of the cocamides and non-cocamides datasets
+## 5364 x 931 df 
 inputCocamidesTrain = CSV.read("D:\\0_data\\CocamideExt_Fingerprints_train.csv", DataFrame)
 sort!(inputCocamidesTrain, :SMILES)
 
+## 947 x 931 df
 inputCocamidesTest = CSV.read("D:\\0_data\\CocamideExt_Fingerprints_test.csv", DataFrame)
 sort!(inputCocamidesTest, :SMILES)
 
-
 # df creating
-dfOnlyCocamides = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
-dfOutsideCocamides = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
-for col in names(inputDB)[3:end]
+dfOnlyCocamides = DataFrame([[],[],[]], ["ENTRY", "SMILES", "INCHIKEY"])
+dfOutsideCocamides = DataFrame([[],[],[]], ["ENTRY", "SMILES", "INCHIKEY"])
+for col in names(inputDB)[4:end]
     dfOnlyCocamides[:, col] = []
     dfOutsideCocamides[:, col] = []
 end
-dfOnlyCocamides[:, "predictRi"] = []
-dfOutsideCocamides[:, "predictRi"] = []
-size(dfOnlyCocamides)  # 0 x (15979+1)
-size(dfOutsideCocamides)  # 0 x (15979+1)
+dfOnlyCocamides[:, "FPpredictRi"] = []
+dfOutsideCocamides[:, "FPpredictRi"] = []
+size(dfOnlyCocamides)  # 0 x (3+15994+1)
+size(dfOutsideCocamides)  # 0 x (3+15994+1)
 
 function cocamidesOrNot(DB, i)
     if (DB[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || DB[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
         return true
     else
-        return false
-    end
-end
-
-function haveFPRiOrNot(DB, i)
-    if (DB[i, "INCHIKEY"] in Array(inputAllFPDB[:, "INCHIKEY"]) || DB[i, "SMILES"] in Array(inputAllFPDB[:, "SMILES"]))
-        return true
-    else 
         return false
     end
 end
@@ -74,6 +60,7 @@ end
     
 function dfExtract(i, columnsCNLs)
     temp = []
+    push!(temp, inputDB[i, "ENTRY"])
     push!(temp, inputDB[i, "SMILES"])
     push!(temp, inputDB[i, "INCHIKEY"])
     for col in columnsCNLs
@@ -82,42 +69,31 @@ function dfExtract(i, columnsCNLs)
     return temp
 end
 
+# x 15997
 inputDB
+
 for i in 1:size(inputDB, 1)
-    if (cocamidesOrNot(inputDB, i) == true)  # && haveFPRiOrNot(inputDB, i) == true)
-        tempRow = dfExtract(i, names(inputDB)[3:end])
-        push!(tempRow, inputAllFPDB[findRowNumber(i)[end:end], "predictRi"][1])
+    if (cocamidesOrNot(inputDB, i) == true)
+        tempRow = dfExtract(i, names(inputDB)[4:end])
+        push!(tempRow, inputAllFPDB[findRowNumber4Ri(inputDB, i)[end:end], "predictRi"][1])
         push!(dfOnlyCocamides, tempRow)
-    elseif (cocamidesOrNot(inputDB, i) == false)  # && haveFPRiOrNot(inputDB, i) == true)
-        tempRow = dfExtract(i, names(inputDB)[3:end])
-        push!(tempRow, Float64(0))
+    elseif (cocamidesOrNot(inputDB, i) == false)
+        tempRow = dfExtract(i, names(inputDB)[4:end])
+        push!(tempRow, inputAllFPDB[findRowNumber4Ri(inputDB, i)[end:end], "predictRi"][1])
         push!(dfOutsideCocamides, tempRow)
     end
 end
+
+# 28 x 15998 df
 dfOnlyCocamides
+
+# 4862 x 15998 df
 dfOutsideCocamides
 
-inputAllMS2DB
-countOnlyCocamides = 0
-countOutsideCocamides = 0
-for i in 1:size(inputAllMS2DB, 1)
-    if (cocamidesOrNot(inputAllMS2DB, i) == true)  # && haveFPRiOrNot(inputAllMS2DB, i) == true)
-        countOnlyCocamides += 1
-    elseif (cocamidesOrNot(inputAllMS2DB, i) == false)  # && haveFPRiOrNot(inputAllMS2DB, i) == true)
-        countOutsideCocamides +=1
-    end
-end
-countOnlyCocamides
-countOutsideCocamides
-
-# df with 30684 x 2+15977+1
-dfOnlyCocamides
-# ouputing df 28302 x (2+15977)
+# outputing dfOnlyCocamides with 28 x (3+15994+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv"
 CSV.write(savePath, dfOnlyCocamides)
 
-# df with 28302 or less x 2+15977+1
-dfWithoutCocamides
-# ouputing df 28302 x (2+15977)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfWithoutCocamides.csv"
-CSV.write(savePath, dfWithoutCocamides)
+# outputing dfOutsideCocamides with 4862 x (3+15994+1)
+savePath = "D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv"
+CSV.write(savePath, dfOutsideCocamides)

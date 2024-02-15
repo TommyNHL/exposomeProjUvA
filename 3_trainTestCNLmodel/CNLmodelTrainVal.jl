@@ -1,6 +1,7 @@
 VERSION
 using Pkg
-#Pkg.add("PyCall")
+Pkg.add("StatsPlots")
+Pkg.add("Plots")
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
@@ -19,6 +20,8 @@ using Random
 using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
+using StatsPlots
+using Plots
 #using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
@@ -36,10 +39,10 @@ using ScikitLearn  #: @sk_import, fit!, predict
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 28302 x (2+15977+1)
+# inputing 4862 x (3+15994+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
-inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
-sort!(inputDB, [:INCHIKEY, :SMILES])
+#inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
+inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
 
 function partitionTrainVal(df, ratio = 0.7)
     noOfRow = nrow(df)
@@ -49,29 +52,30 @@ function partitionTrainVal(df, ratio = 0.7)
     df[train_idx,:], df[test_idx,:]
 end
 
-# give 2+15979+1 = 15980 columns
+# give 3+15994+1 = 15998 columns
 trainSet, valSet = partitionTrainVal(inputDB, 0.7)  # 70% train 30% Val/Test
 size(trainSet)
 size(valSet)
 
-# ouputing trainSet df 0.7 x (2+15977+1)
+# ouputing trainSet df 0.7 x (3+15994+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain.csv"
 CSV.write(savePath, trainSet)
 
-# ouputing trainSet df 0.3 x (2+15977+1)
+# ouputing trainSet df 0.3 x (3+15994+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal.csv"
 CSV.write(savePath, valSet)
 
-# 15980 -> 15977 columns
+# 15998 -> 15994 columns
 ## data for model training
 x_train = deepcopy(trainSet)
-select!(x_train, Not([:SMILES, :INCHIKEY, :predictRi]));
+select!(x_train, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
 size(x_train)
 y_train = deepcopy(trainSet[:, end])
 size(y_train)
+
 ## data for internal model validation
 x_val = deepcopy(valSet)
-select!(x_val, Not([:SMILES, :INCHIKEY, :predictRi]));
+select!(x_val, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
 size(x_val)
 y_val = deepcopy(valSet[:, end])
 size(y_val)
@@ -101,12 +105,10 @@ model = RandomForestRegressor(
       random_state = 1
       )
 fit!(model, Matrix(x_train), Vector(y_train))
-score(model, Matrix(x_train), Vector(y_train))
-cross_val_score(model, Matrix(x_train), Vector(y_train); cv = 5)
 
-# model validation
-predictedRi = predict(model, Matrix(x_val))
-# CNL-predictedRi vs. FP-predictedRi
+# saving model
+modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi.joblib"
+jl.dump(model, modelSavePath, compress = 5)
 
 # performace
 ## Maximum absolute error
@@ -127,8 +129,6 @@ function errorDetermination(arrRi, predictedRi)
     return maxAE, MSE, RMSE
 end
 
-errorDetermination(y_val, predictedRi)
-
 ## R-square value
 function rSquareDetermination(arrRi, predictedRi)
     sumY = 0
@@ -148,22 +148,78 @@ function rSquareDetermination(arrRi, predictedRi)
     return rSquare
 end
 
-rSquareDetermination(y_val, predictedRi)
+## Average accuracy
+function avgAcc(arrAcc, cv)
+    sumAcc = 0
+    for acc in arrAcc
+        sumAcc += acc
+    end
+    return sumAcc / cv
+end
 
+# training performace, CNL-predictedRi vs. FP-predictedRi
+predictedRi_train = predict(model, Matrix(x_train))
+trainSet[!, "CNLpredictRi"] = predictedRi_train
+# save, ouputing trainSet df 0.7 x (3+15994+1)
+savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain_withCNLPredictedRi.csv"
+CSV.write(savePath, trainSet)
+
+maxAE_train, MSE_train, RMSE_train = errorDetermination(y_train, predictedRi_train)
+rSquare_train = rSquareDetermination(y_train, predictedRi_train)
 ## accuracy
-score(model, Matrix(x_train), Vector(y_train))
-score(model, Matrix(x_val), Vector(y_val))
+acc1_train = score(model, Matrix(x_train), Vector(y_train))
+acc5_train = cross_val_score(model, Matrix(x_train), Vector(y_train); cv = 5)
+avgAcc_train = avgAcc(acc5_train, 5)
 
-# Parity plot of the CNL model predictions and the experimental r i values for the training set (n=17998) (A)
-#the external NORMAN test set (n=3131) (B) 
-# and the external amide test set (n=604) (C) 
-#with the coefficient of determination ( R2 ), root mean squared error (RMSE) and maximum error. 
-# In addition, marginal distributions of the experimental and predicted r i are shown
+# internal validation
+predictedRi_val = predict(model, Matrix(x_val))
+valSet[!, "CNLpredictRi"] = predictedRi_val
+# save, ouputing trainSet df 0.7 x (3+15994+1)
+savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal_withCNLPredictedRi.csv"
+CSV.write(savePath, valSet)
 
-## plots
+maxAE_val, MSE_val, RMSE_val = errorDetermination(y_val, predictedRi_val)
+rSquare_val = rSquareDetermination(y_val, predictedRi_val)
+## accuracy
+acc1_val = score(model, Matrix(x_val), Vector(y_val))
+acc5_val = cross_val_score(model, Matrix(x_val), Vector(y_val); cv = 5)
+avgAcc_val = avgAcc(acc5_val, 5)
 
+# plots
+plotTrain = marginalkde(
+        y_train, 
+        predictedRi_train, 
+        xlabel = "FP-derived Ri values", 
+        ylabel = "CNL-derived Ri values", 
+        label = false, 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+plot!(plotTrain.spmap[:contour], 
+        y_train -> y_train, c=:red, 
+        label = false, 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300)
+        # Saving
+savefig(plotTrain, "D:\\2_output\\CNLRiPrediction_Train.png")
 
-
-# saving model
-modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi.joblib"
-jl.dump(model, modelSavePath, compress = 5)
+plotVal = marginalkde(
+        y_val, 
+        predictedRi_val, 
+        xlabel = "FP-derived Ri values", 
+        ylabel = "CNL-derived Ri values", 
+        label = false, 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+plot!(plotVal.spmap[:contour], 
+        y_val -> y_val, c=:red, 
+        label = false, 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300)
+        # Saving
+savefig(plotVal, "D:\\2_output\\CNLRiPrediction_Val.png")
