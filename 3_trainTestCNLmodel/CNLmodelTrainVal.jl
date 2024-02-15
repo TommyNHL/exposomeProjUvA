@@ -29,7 +29,7 @@ pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")            #calculation of FP
 jl = pyimport("joblib")             # used for loading models
 
-using ScikitLearn: @sk_import, fit!, predict
+using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: RandomForestClassifier
 #using ScikitLearn.GridSearch: RandomizedSearchCV
@@ -118,7 +118,7 @@ size(y_val)
 model = RandomForestRegressor()
 param_dist = Dict(
       "n_estimators" => 50:50:300, 
-      "max_depth" => 2:2:10, 
+      #"max_depth" => 2:2:10, 
       "min_samples_leaf" => 8:8:32, 
       "max_features" => [Int64(ceil(size(x_train,2)/3))], 
       "n_jobs" => [-1], 
@@ -139,6 +139,7 @@ model = RandomForestRegressor(
       random_state = 1
       )
 fit!(model, Matrix(x_train), Vector(y_train))
+score()
 cross_val_score(model, Matrix(x_train), Vector(y_train); cv = 5)
 
 # model validation
@@ -150,6 +151,7 @@ predictedRi = predict(model, Matrix(x_val))
 for i = 1:size(predictedRi, 1)
     println(predictedRi[i], ", ", y_val[i])
 end
+## 
 
 # saving model
 modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi.joblib"
