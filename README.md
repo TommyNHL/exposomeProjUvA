@@ -18,19 +18,21 @@
 #### ***to be continued***
 
 ## 2_prepareCNLmodel (folder)
-### Filtering4NLsCalculation.jl
+### Filtering4NLsCalculation.jl ***wasted***
 #### - step 1: filter in positive ionization mode
 #### - step 2: filter in precusor ion with measured m/z
 #### - step 3: bin the m/z domain with bin size 0.01 Da (steps)
 #### - step 4: calculate NLs by m/z(precusor ion) - m/z(fragment ions)
 ####           -> new .csv
 ### JoiningInternalDB.jl
-#### - step 5: repeat steps 1-4
-#### - step 6: join with Cocamide MS2 spectra DB
-### MergingNLs2CNLsMasses.jl
+#### - step 5: repeat steps 1-4 ***done***
+#### - step 6: join with Cocamide MS2 spectra DB ***ignored***
+### MergingNLs2CNLsMasses.jl  ***wasted***
 #### - step 7: merge NLs into list for each ID copound
 ####           -> new .csv
-### CNLsFeaturing.jl ***re-run overnight***
+### CNLsFeaturing.jl ***wasted***
+#### - step 8: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
+### CNLsFeaturingCopy.jl ***working***
 #### - step 8: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
 ####           -> new .csv
 #### - step 9: transform table as row(ID copounds) x column(CNLs masses)

@@ -22,37 +22,53 @@ sort!(inputDB, [:INCHIKEY, :SMILES])
 inputDBcocamide = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
 sort!(inputDBcocamide, [:INCHIKEY, :SMILES])
 
+# other input 
+inputAllMS2DB = CSV.read("D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv", DataFrame)
+sort!(inputAllMS2DB, [:INCHIKEY, :SMILES])
+
+inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
+sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
+
+inputCocamidesTrain = CSV.read("D:\\0_data\\CocamideExt_Fingerprints_train.csv", DataFrame)
+sort!(inputCocamidesTrain, :SMILES)
+
+inputCocamidesTest = CSV.read("D:\\0_data\\CocamideExt_Fingerprints_test.csv", DataFrame)
+sort!(inputCocamidesTest, :SMILES)
+
+
 # df creating
 dfOnlyCocamides = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
-dfWithoutCocamides = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
+dfOutsideCocamides = DataFrame([[],[]], ["SMILES", "INCHIKEY"])
 for col in names(inputDB)[3:end]
     dfOnlyCocamides[:, col] = []
-    dfWithoutCocamides[:, col] = []
+    dfOutsideCocamides[:, col] = []
 end
 dfOnlyCocamides[:, "predictRi"] = []
-dfWithoutCocamides[:, "predictRi"] = []
+dfOutsideCocamides[:, "predictRi"] = []
 size(dfOnlyCocamides)  # 0 x (15979+1)
-size(dfWithoutCocamides)  # 0 x (15979+1)
+size(dfOutsideCocamides)  # 0 x (15979+1)
 
-function cocamidesOrNot(i)
-    if (inputDB[i, "INCHIKEY"] in Array(inputDBcocamide[:, "INCHIKEY"]))
+function cocamidesOrNot(DB, i)
+    if (DB[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || DB[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
         return true
     else
-        if (inputDB[i, "SMILES"] in Array(inputDBcocamide[:, "SMILES"]))
-            return true
-        end
+        return false
     end
 end
 
-function findRowNumber(i)
-    if (inputDB[i, "INCHIKEY"] in Array(inputDBcocamide[:, "INCHIKEY"]))
-        println(findall(inputDBcocamide.INCHIKEY .== inputDB[i, "INCHIKEY"]))
-        return findall(inputDBcocamide.INCHIKEY .== inputDB[i, "INCHIKEY"])
-    else
-        if (inputDB[i, "SMILES"] in Array(inputDBcocamide[:, "SMILES"]))
-            println(findall(inputDBcocamide.SMILES .== inputDB[i, "SMILES"]))
-            return findall(inputDBcocamide.SMILES .== inputDB[i, "SMILES"])
-        end
+function haveFPRiOrNot(DB, i)
+    if (DB[i, "INCHIKEY"] in Array(inputAllFPDB[:, "INCHIKEY"]) || DB[i, "SMILES"] in Array(inputAllFPDB[:, "SMILES"]))
+        return true
+    else 
+        return false
+    end
+end
+
+function findRowNumber4Ri(DB, i)
+    if (DB[i, "INCHIKEY"] in Array(inputAllFPDB[:, "INCHIKEY"]))
+        return findall(inputAllFPDB.INCHIKEY .== DB[i, "INCHIKEY"])
+    elseif (DB[i, "SMILES"] in Array(inputAllFPDB[:, "SMILES"]))
+        return findall(inputAllFPDB.SMILES .== DB[i, "SMILES"])
     end
 end
     
@@ -66,17 +82,33 @@ function dfExtract(i, columnsCNLs)
     return temp
 end
 
+inputDB
 for i in 1:size(inputDB, 1)
-    if (cocamidesOrNot(i) == true)
+    if (cocamidesOrNot(inputDB, i) == true)  # && haveFPRiOrNot(inputDB, i) == true)
         tempRow = dfExtract(i, names(inputDB)[3:end])
-        push!(tempRow, inputDBcocamide[findRowNumber(i)[end:end], "predictRi"][1])
+        push!(tempRow, inputAllFPDB[findRowNumber(i)[end:end], "predictRi"][1])
         push!(dfOnlyCocamides, tempRow)
-    else
+    elseif (cocamidesOrNot(inputDB, i) == false)  # && haveFPRiOrNot(inputDB, i) == true)
         tempRow = dfExtract(i, names(inputDB)[3:end])
         push!(tempRow, Float64(0))
-        push!(dfWithoutCocamides, tempRow)
+        push!(dfOutsideCocamides, tempRow)
     end
 end
+dfOnlyCocamides
+dfOutsideCocamides
+
+inputAllMS2DB
+countOnlyCocamides = 0
+countOutsideCocamides = 0
+for i in 1:size(inputAllMS2DB, 1)
+    if (cocamidesOrNot(inputAllMS2DB, i) == true)  # && haveFPRiOrNot(inputAllMS2DB, i) == true)
+        countOnlyCocamides += 1
+    elseif (cocamidesOrNot(inputAllMS2DB, i) == false)  # && haveFPRiOrNot(inputAllMS2DB, i) == true)
+        countOutsideCocamides +=1
+    end
+end
+countOnlyCocamides
+countOutsideCocamides
 
 # df with 30684 x 2+15977+1
 dfOnlyCocamides

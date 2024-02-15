@@ -41,44 +41,6 @@ using ScikitLearn.GridSearch: GridSearchCV
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
 sort!(inputDB, [:INCHIKEY, :SMILES])
 
-#= inputDB1 = CSV.read("D:\\0_data\\databaseOfAllMS2_withMergedNLs.csv", DataFrame)
-sort!(inputDB1, [:INCHIKEY, :SMILES])
-
-inputDB2 = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
-sort!(inputDB2, [:INCHIKEY, :SMILES])
-
-input1 = CSV.read("D:\\0_data\\CocamideExt_Fingerprints_train.csv", DataFrame)
-sort!(input1, :SMILES)
-
-input2 = CSV.read("D:\\0_data\\CocamideExt_Fingerprints_test.csv", DataFrame)
-sort!(input2, :SMILES) =#
-
-#= function existOrNot(i)
-  if (inputDB[i, "INCHIKEY"] in Array(input1[:, "SMILES"]))
-      return true
-  else
-      if (inputDB[i, "SMILES"] in Array(input2[:, "SMILES"]))
-          return true
-      end
-  end
-end =#
-
-#= count = 0
-record = []
-for i in 1:size(inputDB, 1)
-  if (existOrNot(i) == true)
-      push!(record, i)
-      count += 1
-      println(count)
-  end
-end
-for i in record
-    println(inputDB[i, "SMILES"], 
-        inputDB2[findall(inputDB2.SMILES .== inputDB1[i, "SMILES"]), "predictRi"], 
-        input1[findall(input1.SMILES .== inputDB1[i, "SMILES"]), "RI"], 
-        input2[findall(input2.SMILES .== inputDB1[i, "SMILES"]), "RI"])
-end =#
-
 function partitionTrainVal(df, ratio = 0.7)
     noOfRow = nrow(df)
     idx = shuffle(1:noOfRow)
@@ -130,8 +92,8 @@ gridsearch = GridSearchCV(model, param_dist)
 println("Best parameters: $(gridsearch.best_params_)")
 
 model = RandomForestRegressor(
-      n_estimators = 100, 
-      max_depth = 10, 
+      n_estimators = 250, 
+      #max_depth = 10, 
       min_samples_leaf = 8, 
       max_features = Int64(ceil(size(x_train,2)/3)), 
       n_jobs = -1, 
@@ -139,7 +101,7 @@ model = RandomForestRegressor(
       random_state = 1
       )
 fit!(model, Matrix(x_train), Vector(y_train))
-score()
+score(model, Matrix(x_train), Vector(y_train))
 cross_val_score(model, Matrix(x_train), Vector(y_train); cv = 5)
 
 # model validation
@@ -147,11 +109,60 @@ predictedRi = predict(model, Matrix(x_val))
 # CNL-predictedRi vs. FP-predictedRi
 
 # performace
-## error calculation
-for i = 1:size(predictedRi, 1)
-    println(predictedRi[i], ", ", y_val[i])
+## Maximum absolute error
+## mean square error (MSE) calculation
+## Root mean square error (RMSE) calculation
+function errorDetermination(arrRi, predictedRi)
+    sumAE = 0
+    maxAE = 0
+    for i = 1:size(predictedRi, 1)
+        AE = abs(arrRi[i] - predictedRi[i])
+        if (AE > maxAE)
+            maxAE = AE
+        end
+        sumAE += (AE ^ 2)
+    end
+    MSE = sumAE / size(predictedRi, 1)
+    RMSE = MSE ^ 0.5
+    return maxAE, MSE, RMSE
 end
-## 
+
+errorDetermination(y_val, predictedRi)
+
+## R-square value
+function rSquareDetermination(arrRi, predictedRi)
+    sumY = 0
+    for i = 1:size(predictedRi, 1)
+        sumY += predictedRi[i]
+    end
+    meanY = sumY / size(predictedRi, 1)
+    sumAE = 0
+    sumRE = 0
+    for i = 1:size(predictedRi, 1)
+        AE = abs(arrRi[i] - predictedRi[i])
+        RE = abs(arrRi[i] - meanY)
+        sumAE += (AE ^ 2)
+        sumRE += (RE ^ 2)
+    end
+    rSquare = 1 - (sumAE / sumRE)
+    return rSquare
+end
+
+rSquareDetermination(y_val, predictedRi)
+
+## accuracy
+score(model, Matrix(x_train), Vector(y_train))
+score(model, Matrix(x_val), Vector(y_val))
+
+# Parity plot of the CNL model predictions and the experimental r i values for the training set (n=17998) (A)
+#the external NORMAN test set (n=3131) (B) 
+# and the external amide test set (n=604) (C) 
+#with the coefficient of determination ( R2 ), root mean squared error (RMSE) and maximum error. 
+# In addition, marginal distributions of the experimental and predicted r i are shown
+
+## plots
+
+
 
 # saving model
 modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi.joblib"

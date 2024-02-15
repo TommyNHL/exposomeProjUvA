@@ -59,7 +59,7 @@ function getVec(matStr)
 end
 #test = getVec(inputDB[1,4])
 
-# defining features without tolerance
+# defining features
 featuresCNLs = []
 for i in 1:size(inputDB, 1)
     println(i)
