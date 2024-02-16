@@ -61,10 +61,15 @@
 #### - step 3: train model
 #### - step 4: precdict CNL-based Ri values for the internally split cocamides val set
 #### - step 5: analyze model predictive power
+####           -> new .csv
+####           -> new .csv
 ####           -> new performance metrics
+####           -> new performance metrics
+####           -> new .png
 ####           -> new .png
 ### CNLmodelTest.jl ***done***
 #### - step 6: load the pre-train CNL-based model- CocamideExtended_CNLsRi.joblib
 #### - step 7: precdict CNL-based Ri values for the non-cocamides test set
+####           -> new .csv
 ####           -> new performance metrics
 ####           -> new .png
