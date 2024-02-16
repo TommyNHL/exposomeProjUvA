@@ -42,6 +42,7 @@ using ScikitLearn.GridSearch: GridSearchCV
 # inputing 4862 x (3+15994+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
 #inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
+#inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesInDA.csv", DataFrame)
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
 
 function partitionTrainVal(df, ratio = 0.7)

@@ -6,10 +6,12 @@ using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
 #Conda.add("joblib")
+#Conda.add("Numpy")
 ## import packages ##
 pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
 jl = pyimport("joblib")
+np = pyimport("numpy")
 
 # inputing 28302 x (3+15994) df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
@@ -97,3 +99,34 @@ CSV.write(savePath, dfOnlyCocamides)
 # outputing dfOutsideCocamides with 4862 x (3+15994+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv"
 CSV.write(savePath, dfOutsideCocamides)
+
+# determining Leverage values
+# 3+15994+1+1
+dfOnlyCocamides[!, "LeverageValue"] .= Float64(0)
+dfOutsideCocamides[!, "LeverageValue"] .= Float64(0)
+
+###
+function leverageCal(matX)
+    hiis = []
+    matX_t = transpose(matX)
+    for i in 1:size(matX, 1)
+        for j in 1:size(matX, 2)
+            hii = (matX[i] ./ matX) * (matX[j] ./ matX_t)
+            push!(hiis, hii)
+        end
+    end
+    return hiis
+end
+###
+
+levOnlyCocamides = leverageCal(Matrix(dfOnlyCocamides[:, 4:end-2]))
+levOutsideCocamides = leverageCal(Matrix(dfOutsideCocamides[:, 4:end-2]))
+
+diff = 0.001
+bins = collect(0:diff:1)
+counts = zeros(length(bins)-1)
+for i = 1:length(bins)-1
+    counts[i] = sum(bins[i] .<= levOnlyCocamides .< bins[i+1])
+end
+thresholdAD = bins[findfirst(cumsum(counts)./sum(counts) .> 0.95)-1]
+

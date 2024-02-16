@@ -51,6 +51,12 @@
 ####           -> new .csv
 #### - step 10: split the table without the cocamides
 ####           -> new .csv
+#### - step 11: calculate leverage values for the cocamides
+#### - step 12: filter in rows within 95% AD for the cocamides
+####           -> new .csv
+#### - step 13: calculate leverage values for the non-cocamides
+#### - step 14: filter in rows within 95% AD for the non-cocamides
+####           -> new .csv
 
 ## 3_trainTestCNLmodel
 ### CNLmodelTrainVal.jl ***done***
@@ -73,3 +79,12 @@
 ####           -> new .csv
 ####           -> new performance metrics
 ####           -> new .png
+### ADcalculation.jl ***workingOn***
+#### - step 8: calculate the Leverage values for the Cocamides and Non-Cacamides
+####           -> new .png
+####           -> new .png
+#### - step 9: filter out the rows entries that are outside AD
+####           -> new .csv
+####           -> new .csv
+### CNLmodelTest.jl ***done***
+#### - step 6: repeat steps 6-7

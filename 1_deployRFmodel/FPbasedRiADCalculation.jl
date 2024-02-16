@@ -1,1 +1,1 @@
-# RF-derived FP-based Ri values are 1 of the feature in the final predictive model
+# FP-derived AD leverage values are 1 of the feature in the final predictive model
