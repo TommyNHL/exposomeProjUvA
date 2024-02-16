@@ -106,6 +106,18 @@ for col in columnsCNLs
 end
 size(dfCNLs)  # 0 x (3+15994)
 
+function threeAboveOrNot(i)
+    for col in finalCNLs
+        arr = []
+        arr = getMasses(i, arr)
+    end
+    if (size(arr, 1) >= 3)
+        return true
+    else
+        return false
+    end
+end
+
 function df1RowFilling1or0(count, i, columnsCNLs)
     ## 1 row
     temp = []
@@ -140,7 +152,7 @@ dfCNLs
 count = 0
 for i in 1:5000 #size(inputDB, 1)  #5000
     println(i)
-    if (haveFPRiOrNot(inputDB, i) == true)
+    if (threeAboveOrNot(i) == true && haveFPRiOrNot(inputDB, i) == true)
         count += 1
         push!(dfCNLs, df1RowFilling1or0(count, i, columnsCNLs))
     end

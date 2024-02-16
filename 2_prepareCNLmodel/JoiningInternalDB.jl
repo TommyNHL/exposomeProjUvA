@@ -82,6 +82,7 @@ for i in 1:size(inputData, 1)
           #println(arrNL)
         end
     end
+    arrNL = string(arrNL, ", ", string(round(inputData[i,"PRECURSOR_ION"], digits = 2)))
     inputData[i, "CNLmasses"] = arrNL
 end
 

@@ -23,9 +23,10 @@
 #### - step 2: filter in precusor ion with measured m/z
 #### - step 3: bin the m/z domain with bin size 0.01 Da (steps)
 #### - step 4: calculate NLs by m/z(precusor ion) - m/z(fragment ions)
+#### - step 5: include the pre-ion
 ####           -> new .csv
 ### JoiningInternalDB.jl
-#### - step --: repeat steps 1-4 ***done***
+#### - step --: repeat steps 1-5 ***done***
 #### - step --: join with Cocamide MS2 spectra DB ***ignored***
 ### MergingNLs2CNLsMasses.jl  ***wasted***
 #### - step --: merge NLs into list for each ID copound
@@ -34,9 +35,10 @@
 #### - step --: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
 ### CNLsFeaturingCopy.jl ***done***
 #### - step 5: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
+#### - step 6: filter out rows with <3 CNL features
 ####           -> new .csv
-#### - step 6: collect Entry-of-interest according to the presence of FPs in .csv DB
-#### - step 7: transform table as row(ID copounds) x column(CNLs masses)
+#### - step 7: collect Entry-of-interest according to the presence of FPs in .csv DB
+#### - step 8: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
 ####           -> new .png
 ### ScoresCNLsCalculation.jl ***wasted***
@@ -46,16 +48,16 @@
 #### - step --: calculate Score(CNL) for each CNL = 1 - SUM(P(TP)) / SUM(P(TN))
 ####           -> new .csv
 ### Dfs4CNLmodeling.jl ***done***
-#### - step 8: split the table with only the cocamides
-#### - step 9: merge the table with only the cocamides with the FP-based Ri
+#### - step 9: split the table with only the cocamides
+#### - step 10: merge the table with only the cocamides with the FP-based Ri
 ####           -> new .csv
-#### - step 10: split the table without the cocamides
+#### - step 11: split the table without the cocamides
 ####           -> new .csv
-#### - step 11: calculate leverage values for the cocamides
-#### - step 12: filter in rows within 95% AD for the cocamides
+#### - step 12: calculate leverage values for the cocamides
+#### - step 13: filter in rows within 95% AD for the cocamides
 ####           -> new .csv
-#### - step 13: calculate leverage values for the non-cocamides
-#### - step 14: filter in rows within 95% AD for the non-cocamides
+#### - step 14: calculate leverage values for the non-cocamides
+#### - step 15: filter in rows within 95% AD for the non-cocamides
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel
@@ -88,3 +90,9 @@
 ####           -> new .csv
 ### CNLmodelTest.jl ***done***
 #### - step 6: repeat steps 6-7
+
+# set min. no. of CNL (3, pre-ion inclusive) ***v***
+# include pre-ion ***v***
+# perform strtification(mixing) for the FP data, not CNL
+# CV=3 for modeling
+# try CatBoost
