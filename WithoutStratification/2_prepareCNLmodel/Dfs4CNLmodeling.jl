@@ -13,7 +13,7 @@ pd = pyimport("padelpy")
 jl = pyimport("joblib")
 np = pyimport("numpy")
 
-# inputing 28302 x (3+15994) df
+# inputing 28302 x (3+22243) df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
 
@@ -41,8 +41,8 @@ for col in names(inputDB)[4:end]
 end
 dfOnlyCocamides[:, "FPpredictRi"] = []
 dfOutsideCocamides[:, "FPpredictRi"] = []
-size(dfOnlyCocamides)  # 0 x (3+15994+1)
-size(dfOutsideCocamides)  # 0 x (3+15994+1)
+size(dfOnlyCocamides)  # 0 x (3+22243+1)
+size(dfOutsideCocamides)  # 0 x (3+22243+1)
 
 function cocamidesOrNot(DB, i)
     if (DB[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || DB[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
@@ -86,47 +86,16 @@ for i in 1:size(inputDB, 1)
     end
 end
 
-# 28 x 15998 df
+# 28 x 22247 df
 dfOnlyCocamides
 
-# 4862 x 15998 df
+# 4862 x 22247 df
 dfOutsideCocamides
 
-# outputing dfOnlyCocamides with 28 x (3+15994+1)
+# outputing dfOnlyCocamides with 28 x (3+22243+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv"
 CSV.write(savePath, dfOnlyCocamides)
 
-# outputing dfOutsideCocamides with 4862 x (3+15994+1)
+# outputing dfOutsideCocamides with 4862 x (3+22243+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv"
 CSV.write(savePath, dfOutsideCocamides)
-
-# determining Leverage values
-# 3+15994+1+1
-dfOnlyCocamides[!, "LeverageValue"] .= Float64(0)
-dfOutsideCocamides[!, "LeverageValue"] .= Float64(0)
-
-###
-function leverageCal(matX)
-    hiis = []
-    matX_t = transpose(matX)
-    for i in 1:size(matX, 1)
-        for j in 1:size(matX, 2)
-            hii = (matX[i] ./ matX) * (matX[j] ./ matX_t)
-            push!(hiis, hii)
-        end
-    end
-    return hiis
-end
-###
-
-levOnlyCocamides = leverageCal(Matrix(dfOnlyCocamides[:, 4:end-2]))
-levOutsideCocamides = leverageCal(Matrix(dfOutsideCocamides[:, 4:end-2]))
-
-diff = 0.001
-bins = collect(0:diff:1)
-counts = zeros(length(bins)-1)
-for i = 1:length(bins)-1
-    counts[i] = sum(bins[i] .<= levOnlyCocamides .< bins[i+1])
-end
-thresholdAD = bins[findfirst(cumsum(counts)./sum(counts) .> 0.95)-1]
-

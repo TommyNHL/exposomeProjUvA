@@ -6,11 +6,6 @@ Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-#Pkg.add("JLD")
-#Pkg.add("HDF5")
-#Pkg.add("PyCallJLD")
-#Pkg.add(Pkg.PackageSpec(;name="ScikitLearn", version="1.3.1"))
-#using JLD, HDF5, PyCallJLD
 #Pkg.add(PackageSpec(url=""))
 using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics

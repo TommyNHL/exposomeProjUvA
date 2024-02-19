@@ -1,20 +1,12 @@
 VERSION
 using Pkg
-Pkg.add("StatsPlots")
-Pkg.add("Plots")
+#Pkg.add("StatsPlots")
+#Pkg.add("Plots")
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-#Pkg.add("MLJ")
-#Pkg.add("JLD")
-#Pkg.add("HDF5")
-#Pkg.add("PyCallJLD")
-#Pkg.add(Pkg.PackageSpec(;name="ScikitLearn", version="1.3.1"))
-#using JLD, HDF5, PyCallJLD
-#Pkg.add(PackageSpec(url=""))
-#Pkg.add("MLDataUtils")
 #Pkg.add(PackageSpec(url=""))
 using Random
 using BSON
@@ -37,12 +29,12 @@ using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestClassifier
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
+using ScikitLearn.CrossValidation: train_test_split
 using ScikitLearn.GridSearch: GridSearchCV
 
 # inputing 4862 x (3+15994+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
 #inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
-#inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesInDA.csv", DataFrame)
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
 
 function partitionTrainVal(df, ratio = 0.7)
@@ -59,11 +51,11 @@ size(trainSet)
 size(valSet)
 
 # ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain.csv"
+savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain_withoutStratification.csv"
 CSV.write(savePath, trainSet)
 
 # ouputing trainSet df 0.3 x (3+15994+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal.csv"
+savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal_withoutStratification.csv"
 CSV.write(savePath, valSet)
 
 # 15998 -> 15994 columns
@@ -80,36 +72,6 @@ select!(x_val, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
 size(x_val)
 y_val = deepcopy(valSet[:, end])
 size(y_val)
-
-# modeling
-model = RandomForestRegressor()
-param_dist = Dict(
-      "n_estimators" => 50:50:300, 
-      #"max_depth" => 2:2:10, 
-      "min_samples_leaf" => 8:8:32, 
-      "max_features" => [Int64(ceil(size(x_train,2)/3))], 
-      "n_jobs" => [-1], 
-      "oob_score" => [true], 
-      "random_state" => [1]
-      )
-gridsearch = GridSearchCV(model, param_dist)
-@time fit!(gridsearch, Matrix(x_train), Vector(y_train))
-println("Best parameters: $(gridsearch.best_params_)")
-
-model = RandomForestRegressor(
-      n_estimators = 250, 
-      #max_depth = 10, 
-      min_samples_leaf = 8, 
-      max_features = Int64(ceil(size(x_train,2)/3)), 
-      n_jobs = -1, 
-      oob_score = true, 
-      random_state = 1
-      )
-fit!(model, Matrix(x_train), Vector(y_train))
-
-# saving model
-modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi.joblib"
-jl.dump(model, modelSavePath, compress = 5)
 
 # performace
 ## Maximum absolute error
@@ -158,11 +120,84 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
+# modeling, 252 times
+function optimRandomForestRegressor(Features, RIs)
+    #leaf_r = [collect(4:2:10);15;20]
+    leaf_r = [collect(8:8:32)]
+    #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
+    tree_r = vcat(collect(50:50:300))
+    z = zeros(1,6)
+    itr = 1
+    for l = 1:length(leaf_r)
+        for t = 1:length(tree_r)
+            for state = 1:3
+                println("itr=", itr, ", leaf=", l, ", tree=", t, ", s=", state)
+                leaf = leaf_r[l]
+                tree = tree_r[t]
+                MaxFeat = Int64(ceil(size(Features,2)/3))
+                ## Regression ##
+                Xx_train, Xx_test, Yy_train, Yy_test = train_test_split(Features, RIs, test_size=0.20, random_state=42);
+                reg = RandomForestRegressor(n_estimators=tree, min_samples_leaf=leaf, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+                fit!(reg, Xx_train, Yy_train)
+                if itr == 1
+                    z[1,1] = leaf
+                    z[1,2] = tree
+                    z[1,3] = state
+                    z[1,4] = score(reg, Xx_train, Yy_train)
+                    acc5_train = cross_val_score(reg, Xx_train, Yy_train; cv = 3)
+                    z[1,5] = avgAcc(acc5_train, 3)
+                    z[1,6] = score(reg, Xx_test, Yy_test)
+                else
+                    acc5_train = cross_val_score(reg, Xx_train, Yy_train; cv = 3)
+                    z = vcat(z,[leaf tree state score(reg, Xx_train, Yy_train) avgAcc(acc5_train, 3) score(reg, Xx_test, Yy_test)])
+                end
+                #println("End of $itr iterations")
+                itr += 1
+            end
+        end
+    end
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], state=z[:,3], accuracy_train = z[:,4], avgAccuracy_train = z[:,5], accuracy_test = z[:,6])
+    z_df_sorted = sort(z_df, [:avgAccuracy_train, :accuracy_test], rev=true)
+    return z_df_sorted
+end
+
+optiSearch_df = optimRandomForestRegressor(x_train, y_train)
+
+#= model = RandomForestRegressor()
+param_dist = Dict(
+      "n_estimators" => 50:50:300, 
+      #"max_depth" => 2:2:10, 
+      "min_samples_leaf" => 8:8:32, 
+      "max_features" => [Int64(ceil(size(x_train,2)/3))], 
+      "n_jobs" => [-1], 
+      "oob_score" => [true], 
+      "random_state" => [1]
+      )
+gridsearch = GridSearchCV(model, param_dist)
+@time fit!(gridsearch, Matrix(x_train), Vector(y_train))
+println("Best parameters: $(gridsearch.best_params_)") =#
+
+model = RandomForestRegressor(
+      n_estimators = 300, 
+      #max_depth = 10, 
+      min_samples_leaf = 8, 
+      max_features = Int64(ceil(size(x_train,2)/3)), 
+      n_jobs = -1, 
+      oob_score = true, 
+      random_state = 42
+      )
+fit!(model, Matrix(x_train), Vector(y_train))
+
+# saving model
+modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi_RFwithoutStratification.joblib"
+jl.dump(model, modelSavePath, compress = 5)
+
+
 # training performace, CNL-predictedRi vs. FP-predictedRi
 predictedRi_train = predict(model, Matrix(x_train))
 trainSet[!, "CNLpredictRi"] = predictedRi_train
 # save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain_withCNLPredictedRi.csv"
+savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain_RFwithoutStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, trainSet)
 
 maxAE_train, MSE_train, RMSE_train = errorDetermination(y_train, predictedRi_train)
@@ -176,7 +211,7 @@ avgAcc_train = avgAcc(acc5_train, 5)
 predictedRi_val = predict(model, Matrix(x_val))
 valSet[!, "CNLpredictRi"] = predictedRi_val
 # save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal_withCNLPredictedRi.csv"
+savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal_RFwithoutStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, valSet)
 
 maxAE_val, MSE_val, RMSE_val = errorDetermination(y_val, predictedRi_val)
@@ -200,11 +235,12 @@ plotTrain = marginalkde(
 plot!(plotTrain.spmap[:contour], 
         y_train -> y_train, c=:red, 
         label = false, 
+        title = "RF Model Training Without Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
         # Saving
-savefig(plotTrain, "D:\\2_output\\CNLRiPrediction_Train.png")
+savefig(plotTrain, "D:\\2_output\\CNLRiPrediction_RFTrainWithoutStratification.png")
 
 plotVal = marginalkde(
         y_val, 
@@ -219,8 +255,9 @@ plotVal = marginalkde(
 plot!(plotVal.spmap[:contour], 
         y_val -> y_val, c=:red, 
         label = false, 
+        title = "RF Model Val Without Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
         # Saving
-savefig(plotVal, "D:\\2_output\\CNLRiPrediction_Val.png")
+savefig(plotVal, "D:\\2_output\\CNLRiPrediction_RFValWithoutStratification.png")

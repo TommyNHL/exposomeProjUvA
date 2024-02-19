@@ -1,1 +1,0 @@
-# FP-derived AD leverage values are 1 of the feature in the final predictive model

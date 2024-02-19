@@ -1,20 +1,12 @@
 VERSION
 using Pkg
-Pkg.add("StatsPlots")
-Pkg.add("Plots")
+#Pkg.add("StatsPlots")
+#Pkg.add("Plots")
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-#Pkg.add("MLJ")
-#Pkg.add("JLD")
-#Pkg.add("HDF5")
-#Pkg.add("PyCallJLD")
-#Pkg.add(Pkg.PackageSpec(;name="ScikitLearn", version="1.3.1"))
-#using JLD, HDF5, PyCallJLD
-#Pkg.add(PackageSpec(url=""))
-#Pkg.add("MLDataUtils")
 #Pkg.add(PackageSpec(url=""))
 using Random
 using BSON
@@ -37,13 +29,13 @@ using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestClassifier
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
+using ScikitLearn.CrossValidation: train_test_split
 using ScikitLearn.GridSearch: GridSearchCV
 
 # inputing 4862 x (3+15994+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
 #inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
-#inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamidesInDA.csv", DataFrame)
 
 # 15998 -> 15994 columns
 ## data for model testing
@@ -55,7 +47,7 @@ size(y_test)
 
 #load a model
 # requires python 3.11 or 3.12
-modelRF_CNL = jl.load("D:\\1_model\\CocamideExtended_CNLsRi.joblib")
+modelRF_CNL = jl.load("D:\\1_model\\CocamideExtended_CNLsRi_RFwithoutStratification.joblib")
 size(modelRF_CNL)
 
 # performace
@@ -110,7 +102,7 @@ end
 predictedRi_test = predict(modelRF_CNL, Matrix(x_test))
 inputDB[!, "CNLpredictRi"] = predictedRi_test
 # save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfNonCocamidesTest_withCNLPredictedRi.csv"
+savePath = "D:\\0_data\\dataframeCNLsRows_dfNonCocamidesTest_RFwithoutStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, inputDB)
 
 maxAE_test, MSE_test, RMSE_test = errorDetermination(y_test, predictedRi_test)
@@ -134,8 +126,9 @@ plotTest = marginalkde(
 plot!(plotTest.spmap[:contour], 
         y_test -> y_test, c=:red, 
         label = false, 
+        title = "RF Model Test Without Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
         # Saving
-savefig(plotTest, "D:\\2_output\\CNLRiPrediction_Test.png")
+savefig(plotTest, "D:\\2_output\\CNLRiPrediction_RFTestWithoutStratification.png")
