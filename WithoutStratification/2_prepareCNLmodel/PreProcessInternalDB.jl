@@ -2,14 +2,14 @@ using Pkg
 #Pkg.add("BSON")
 #Pkg.add(PackageSpec(url=""))
 #using BSON
-using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
+using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
 #Conda.add("joblib")
 ## import packages ##
-pcp = pyimport("pubchempy")
-pd = pyimport("padelpy")
-jl = pyimport("joblib")
+#pcp = pyimport("pubchempy")
+#pd = pyimport("padelpy")
+#jl = pyimport("joblib")
 
 function getVec(matStr)
     if matStr[1] .== '['
@@ -78,9 +78,11 @@ for i in 1:size(inputData, 1)
     arrNL = Set()
     pre = round(inputData[i,"PRECURSOR_ION"], digits = 2)
     for frag in fragIons
-        NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
-        if (NL in candidatesList)
-            push!(arrNL, NL)
+        if ((inputData[i,"PRECURSOR_ION"] - frag) >= 0.0)
+            NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
+            if (NL in candidatesList)
+                push!(arrNL, NL)
+            end
         end
         push!(arrNL, pre)
     end
@@ -128,7 +130,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         # 28614546 features -> 22589 features
         distinctFeaturesCNLs = Set()
         for featuresCNL in featuresCNLs
-            if (featuresCNL >= -0.005)
+            if (featuresCNL >= 0.0)
                 push!(distinctFeaturesCNLs, featuresCNL)
             end
         end
@@ -210,7 +212,7 @@ size(finalFeaturesCNLs)
 # 2650060 features -> 22243 features
 finalDistinctFeaturesCNLs = Set()
 for featuresCNL in finalFeaturesCNLs
-    if (featuresCNL >= -0.005)
+    if (featuresCNL >= 0.0)
         push!(finalDistinctFeaturesCNLs, featuresCNL)
     end
 end
@@ -235,7 +237,7 @@ function df1RowFilling1or0(count, i)
     push!(temp, count)
     push!(temp, dfOutput[i, "SMILES"])
     push!(temp, dfOutput[i, "INCHIKEY"])
-    for col in finalColumnsCNLs
+    for col in finalDistinctFeaturesCNLs
         arr = []
         arr = getMasses(dfOutput, i, arr)
         mumIon = dfOutput[i, "PRECURSOR_ION"]
@@ -253,7 +255,7 @@ end
 dfCNLs
 
 count = 1
-for i in 1:5000 #size(inputDB, 1)
+for i in 1:5000 #size(dfOutput, 1)
     println(i)
     push!(dfCNLs, df1RowFilling1or0(count, i))
     count += 1
