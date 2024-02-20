@@ -36,6 +36,7 @@ using ScikitLearn.GridSearch: GridSearchCV
 # columns: SMILES, INCHIKEY, CNLs, predictRi
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
 #inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
+sort!(inputDB, [:ENTRY])
 
 # 15998 -> 15994 columns
 ## data for model testing

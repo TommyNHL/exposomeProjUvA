@@ -8,14 +8,15 @@ using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
 #Conda.add("joblib")
 #Conda.add("Numpy")
 ## import packages ##
-pcp = pyimport("pubchempy")
-pd = pyimport("padelpy")
-jl = pyimport("joblib")
-np = pyimport("numpy")
+#pcp = pyimport("pubchempy")
+#pd = pyimport("padelpy")
+#jl = pyimport("joblib")
+#np = pyimport("numpy")
 
 # inputing 5000 x (3+21567) df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
+sort!(inputDB, [:ENTRY])
 
 # imputing 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
@@ -41,8 +42,8 @@ for col in names(inputDB)[4:end]
 end
 dfOnlyCocamides[:, "FPpredictRi"] = []
 dfOutsideCocamides[:, "FPpredictRi"] = []
-size(dfOnlyCocamides)  # 0 x (3+22227+1)
-size(dfOutsideCocamides)  # 0 x (3+22227+1)
+size(dfOnlyCocamides)  # 0 x (3+21567+1)
+size(dfOutsideCocamides)  # 0 x (3+21567+1)
 
 function cocamidesOrNot(DB, i)
     if (DB[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || DB[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
@@ -71,7 +72,7 @@ function dfExtract(i, columnsCNLs)
     return temp
 end
 
-# 5000 x 22230
+# 5000 x 21571
 inputDB
 
 for i in 1:size(inputDB, 1)
@@ -86,16 +87,16 @@ for i in 1:size(inputDB, 1)
     end
 end
 
-# 28 x 22230 df
+# 13 x 21571 df
 dfOnlyCocamides
 
-# 4862 x 22230 df
+# 4987 x 21571 df
 dfOutsideCocamides
 
-# outputing dfOnlyCocamides with 28 x (3+22243+1)
+# outputing dfOnlyCocamides with 13 x (3+21567+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv"
 CSV.write(savePath, dfOnlyCocamides)
 
-# outputing dfOutsideCocamides with 4862 x (3+22243+1)
+# outputing dfOutsideCocamides with 4987 x (3+21567+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv"
 CSV.write(savePath, dfOutsideCocamides)

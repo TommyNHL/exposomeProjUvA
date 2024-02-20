@@ -10,8 +10,8 @@ Pkg.status()
 using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
-Conda.add("padelpy")
-Conda.add("joblib")
+#Conda.add("padelpy")
+#Conda.add("joblib")
 ## import packages ##
 #using PyCall, Conda                 #using python packages
 pd = pyimport("padelpy")            #calculation of FP

@@ -34,10 +34,11 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 4862 x (3+15994+1)
+# inputing 4987 x (3+21567+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
 #inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
+sort!(inputDB, [:ENTRY])
 
 # internal train/test split by Leverage values
 X = deepcopy(inputDB)
