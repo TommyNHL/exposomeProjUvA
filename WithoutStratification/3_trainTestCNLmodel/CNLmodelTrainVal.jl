@@ -2,6 +2,7 @@ VERSION
 using Pkg
 #Pkg.add("StatsPlots")
 #Pkg.add("Plots")
+#Pkg.add("ProgressBars")
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
@@ -14,6 +15,7 @@ using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
+using ProgressBars
 #using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
@@ -37,6 +39,13 @@ using ScikitLearn.GridSearch: GridSearchCV
 #inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
 
+# internal train/test split by Leverage values
+X = deepcopy(inputDB)
+select!(X, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]))
+size(X)
+Y = deepcopy(inputDB[:, end])
+size(Y)
+
 function partitionTrainVal(df, ratio = 0.7)
     noOfRow = nrow(df)
     idx = shuffle(1:noOfRow)
@@ -45,20 +54,57 @@ function partitionTrainVal(df, ratio = 0.7)
     df[train_idx,:], df[test_idx,:]
 end
 
-# give 3+15994+1 = 15998 columns
+#= function leverage_dist(X)   # Set x1 and x2 to your FPs variables
+    h = []
+    for i in ProgressBar(1: size(X,1)) #check dimensions
+        x = X[i,:] 
+        hi = x'*pinv(X'*X)*x
+        push!(h,hi)
+    end   
+    return h
+end
+
+h = leverage_dist(Matrix(X))
+
+function strat_split(leverage=h; limits = limits)
+    n = length(leverage)
+    bin = collect(1:n)
+    for i = 1: (length(limits)-1)
+        bin[limits[i].<= leverage].= i
+    end
+    X_train, X_test, y_train, y_test = train_test_split(collect(1:length(leverage)), leverage, test_size = 0.9, random_state = 42, stratify = bin)
+    return  X_train, X_test, y_train, y_test
+end
+
+function create_train_test_split_strat(total_df, y_data, leverage=h; limits = collect(0.0:0.2:1)) # SET START_COL_X_DATA TO 3!!!
+    X_train_ind, X_test_ind, train_lev, test_lev = strat_split(leverage, limits = limits)
+    # Create train test split of total DataFrame and dependent variables using the chosen parameters
+    X_train = total_df[X_train_ind,:]
+    X_test = total_df[X_test_ind,:]
+    y_train = y_data[X_train_ind]
+    y_test = y_data[X_test_ind]
+    # # Select train and test set of independent variables 
+    # X_train = total_train[:, start_col_X_data:end]
+    # X_test = total_test[:, start_col_X_data:end]
+    return  X_train, X_test, y_train, y_test, train_lev, test_lev
+end
+
+create_train_test_split_strat(X, Y, h) =#
+
+# give 3+21567+1 = 21571 columns
 trainSet, valSet = partitionTrainVal(inputDB, 0.7)  # 70% train 30% Val/Test
 size(trainSet)
 size(valSet)
 
-# ouputing trainSet df 0.7 x (3+15994+1)
+# ouputing trainSet df 0.7 x (3+21567+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain_withoutStratification.csv"
 CSV.write(savePath, trainSet)
 
-# ouputing trainSet df 0.3 x (3+15994+1)
+# ouputing trainSet df 0.3 x (3+21567+1)
 savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal_withoutStratification.csv"
 CSV.write(savePath, valSet)
 
-# 15998 -> 15994 columns
+# 21571 -> 21567 columns
 ## data for model training
 x_train = deepcopy(trainSet)
 select!(x_train, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
@@ -135,19 +181,23 @@ function optimRandomForestRegressor(Features, RIs)
                 leaf = leaf_r[l]
                 tree = tree_r[t]
                 MaxFeat = Int64(ceil(size(Features,2)/3))
-                ## Regression ##
+                println("## split ##")
                 Xx_train, Xx_test, Yy_train, Yy_test = train_test_split(Features, RIs, test_size=0.20, random_state=42);
+                println("## Regression ##")
                 reg = RandomForestRegressor(n_estimators=tree, min_samples_leaf=leaf, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+                println("## fit ##")
                 fit!(reg, Xx_train, Yy_train)
                 if itr == 1
                     z[1,1] = leaf
                     z[1,2] = tree
                     z[1,3] = state
                     z[1,4] = score(reg, Xx_train, Yy_train)
+                    println("## CV ##")
                     acc5_train = cross_val_score(reg, Xx_train, Yy_train; cv = 3)
                     z[1,5] = avgAcc(acc5_train, 3)
                     z[1,6] = score(reg, Xx_test, Yy_test)
                 else
+                    println("## CV ##")
                     acc5_train = cross_val_score(reg, Xx_train, Yy_train; cv = 3)
                     z = vcat(z,[leaf tree state score(reg, Xx_train, Yy_train) avgAcc(acc5_train, 3) score(reg, Xx_test, Yy_test)])
                 end

@@ -171,7 +171,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         dfOutput = DataFrame([[],[],[],[]], ["SMILES", "INCHIKEY", "PRECURSOR_ION", "CNLmasses"])
         size(dfOutput)  # 0 x 4
 
-# 833958 x 5
+# 817413 x 5
 inputData
 dfOutput
 size(inputData[1, "CNLmasses"], 1)
@@ -193,11 +193,11 @@ for i in 1:size(inputData, 1)
     end
 end
 
-# 698735 x 4
+# 693677 x 4
 dfOutput
 
 # save
-# output csv is a 698735 x 4 df
+# output csv is a 693677 x 4 df
 savePath = "D:\\0_data\\databaseOfInternal_withNLs.csv"
 CSV.write(savePath, dfOutput)
 
@@ -209,7 +209,7 @@ for i in 1:size(dfOutput, 1)
 end
 size(finalFeaturesCNLs)
 
-# 26363369 features -> 22227 features
+# 26190683 features -> 21567 features
 finalDistinctFeaturesCNLs = Set()
 for featuresCNL in finalFeaturesCNLs
     if (featuresCNL >= 0.0)
@@ -218,7 +218,7 @@ for featuresCNL in finalFeaturesCNLs
 end
 finalDistinctFeaturesCNLs = sort!(collect(finalDistinctFeaturesCNLs))
 
-# creating a table with 3+22227 columns features CNLs
+# creating a table with 3+21567 columns features CNLs
 finalColumnsCNLs = []
 for distinctFeaturesCNL in finalDistinctFeaturesCNLs
     push!(finalColumnsCNLs, string(distinctFeaturesCNL))
@@ -229,7 +229,7 @@ dfCNLs = DataFrame([[],[],[]], ["ENTRY", "SMILES", "INCHIKEY"])
 for col in finalColumnsCNLs
     dfCNLs[:, col] = []
 end
-size(dfCNLs)  # 0 x (3+22227)
+size(dfCNLs)  # 0 x (3+21567)
 
 function df1RowFilling1or0(count, i)
     ## 1 row
@@ -263,7 +263,7 @@ end
 
 dfCNLs
 
-# ouputing df 5000 x (3+22227)
+# ouputing df 5000 x (3+21567)
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 

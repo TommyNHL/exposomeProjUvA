@@ -13,7 +13,7 @@ pd = pyimport("padelpy")
 jl = pyimport("joblib")
 np = pyimport("numpy")
 
-# inputing 5000 x (3+22227) df
+# inputing 5000 x (3+21567) df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
 
@@ -73,7 +73,7 @@ end
 
 # 5000 x 22230
 inputDB
-inputAllFPDB[findRowNumber4Ri(inputDB, 100)[end:end], 1]
+
 for i in 1:size(inputDB, 1)
     if (cocamidesOrNot(inputDB, i) == true)
         tempRow = dfExtract(i, names(inputDB)[4:end])
