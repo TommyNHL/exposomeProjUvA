@@ -1,7 +1,8 @@
 VERSION
 using Pkg
-#Pkg.add("StatsPlots")
+#Pkg.add("ScikitLearn")
 #Pkg.add("Plots")
+#Pkg.add("ProgressBars")
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
@@ -14,6 +15,7 @@ using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
+using ProgressBars
 #using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
@@ -41,7 +43,7 @@ sort!(inputDB, [:ENTRY])
 # 15998 -> 15994 columns
 ## data for model testing
 x_test = deepcopy(inputDB)
-select!(x_test, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
+select!(x_test, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]))
 size(x_test)
 y_test = deepcopy(inputDB[:, end])
 size(y_test)

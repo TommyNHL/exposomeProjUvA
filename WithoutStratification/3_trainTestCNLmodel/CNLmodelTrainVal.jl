@@ -1,6 +1,6 @@
 VERSION
 using Pkg
-#Pkg.add("StatsPlots")
+#Pkg.add("ScikitLearn")
 #Pkg.add("Plots")
 #Pkg.add("ProgressBars")
 import Conda
@@ -36,7 +36,7 @@ using ScikitLearn.GridSearch: GridSearchCV
 
 # inputing 4987 x (3+21567+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
-#inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
+inputDB_test = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
@@ -54,43 +54,6 @@ function partitionTrainVal(df, ratio = 0.7)
     test_idx = view(idx, (floor(Int, ratio*noOfRow)+1):noOfRow)
     df[train_idx,:], df[test_idx,:]
 end
-
-#= function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = []
-    for i in ProgressBar(1: size(X,1)) #check dimensions
-        x = X[i,:] 
-        hi = x'*pinv(X'*X)*x
-        push!(h,hi)
-    end   
-    return h
-end
-
-h = leverage_dist(Matrix(X))
-
-function strat_split(leverage=h; limits = limits)
-    n = length(leverage)
-    bin = collect(1:n)
-    for i = 1: (length(limits)-1)
-        bin[limits[i].<= leverage].= i
-    end
-    X_train, X_test, y_train, y_test = train_test_split(collect(1:length(leverage)), leverage, test_size = 0.9, random_state = 42, stratify = bin)
-    return  X_train, X_test, y_train, y_test
-end
-
-function create_train_test_split_strat(total_df, y_data, leverage=h; limits = collect(0.0:0.2:1)) # SET START_COL_X_DATA TO 3!!!
-    X_train_ind, X_test_ind, train_lev, test_lev = strat_split(leverage, limits = limits)
-    # Create train test split of total DataFrame and dependent variables using the chosen parameters
-    X_train = total_df[X_train_ind,:]
-    X_test = total_df[X_test_ind,:]
-    y_train = y_data[X_train_ind]
-    y_test = y_data[X_test_ind]
-    # # Select train and test set of independent variables 
-    # X_train = total_train[:, start_col_X_data:end]
-    # X_test = total_test[:, start_col_X_data:end]
-    return  X_train, X_test, y_train, y_test, train_lev, test_lev
-end
-
-create_train_test_split_strat(X, Y, h) =#
 
 # give 3+21567+1 = 21571 columns
 trainSet, valSet = partitionTrainVal(inputDB, 0.7)  # 70% train 30% Val/Test
@@ -167,52 +130,72 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 252 times
-function optimRandomForestRegressor(Features, RIs)
+# modeling, 4 x 6 x 3 times
+function optimRandomForestRegressor(df_train, df_val, df_test)
     #leaf_r = [collect(4:2:10);15;20]
-    leaf_r = [collect(8:8:32)]
+    leaf_r = collect(8:8:32)
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
-    tree_r = vcat(collect(50:50:300))
-    z = zeros(1,6)
+    tree_r = collect(50:50:300)
+    z = zeros(1,8)
     itr = 1
-    for l = 1:length(leaf_r)
-        for t = 1:length(tree_r)
+    for l in leaf_r
+        for t in tree_r
             for state = 1:3
                 println("itr=", itr, ", leaf=", l, ", tree=", t, ", s=", state)
-                leaf = leaf_r[l]
-                tree = tree_r[t]
-                MaxFeat = Int64(ceil(size(Features,2)/3))
+                MaxFeat = Int64((ceil(size(df_train,2)-1)/3))
                 println("## split ##")
-                Xx_train, Xx_test, Yy_train, Yy_test = train_test_split(Features, RIs, test_size=0.20, random_state=42);
+                M_train, M_test = partitionTrainVal(df_train, 0.80)
+                Xx_train = deepcopy(M_train)
+                select!(Xx_train, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
+                Yy_train = deepcopy(M_train[:, end])
+                Xx_test = deepcopy(M_test)
+                select!(Xx_test, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
+                Yy_test = deepcopy(M_test[:, end])
+                xx_val = deepcopy(df_val)
+                select!(xx_val, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]))
+                yy_val = deepcopy(df_val[:, end])
+                xx_test = deepcopy(inputDB_test)
+                select!(xx_test, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]))
+                yy_test = deepcopy(inputDB_test[:, end])
+                #Xx_train, Xx_test, Yy_train, Yy_test = train_test_split(Features, RIs, test_size=0.20, random_state=42)
                 println("## Regression ##")
-                reg = RandomForestRegressor(n_estimators=tree, min_samples_leaf=leaf, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+                reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
                 println("## fit ##")
-                fit!(reg, Xx_train, Yy_train)
+                fit!(reg, Matrix(Xx_train), Vector(Yy_train))
                 if itr == 1
-                    z[1,1] = leaf
-                    z[1,2] = tree
+                    z[1,1] = l
+                    z[1,2] = t
                     z[1,3] = state
-                    z[1,4] = score(reg, Xx_train, Yy_train)
+                    z[1,4] = score(reg, Matrix(Xx_train), Vector(Yy_train))
                     println("## CV ##")
-                    acc5_train = cross_val_score(reg, Xx_train, Yy_train; cv = 3)
+                    acc5_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3)
                     z[1,5] = avgAcc(acc5_train, 3)
-                    z[1,6] = score(reg, Xx_test, Yy_test)
+                    z[1,6] = score(reg, Matrix(Xx_test), Vector(Yy_test))
+                    z[1,7] = score(reg, Matrix(xx_val), Vector(yy_val))
+                    z[1,8] = score(reg, Matrix(xx_test), Vector(yy_test))
+                    println(z)
                 else
                     println("## CV ##")
-                    acc5_train = cross_val_score(reg, Xx_train, Yy_train; cv = 3)
-                    z = vcat(z,[leaf tree state score(reg, Xx_train, Yy_train) avgAcc(acc5_train, 3) score(reg, Xx_test, Yy_test)])
+                    itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
+                    acc5_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3)
+                    icvtrain = avgAcc(acc5_train, 3) 
+                    itest = score(reg, Matrix(Xx_test), Vector(Yy_test)) 
+                    ival = score(reg, Matrix(xx_val), Vector(yy_val)) 
+                    etest = score(reg, Matrix(xx_test), Vector(yy_test))
+                    z = vcat(z, [l t state itrain icvtrain itest ival etest])
+                    println(z)
                 end
                 #println("End of $itr iterations")
                 itr += 1
             end
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], state=z[:,3], accuracy_train = z[:,4], avgAccuracy_train = z[:,5], accuracy_test = z[:,6])
-    z_df_sorted = sort(z_df, [:avgAccuracy_train, :accuracy_test], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], state=z[:,3], accuracy_train = z[:,4], avgAccuracy_train = z[:,5], accuracy_test = z[:,6], accuracy_val = z[:,7],  accuracy_ext_test = z[:,8])
+    z_df_sorted = sort(z_df, [:accuracy_ext_test, :accuracy_val, :accuracy_test, :avgAccuracy_train], rev=true)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestRegressor(x_train, y_train)
+optiSearch_df = optimRandomForestRegressor(trainSet, valSet, inputDB_test)
 
 #= model = RandomForestRegressor()
 param_dist = Dict(

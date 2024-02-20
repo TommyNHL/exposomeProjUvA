@@ -242,6 +242,8 @@ for i in 1:size(dfOutput, 1)
         end
     end
 end
+X = zeros(3, 3)
+dfCNLs = DataFrame(X)
 
 dfCNLs = DataFrame([[],[],[]], ["ENTRY", "SMILES", "INCHIKEY"])
 for col in finalColumnsCNLs

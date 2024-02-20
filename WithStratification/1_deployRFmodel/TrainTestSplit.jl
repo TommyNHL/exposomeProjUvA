@@ -119,7 +119,7 @@ size(X)
 Y = deepcopy(inputDB[:, end])
 size(Y)
 
-#= function leverage_dist(X)   # Set x1 and x2 to your FPs variables
+function leverage_dist(X)   # Set x1 and x2 to your FPs variables
     h = []
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:] 
@@ -154,9 +154,4 @@ function create_train_test_split_strat(total_df, y_data, leverage=h; limits = co
     return  X_train, X_test, y_train, y_test, train_lev, test_lev
 end
 
-create_train_test_split_strat(X, Y, h) =#
-
-# give 3+21567+1 = 21571 columns
-trainSet, valSet = partitionTrainVal(inputDB, 0.7)  # 70% train 30% Val/Test
-size(trainSet)
-size(valSet)
+create_train_test_split_strat(X, Y, h)
