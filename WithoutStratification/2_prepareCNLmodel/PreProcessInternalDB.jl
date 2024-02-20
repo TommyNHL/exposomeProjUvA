@@ -225,6 +225,24 @@ for distinctFeaturesCNL in finalDistinctFeaturesCNLs
 end
 size(finalColumnsCNLs)
 
+# storing data in a Matrix
+X = zeros(693677, 21567)
+
+for i in 1:size(dfOutput, 1)
+    println(i)
+    arr = []
+    arr = getMasses(dfOutput, i, arr)
+    mumIon = dfOutput[i, "PRECURSOR_ION"]
+    for col in arr
+        findall(x->x==col, finalDistinctFeaturesCNLs)
+        if (col <= mumIon)
+            X[i, x] = 1
+        elseif (col > mumIon)
+            X[i, x] = -1
+        end
+    end
+end
+
 dfCNLs = DataFrame([[],[],[]], ["ENTRY", "SMILES", "INCHIKEY"])
 for col in finalColumnsCNLs
     dfCNLs[:, col] = []
