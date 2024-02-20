@@ -242,48 +242,14 @@ for i in 1:size(dfOutput, 1)
         end
     end
 end
-X = zeros(3, 3)
-dfCNLs = DataFrame(X)
 
-dfCNLs = DataFrame([[],[],[]], ["ENTRY", "SMILES", "INCHIKEY"])
-for col in finalColumnsCNLs
-    dfCNLs[:, col] = []
-end
-size(dfCNLs)  # 0 x (3+21567)
+dfCNLs = DataFrame(X, finalColumnsCNLs)
+insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:693677)))
+insertcols!(dfCNLs, 2, ("SMILES"=>dfOutput[:, "SMILES"]))
+insertcols!(dfCNLs, 3, ("INCHIKEY"=>dfOutput[:, "INCHIKEY"]))
+size(dfCNLs)  # 693677 x (3+21567)
 
-function df1RowFilling1or0(count, i)
-    ## 1 row
-    temp = []
-    push!(temp, count)
-    push!(temp, dfOutput[i, "SMILES"])
-    push!(temp, dfOutput[i, "INCHIKEY"])
-    for col in finalDistinctFeaturesCNLs
-        arr = []
-        arr = getMasses(dfOutput, i, arr)
-        mumIon = dfOutput[i, "PRECURSOR_ION"]
-        if (col in arr && col <= mumIon)
-            push!(temp, 1)
-        elseif (col in arr && col > mumIon)
-            push!(temp, -1)
-        else
-            push!(temp, 0)
-        end
-    end
-    return temp
-end
-
-dfCNLs
-
-count = 1
-for i in 1:5000 #size(dfOutput, 1)
-    println(i)
-    push!(dfCNLs, df1RowFilling1or0(count, i))
-    count += 1
-end
-
-dfCNLs
-
-# ouputing df 5000 x (3+21567)
+# ouputing df 693677 x (3+21567)
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
