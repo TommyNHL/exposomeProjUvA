@@ -52,18 +52,18 @@ end
 inputDB = CSV.read("D:\\0_data\\Database_INTERNAL_2022-11-17.csv", DataFrame)
 
 # filtering out NEGATIVE ionization mode -> 1078844 x 4
-# filtering out NEGATIVE ionization mode -> 817512 x 4
-# filtering in precusor ion with measured m/z -> 817413 x 4
-inputData0 = inputDB[inputDB.ION_MODE .!= "NEGATIVE", 
-    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES", "ION_MODE"]]
-inputData = inputData0[inputData0.ION_MODE .!= "N", 
+# filtering out NEGATIVE ionization mode -> 834057 x 4
+# filtering in precusor ion with measured m/z -> 833958 x 4
+inputData = inputDB[inputDB.ION_MODE .!= "NEGATIVE", 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
+inputData = inputDB[inputDB.ION_MODE .!= "N", 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 inputData = inputData[inputData.PRECURSOR_ION .!== NaN, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 #= inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]] =#
 
-# initialization for 1 more column -> 817413 x 5
+# initialization for 2 more columns -> 833958 x 5
 inputData[!, "CNLmasses"] .= [[]]
 size(inputData)
 
@@ -99,7 +99,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 # inputing 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
-        inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
+        inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
         sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
         
         # finding missing features
@@ -127,7 +127,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         end
         size(featuresCNLs)
 
-        # 28251935 features -> 22472 features
+        # 28614546 features -> 22589 features
         distinctFeaturesCNLs = Set()
         for featuresCNL in featuresCNLs
             if (featuresCNL >= 0.0)
@@ -179,7 +179,7 @@ size(inputData[1, "CNLmasses"], 1)
 ref = ""
 for i in 1:size(inputData, 1)
     println(i)
-    if ( (size(inputData[i, "CNLmasses"], 1) >= 3) && (haveFPRiOrNot(inputData, i) == true))
+    if ( (size(inputData[i, "CNLmasses"], 1) >= 3) && (haveFPRiOrNot(inputDB, i) == true))
         temp = []
         mass = string(inputData[i, "SMILES"], inputData[i, "INCHIKEY"], inputData[i, "CNLmasses"])
         push!(temp, inputData[i, "SMILES"])
@@ -193,11 +193,11 @@ for i in 1:size(inputData, 1)
     end
 end
 
-# 698735 x 4
+# 703049 x 4
 dfOutput
 
 # save
-# output csv is a 698735 x 4 df
+# output csv is a 833958 x 5 df
 savePath = "D:\\0_data\\databaseOfInternal_withNLs.csv"
 CSV.write(savePath, dfOutput)
 
@@ -209,7 +209,7 @@ for i in 1:size(dfOutput, 1)
 end
 size(finalFeaturesCNLs)
 
-# 26363369 features -> 22227 features
+# 2650060 features -> 22243 features
 finalDistinctFeaturesCNLs = Set()
 for featuresCNL in finalFeaturesCNLs
     if (featuresCNL >= 0.0)
@@ -218,7 +218,7 @@ for featuresCNL in finalFeaturesCNLs
 end
 finalDistinctFeaturesCNLs = sort!(collect(finalDistinctFeaturesCNLs))
 
-# creating a table with 3+22227 columns features CNLs
+# creating a table with 3+22243 columns features CNLs
 finalColumnsCNLs = []
 for distinctFeaturesCNL in finalDistinctFeaturesCNLs
     push!(finalColumnsCNLs, string(distinctFeaturesCNL))
@@ -229,7 +229,7 @@ dfCNLs = DataFrame([[],[],[]], ["ENTRY", "SMILES", "INCHIKEY"])
 for col in finalColumnsCNLs
     dfCNLs[:, col] = []
 end
-size(dfCNLs)  # 0 x (3+22227)
+size(dfCNLs)  # 0 x (3+22243)
 
 function df1RowFilling1or0(count, i)
     ## 1 row
@@ -263,11 +263,11 @@ end
 
 dfCNLs
 
-# ouputing df 5000 x (3+22227)
+# ouputing df 28302 x (3+22243)
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
-desStat = describe(dfCNLs)  # 22230 x 7
+desStat = describe(dfCNLs)  # 22246 x 7
 desStat[4,:]
 
 sumUp = []
@@ -282,7 +282,7 @@ for col in names(dfCNLs)[4:end]
     push!(sumUp, count)
 end
 push!(dfCNLs, sumUp)
-# 5000 -> 5001 rows
+# 28302 -> 28303 rows
 dfCNLs[end,:]  #4891
 
 using DataSci4Chem

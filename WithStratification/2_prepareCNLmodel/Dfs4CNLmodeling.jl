@@ -13,7 +13,7 @@ pd = pyimport("padelpy")
 jl = pyimport("joblib")
 np = pyimport("numpy")
 
-# inputing 5000 x (3+22227) df
+# inputing 28302 x (3+22243) df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
 
@@ -41,8 +41,8 @@ for col in names(inputDB)[4:end]
 end
 dfOnlyCocamides[:, "FPpredictRi"] = []
 dfOutsideCocamides[:, "FPpredictRi"] = []
-size(dfOnlyCocamides)  # 0 x (3+22227+1)
-size(dfOutsideCocamides)  # 0 x (3+22227+1)
+size(dfOnlyCocamides)  # 0 x (3+22243+1)
+size(dfOutsideCocamides)  # 0 x (3+22243+1)
 
 function cocamidesOrNot(DB, i)
     if (DB[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || DB[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
@@ -71,9 +71,9 @@ function dfExtract(i, columnsCNLs)
     return temp
 end
 
-# 5000 x 22230
+# x 15997
 inputDB
-inputAllFPDB[findRowNumber4Ri(inputDB, 100)[end:end], 1]
+
 for i in 1:size(inputDB, 1)
     if (cocamidesOrNot(inputDB, i) == true)
         tempRow = dfExtract(i, names(inputDB)[4:end])
@@ -86,10 +86,10 @@ for i in 1:size(inputDB, 1)
     end
 end
 
-# 28 x 22230 df
+# 28 x 22247 df
 dfOnlyCocamides
 
-# 4862 x 22230 df
+# 4862 x 22247 df
 dfOutsideCocamides
 
 # outputing dfOnlyCocamides with 28 x (3+22243+1)
