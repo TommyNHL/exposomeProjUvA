@@ -197,6 +197,10 @@ end
 
 optiSearch_df = optimRandomForestRegressor(trainSet, valSet, inputDB_test)
 
+# save, ouputing 72 x 8 df
+savePath = "D:\\0_data\\hyperparameterTuning_RFwithoutStratification.csv"
+CSV.write(savePath, optiSearch_df)
+
 #= model = RandomForestRegressor()
 param_dist = Dict(
       "n_estimators" => 50:50:300, 
