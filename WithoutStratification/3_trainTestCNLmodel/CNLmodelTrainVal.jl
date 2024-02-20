@@ -230,7 +230,6 @@ fit!(model, Matrix(x_train), Vector(y_train))
 modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi_RFwithoutStratification.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
-
 # training performace, CNL-predictedRi vs. FP-predictedRi
 predictedRi_train = predict(model, Matrix(x_train))
 trainSet[!, "CNLpredictRi"] = predictedRi_train
