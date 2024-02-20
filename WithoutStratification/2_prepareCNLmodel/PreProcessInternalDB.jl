@@ -234,11 +234,11 @@ for i in 1:size(dfOutput, 1)
     arr = getMasses(dfOutput, i, arr)
     mumIon = dfOutput[i, "PRECURSOR_ION"]
     for col in arr
-        findall(x->x==col, finalDistinctFeaturesCNLs)
+        mz = findall(x->x==col, finalDistinctFeaturesCNLs)
         if (col <= mumIon)
-            X[i, x] = 1
+            X[i, mz] .= 1
         elseif (col > mumIon)
-            X[i, x] = -1
+            X[i, mz] .= -1
         end
     end
 end
