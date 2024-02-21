@@ -186,6 +186,7 @@ function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, 
 end
 
 X_trainFP, X_testFP, Y_trainFPRi, Y_testFPRi = create_train_test_split_strat(X, Y, X_trainIdx, X_testIdx, true)
+
 inputCNLs
 CNLs = deepcopy(inputCNLs[:, 4:end])
 size(CNLs)
@@ -196,14 +197,14 @@ df_info = hcat(inputCNLs[:, 1:1], dfOutputFP[:,1:2])
 df_info
 X_trainInfo, X_testInfo = create_train_test_split_strat(df_info, df_info, X_trainIdx, X_testIdx, false)
 
-dfTrainSetWithStratification = hcat(X_trainInfo, X_trainFP, X_trainCNL, Y_trainFPRi)
+dfTrainSetWithStratification = hcat(X_trainInfo, X_trainCNL, Y_trainFPRi)
 dfTrainSetWithStratification
-# output csv is a 693677 x 3+22357+1 df
+# output csv is a 693677*0.7 x 3+22357+1 df
 savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification.csv"
 CSV.write(savePath, dfTrainSetWithStratification)
 
-dfTestSetWithStratification = hcat(X_testInfo, X_testFP, X_testCNL, Y_testFPRi)
+dfTestSetWithStratification = hcat(X_testInfo, X_testCNL, Y_testFPRi)
 dfTestSetWithStratification
-# output csv is a 693677 x 3+22357+1 df
+# output csv is a 693677*0.3 x 3+22357+1 df
 savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification.csv"
 CSV.write(savePath, dfTestSetWithStratification)
