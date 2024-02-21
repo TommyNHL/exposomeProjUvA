@@ -188,11 +188,11 @@ for i in 1:size(inputData, 1)
     end
 end
 
-# 693677 x 4
+# 693685 x 4
 dfOutput
 
 # save
-# output csv is a 693677 x 4 df
+# output csv is a 693685 x 4 df
 savePath = "D:\\0_data\\databaseOfInternal_withNLs.csv"
 CSV.write(savePath, dfOutput)
 
@@ -204,7 +204,7 @@ for i in 1:size(dfOutput, 1)
 end
 size(finalFeaturesCNLs)
 
-# 26190683 features -> 21567 features
+# 25497040 features -> 15961 features
 finalDistinctFeaturesCNLs = Set()
 for featuresCNL in finalFeaturesCNLs
     push!(finalDistinctFeaturesCNLs, featuresCNL)
@@ -219,7 +219,7 @@ end
 size(finalColumnsCNLs)
 
 # storing data in a Matrix
-X = zeros(693677, 21567)
+X = zeros(693685, 15961)
 
 for i in 1:size(dfOutput, 1)
     println(i)
@@ -237,21 +237,22 @@ for i in 1:size(dfOutput, 1)
 end
 
 dfCNLs = DataFrame(X, finalColumnsCNLs)
-insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:693677)))
+insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:693685)))
 insertcols!(dfCNLs, 2, ("SMILES"=>dfOutput[:, "SMILES"]))
 insertcols!(dfCNLs, 3, ("INCHIKEY"=>dfOutput[:, "INCHIKEY"]))
 insertcols!(dfCNLs, 4, ("PRECURSOR_ION"=>dfOutput[:, "PRECURSOR_ION"]))
-size(dfCNLs)  # 693677 x (3+21567)
+size(dfCNLs)  # 693685 x (3+1+15961)
 
-# ouputing df 693677 x (3+21567)
+# ouputing df 693685 x (3+1+15961)
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
-desStat = describe(dfCNLs)  # 22230 x 7
+desStat = describe(dfCNLs)  # 15965 x 7
 desStat[4,:]
 
 sumUp = []
 push!(sumUp, 888888)
+push!(sumUp, "summation")
 push!(sumUp, "summation")
 push!(sumUp, "summation")
 for col in names(dfCNLs)[4:end]
@@ -262,11 +263,11 @@ for col in names(dfCNLs)[4:end]
     push!(sumUp, count)
 end
 push!(dfCNLs, sumUp)
-# 5000 -> 5001 rows
-dfCNLs[end,:]  #4891
+# 693685 -> 693686 rows
+dfCNLs[end,:]  #693686
 
 using DataSci4Chem
-massesCNLsDistrution = bar(names(dfCNLs)[4:end], Vector(dfCNLs[end, 4:end]),  #4891
+massesCNLsDistrution = bar(names(dfCNLs)[4:end], Vector(dfCNLs[end, 4:end]), 
     label = false, 
     lc = "skyblue", 
     margin = (5, :mm), 
