@@ -102,7 +102,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         # finding missing features
         inputData[1,5]
 
-        arr = []
+        test = []
         function getMasses(db, i, arr)
             massesArr = arr
             masses = db[i, "CNLmasses"]
@@ -112,7 +112,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
             return massesArr
         end
         
-        test = getMasses(inputData, 1, arr)
+        test = getMasses(inputData, 1, test)
         test
         test = getMasses(inputData, 1, test)
         test
@@ -127,20 +127,18 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         # 817413 features -> 15693 features
         distinctFeaturesCNLs = Set()
         for featuresCNL in featuresCNLs
-            if (featuresCNL >= 0.0)
-                push!(distinctFeaturesCNLs, featuresCNL)
-            end
+            push!(distinctFeaturesCNLs, featuresCNL)
         end
         distinctFeaturesCNLs = sort!(collect(distinctFeaturesCNLs))
 
         # 16022 candidates -> 15994 candidates
         finalCNLs = []
         whatAreMissed = []
-        for distinctFeaturesCNL in distinctFeaturesCNLs
-            if (float(distinctFeaturesCNL) in candidatesList == true)
-                push!(finalCNLs, distinctFeaturesCNL)
+        for candidate in candidatesList
+            if (candidate in distinctFeaturesCNLs)
+                push!(finalCNLs, candidate)
             else
-                push!(whatAreMissed, distinctFeaturesCNL)
+                push!(whatAreMissed, candidate)
             end
         end
         size(finalCNLs)
@@ -209,9 +207,7 @@ size(finalFeaturesCNLs)
 # 26190683 features -> 21567 features
 finalDistinctFeaturesCNLs = Set()
 for featuresCNL in finalFeaturesCNLs
-    if (featuresCNL >= 0.0)
-        push!(finalDistinctFeaturesCNLs, featuresCNL)
-    end
+    push!(finalDistinctFeaturesCNLs, featuresCNL)
 end
 finalDistinctFeaturesCNLs = sort!(collect(finalDistinctFeaturesCNLs))
 
