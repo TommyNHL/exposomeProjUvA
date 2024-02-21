@@ -116,7 +116,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         test
         test = getMasses(inputData, 1, test)
         test
-
+        
         featuresCNLs = []
         for i in 1:size(inputData, 1)
             println(i)
@@ -124,7 +124,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         end
         size(featuresCNLs)
 
-        # 817413 features -> 15693 features
+        # 27434522 features -> 15994 features
         distinctFeaturesCNLs = Set()
         for featuresCNL in featuresCNLs
             push!(distinctFeaturesCNLs, featuresCNL)
@@ -211,7 +211,7 @@ for featuresCNL in finalFeaturesCNLs
 end
 finalDistinctFeaturesCNLs = sort!(collect(finalDistinctFeaturesCNLs))
 
-# creating a table with 3+21567 columns features CNLs
+# creating a table with 4+15961 columns features CNLs
 finalColumnsCNLs = []
 for distinctFeaturesCNL in finalDistinctFeaturesCNLs
     push!(finalColumnsCNLs, string(distinctFeaturesCNL))
@@ -240,7 +240,7 @@ dfCNLs = DataFrame(X, finalColumnsCNLs)
 insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:693685)))
 insertcols!(dfCNLs, 2, ("SMILES"=>dfOutput[:, "SMILES"]))
 insertcols!(dfCNLs, 3, ("INCHIKEY"=>dfOutput[:, "INCHIKEY"]))
-insertcols!(dfCNLs, 4, ("PRECURSOR_ION"=>dfOutput[:, "PRECURSOR_ION"]))
+insertcols!(dfCNLs, 4, ("ISOTOPICMASS"=>dfOutput[:, "PRECURSOR_ION"]-1.007276))
 size(dfCNLs)  # 693685 x (3+1+15961)
 
 # ouputing df 693685 x (3+1+15961)
