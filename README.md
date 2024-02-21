@@ -15,7 +15,19 @@
 #### - step 2: predict the FP-derived Ri values
 ####           -> new .csv
 ### TrainTestSplit.jl
-#### ***to be continued***
+#### - step 1: find distinct INCHIKEYs
+####           -> new .csv
+####           -> new .csv
+#### - step 2: count frequency for each INCHIKEY
+####           -> new .csv
+#### - step 3: creat a FP df after taking INCHIKEY frequency into account
+####           -> new .csv
+#### - step 4: calculate leverage value
+####           -> new .csv
+#### - step 5: perform 7:3 train/test split by index
+#### - step 6: gather and join ID informaiton and FP and FP-Ri
+####           -> new .csv
+####           -> new .csv
 
 ## 2_prepareCNLmodel (folder)
 ### PreProcessInternalDB.jl
@@ -26,23 +38,17 @@
 #### - step 6: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
 #### - step 7: filter out rows with <2 CNL features
 #### - step 8: collect Entry-of-interest according to the presence of FPs in .csv DB
+#### - step 9: remove duplicated row spectrum 
 ####           -> new .csv
-### CNLsFeaturingCopy.jl ***done***
-#### - step 5: include the pre-ion
-#### - step 9: transform table as row(ID copounds) x column(CNLs masses)
+#### - step 10: include the pre-ion
+#### - step 11: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
 ####           -> new .png
 ### Dfs4CNLmodeling.jl ***done***
-#### - step 9: split the table with only the cocamides
-#### - step 10: merge the table with only the cocamides with the FP-based Ri
+#### - step 12: split the table with only the cocamides
+#### - step 13: merge the table with only the cocamides with the FP-based Ri
 ####           -> new .csv
-#### - step 11: split the table without the cocamides
-####           -> new .csv
-#### - step 12: calculate leverage values for the cocamides
-#### - step --: filter in rows within 95% AD for the cocamides
-####           -> new .csv
-#### - step --: calculate leverage values for the non-cocamides
-#### - step --: filter in rows within 95% AD for the non-cocamides
+#### - step 14: split the table without the cocamides
 ####           -> new .csv
 
 ## 3_trainTestCNLmodel

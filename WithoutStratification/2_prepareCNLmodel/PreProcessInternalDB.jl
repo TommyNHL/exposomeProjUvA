@@ -80,9 +80,11 @@ for i in 1:size(inputData, 1)
     fragIons = getVec(inputData[i,"MZ_VALUES"])
     arrNL = Set()
     for frag in fragIons
-        NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
-        if ((NL >= float(0)) && (NL in candidatesList))
-            push!(arrNL, NL)
+        if (inputData[i,"PRECURSOR_ION"] - frag) >= float(0)
+            NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
+            if (NL in candidatesList)
+                push!(arrNL, NL)
+            end
         end
     end
     inputData[i, "CNLmasses"] = sort!(collect(arrNL))
@@ -94,7 +96,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 # inputing 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
-        inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRi.csv", DataFrame)
+        inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
         sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
         
         # finding missing features
@@ -176,7 +178,7 @@ for i in 1:size(inputData, 1)
     println(i)
     if ( (size(inputData[i, "CNLmasses"], 1) >= 2) && (haveFPRiOrNot(inputData, i) == true))
         temp = []
-        mass = string(inputData[i, "SMILES"], inputData[i, "INCHIKEY"], inputData[i, "CNLmasses"])
+        mass = string(inputData[i, "SMILES"], inputData[i, "INCHIKEY"], inputData[i, "PRECURSOR_ION"], inputData[i, "CNLmasses"])
         push!(temp, inputData[i, "SMILES"])
         push!(temp, inputData[i, "INCHIKEY"])
         push!(temp, inputData[i, "PRECURSOR_ION"])
@@ -227,7 +229,8 @@ for i in 1:size(dfOutput, 1)
     println(i)
     arr = []
     arr = getMasses(dfOutput, i, arr)
-    mumIon = dfOutput[i, "PRECURSOR_ION"]
+    mumIon = round(dfOutput[i, "PRECURSOR_ION"], digits = 2)
+    X[i, 1] .= dfOutput[i, "PRECURSOR_ION"]
     for col in arr
         mz = findall(x->x==col, finalDistinctFeaturesCNLs)
         if (col <= mumIon)
