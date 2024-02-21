@@ -70,28 +70,23 @@ size(inputData)
 # NLs calculation, filtering CNL-in-interest, storing in Vector{Any}
         # filtering in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
         # inputing 16022 candidates
-        candidatesList = Array(CSV.read("D:\\0_data\\CNLs_10mDa.csv", DataFrame)[:,1])
-        candidatesList
+        candidates_df = CSV.read("D:\\0_data\\CNLs_10mDa.csv", DataFrame)
+        candidatesList = []
+        for can in candidates_df[:, 1]
+            push!(candidatesList, round(float(can), digits = 2))
+        end
 for i in 1:size(inputData, 1)
     println(i)
     fragIons = getVec(inputData[i,"MZ_VALUES"])
     arrNL = Set()
-    pre = round(inputData[i,"PRECURSOR_ION"], digits = 2)
     for frag in fragIons
-        if ((inputData[i,"PRECURSOR_ION"] - frag) >= 0.0)
-            NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
-            if (NL in candidatesList)
-                push!(arrNL, NL)
-            end
+        NL = round((inputData[i,"PRECURSOR_ION"] - frag), digits = 2)
+        if ((NL >= float(0)) && (NL in candidatesList))
+            push!(arrNL, NL)
         end
-        push!(arrNL, pre)
     end
-    #push!(arrNL, round(inputData[i,"PRECURSOR_ION"], digits = 2))
     inputData[i, "CNLmasses"] = sort!(collect(arrNL))
-    inputData[i, "PRECURSOR_ION"] = pre
 end
-
-inputData[1,5]
 
 sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 
@@ -127,7 +122,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         end
         size(featuresCNLs)
 
-        # 28251935 features -> 22472 features
+        # 817413 features -> 15693 features
         distinctFeaturesCNLs = Set()
         for featuresCNL in featuresCNLs
             if (featuresCNL >= 0.0)
@@ -139,11 +134,11 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         # 16022 candidates -> 15994 candidates
         finalCNLs = []
         whatAreMissed = []
-        for candidate in candidatesList
-            if (candidate in distinctFeaturesCNLs)
-                push!(finalCNLs, candidate)
+        for distinctFeaturesCNL in distinctFeaturesCNLs
+            if (float(distinctFeaturesCNL) in candidatesList == true)
+                push!(finalCNLs, distinctFeaturesCNL)
             else
-                push!(whatAreMissed, candidate)
+                push!(whatAreMissed, distinctFeaturesCNL)
             end
         end
         size(finalCNLs)
@@ -179,7 +174,7 @@ size(inputData[1, "CNLmasses"], 1)
 ref = ""
 for i in 1:size(inputData, 1)
     println(i)
-    if ( (size(inputData[i, "CNLmasses"], 1) >= 3) && (haveFPRiOrNot(inputData, i) == true))
+    if ( (size(inputData[i, "CNLmasses"], 1) >= 2) && (haveFPRiOrNot(inputData, i) == true))
         temp = []
         mass = string(inputData[i, "SMILES"], inputData[i, "INCHIKEY"], inputData[i, "CNLmasses"])
         push!(temp, inputData[i, "SMILES"])

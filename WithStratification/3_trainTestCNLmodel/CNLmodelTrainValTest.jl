@@ -202,7 +202,7 @@ predictedRi_train = predict(model, Matrix(inputDB[:, 4:end-1]))
 inputDB[!, "CNLpredictRi"] = predictedRi_train
 # save, ouputing trainSet df 0.7 x (3+15994+1)
 savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi.csv"
-CSV.write(savePath, trainSet)
+CSV.write(savePath, inputDB)
 
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end], predictedRi_train)
 rSquare_train = rSquareDetermination(inputDB[:, end], predictedRi_train)
@@ -231,6 +231,59 @@ acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 4:end-1]), Vector
 avgAcc_val = avgAcc(acc5_val, 5)
 
 # plots
+# inputing dfs for separation of the cocamides and non-cocamides datasets
+## 5364 x 931 df 
+inputCocamidesTrain = CSV.read("D:\\0_data\\CocamideExtWithStartification_Fingerprints_train.csv", DataFrame)
+sort!(inputCocamidesTrain, :SMILES)
+
+## 947 x 931 df
+inputCocamidesTest = CSV.read("D:\\0_data\\CocamideExtWithStartification_Fingerprints_test.csv", DataFrame)
+sort!(inputCocamidesTest, :SMILES)
+
+function cocamidesOrNot(plotdf, i)
+    if (plotdf[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || plotdf[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
+        return true
+    else
+        return false
+    end
+end
+
+function findDots(plotdf, i)
+    if (cocamidesOrNot(plotdf, i) == true)
+        return plotdf[i, "predictRi"], plotdf[i, "CNLpredictRi"]
+    end
+end
+
+trainCocamide = []
+trainNonCocamide = []
+inputDB[!, "Cocamides"] = ""
+for i in 1:size(inputDB, 1)
+    if (cocamidesOrNot(inputDB, i) == true)
+        inputDB[i, "Cocamides"] = "yes"
+        push!(trainCocamide, i)
+    elseif (cocamidesOrNot(inputDB, i) == false)
+        inputDB[i, "Cocamides"] = "no"
+        push!(trainNonCocamide, i)
+    end
+end
+savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv"
+CSV.write(savePath, inputDB)
+
+testCocamide = []
+testNonCocamide = []
+inputDB_test[!, "Cocamides"] = ""
+for i in 1:size(inputDB_test, 1)
+    if (cocamidesOrNot(inputDB_test, i) == true)
+        inputDB_test[i, "Cocamides"] = "yes"
+        push!(testCocamide, i)
+    elseif (cocamidesOrNot(inputDB, i) == false)
+        inputDB_test[i, "Cocamides"] = "no"
+        push!(testNonCocamide, i)
+    end
+end
+savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv"
+CSV.write(savePath, inputDB_test)
+
 plotTrain = marginalkde(
         inputDB[:, end], 
         predictedRi_train, 
@@ -248,6 +301,22 @@ plot!(plotTrain.spmap[:contour],
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
+scatter!(inputDB[trainCocamide, end], predictedRi_train[trainCocamide], 
+        markershape = :star, 
+        c = :yellow, 
+        label = "Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+scatter!(inputDB[trainNonCocamide, end], predictedRi_train[trainNonCocamide], 
+        markershape = :star, 
+        c = :orange, 
+        label = "Non-Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
         # Saving
 savefig(plotTrain, "D:\\2_output\\CNLRiPrediction_RFTrainWithStratification.png")
 
@@ -264,9 +333,25 @@ plotTest = marginalkde(
 plot!(plotTest.spmap[:contour], 
         inputDB_test[:, end] -> inputDB_test[:, end], c=:red, 
         label = false, 
-        title = "RF Model Val With Stratification", 
+        title = "RF Model Test With Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
+scatter!(inputDB_test[testCocamide, end], predictedRi_test[testCocamide], 
+        markershape = :star, 
+        c = :yellow, 
+        label = "Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+scatter!(inputDB[testNonCocamide, end], predictedRi_test[testNonCocamide], 
+        markershape = :star, 
+        c = :orange, 
+        label = "Non-Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
         # Saving
-savefig(plotVal, "D:\\2_output\\CNLRiPrediction_RFValWithStratification.png")
+savefig(plotVal, "D:\\2_output\\CNLRiPrediction_RFTestWithStratification.png")
