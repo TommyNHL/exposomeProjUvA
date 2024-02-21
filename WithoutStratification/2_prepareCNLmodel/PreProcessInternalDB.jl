@@ -226,13 +226,12 @@ for i in 1:size(dfOutput, 1)
     arr = []
     arr = getMasses(dfOutput, i, arr)
     mumIon = round(dfOutput[i, "PRECURSOR_ION"], digits = 2)
-    X[i, 1] .= dfOutput[i, "PRECURSOR_ION"]
     for col in arr
         mz = findall(x->x==col, finalDistinctFeaturesCNLs)
         if (col <= mumIon)
             X[i, mz] .= 1
         elseif (col > mumIon)
-            X[i, mz] .= -1
+            X[i, mz1] .= -1
         end
     end
 end
@@ -241,6 +240,7 @@ dfCNLs = DataFrame(X, finalColumnsCNLs)
 insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:693677)))
 insertcols!(dfCNLs, 2, ("SMILES"=>dfOutput[:, "SMILES"]))
 insertcols!(dfCNLs, 3, ("INCHIKEY"=>dfOutput[:, "INCHIKEY"]))
+insertcols!(dfCNLs, 4, ("PRECURSOR_ION"=>dfOutput[:, "PRECURSOR_ION"]))
 size(dfCNLs)  # 693677 x (3+21567)
 
 # ouputing df 693677 x (3+21567)
