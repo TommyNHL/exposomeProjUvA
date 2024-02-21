@@ -102,7 +102,7 @@ for ID in 1:size(dfOutput, 1)
     for i = 1:dfOutput[ID, "FREQUENCY"]
         temp = []
         push!(temp, dfOutput[ID, "INCHIKEY"])
-        rowNo = findall(inputAllFPDB.INCHIKEY .== dfOutput[i, "INCHIKEY"])[end:end]
+        rowNo = findall(inputAllFPDB.INCHIKEY .== dfOutput[ID, "INCHIKEY"])[end:end]
         for col in names(inputAllFPDB)[3:end]
             push!(temp, inputAllFPDB[rowNo, col][1])
         end
