@@ -128,12 +128,13 @@ using LinearAlgebra
 using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = []
+    h = zero(693677,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:] 
         hi = x'*pinv(X'*X)*x
-        push!(h,hi)
-    end   
+        #push!(h,hi)
+        h[i,1] = hi
+    end
     return h
 end
 
