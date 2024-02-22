@@ -255,7 +255,7 @@ sumUp = []
 push!(sumUp, 888888)
 push!(sumUp, "summation")
 push!(sumUp, "summation")
-push!(sumUp, "summation")
+push!(sumUp, 888888)
 for col in names(dfCNLs)[5:end]
     count = 0
     for i in 1:size(dfCNLs, 1)
