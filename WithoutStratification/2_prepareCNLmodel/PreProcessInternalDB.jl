@@ -240,7 +240,7 @@ dfCNLs = DataFrame(X, finalColumnsCNLs)
 insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:693685)))
 insertcols!(dfCNLs, 2, ("SMILES"=>dfOutput[:, "SMILES"]))
 insertcols!(dfCNLs, 3, ("INCHIKEY"=>dfOutput[:, "INCHIKEY"]))
-insertcols!(dfCNLs, 4, ("ISOTOPICMASS"=>dfOutput[:, "PRECURSOR_ION"]-1.007276))
+insertcols!(dfCNLs, 4, ("ISOTOPICMASS"=>dfOutput[:, "PRECURSOR_ION"] .- 1.007276))
 size(dfCNLs)  # 693685 x (3+1+15961)
 
 # ouputing df 693685 x (3+1+15961)
@@ -248,14 +248,14 @@ savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 
 desStat = describe(dfCNLs)  # 15965 x 7
-desStat[4,:]
+desStat[5,:]
 
 sumUp = []
 push!(sumUp, 888888)
 push!(sumUp, "summation")
 push!(sumUp, "summation")
 push!(sumUp, "summation")
-for col in names(dfCNLs)[4:end]
+for col in names(dfCNLs)[5:end]
     count = 0
     for i in 1:size(dfCNLs, 1)
         count += dfCNLs[i, col]
@@ -267,7 +267,7 @@ push!(dfCNLs, sumUp)
 dfCNLs[end,:]  #693686
 
 using DataSci4Chem
-massesCNLsDistrution = bar(names(dfCNLs)[4:end], Vector(dfCNLs[end, 4:end]), 
+massesCNLsDistrution = bar(names(dfCNLs)[5:end], Vector(dfCNLs[end, 5:end]), 
     label = false, 
     lc = "skyblue", 
     margin = (5, :mm), 
