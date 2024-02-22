@@ -219,7 +219,7 @@ size(modelRF_CNL)
 
 predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 4:end-1]))
 inputDB_test[!, "CNLpredictRi"] = predictedRi_test
-# save, ouputing trainSet df 0.7 x (3+15994+1)
+# save, ouputing testSet df 0.3 x (3+15994+1)
 savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, inputDB_test)
 
@@ -276,7 +276,7 @@ for i in 1:size(inputDB_test, 1)
     if (cocamidesOrNot(inputDB_test, i) == true)
         inputDB_test[i, "Cocamides"] = "yes"
         push!(testCocamide, i)
-    elseif (cocamidesOrNot(inputDB, i) == false)
+    elseif (cocamidesOrNot(inputDB_test, i) == false)
         inputDB_test[i, "Cocamides"] = "no"
         push!(testNonCocamide, i)
     end
@@ -345,7 +345,7 @@ scatter!(inputDB_test[testCocamide, end], predictedRi_test[testCocamide],
         size = (600,600), 
         dpi = 300
         )
-scatter!(inputDB[testNonCocamide, end], predictedRi_test[testNonCocamide], 
+scatter!(inputDB_test[testNonCocamide, end], predictedRi_test[testNonCocamide], 
         markershape = :star, 
         c = :orange, 
         label = "Non-Cocamides", 

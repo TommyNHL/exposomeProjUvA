@@ -36,17 +36,14 @@ using ScikitLearn.GridSearch: GridSearchCV
 
 # inputing 693677 x 3+21567 df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
-inputTPTNdf = CSV.read("D:\\Cand_search_rr0_0612_TEST_100-400_extractedWithDeltaRi.csv", DataFrame)
+inputTPTNdf = CSV.read("D:\\dataframe_dfTPTNfinalSet4TrainValTest", DataFrame)
 sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID, :DeltaRi, :FinalScore])
-
-inputDfOnlyTP = inputTPTNdf[inputTPTNdf.LABEL .== 1, :]
-inputDfOnlyTN = inputTPTNdf[inputTPTNdf.LABEL .== 0, :]
 
 # Train/Test Split by Leverage
 ## calculating how large the portion of TN is needed to be removed
-X = deepcopy(inputDfOnlyTN[:, 2:end-1])  # 693677 x 790 df
+X = deepcopy(inputTPTNdf[:, 2:end-1])  # 693677 x 790 df
 size(X)
-Y = deepcopy(inputDfOnlyTN[:, end])  #693677,
+Y = deepcopy(inputTPTNdf[:, end])  #693677,
 size(Y)
 
 using ProgressBars
@@ -54,7 +51,7 @@ using LinearAlgebra
 using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zero(xxx,1)
+    h = zeros(xxx,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:] 
         hi = x'*pinv(X'*X)*x
@@ -93,7 +90,7 @@ for i in X_testIdx
 end
 
 # output csv is a 693677 x 3+790+2 df
-savePath = "D:\\Cand_search_rr0_0612_TEST_100-400_extractedWithDeltaRi_SplitByLeverage.csv"
+savePath = "D:\\dataframe_dfTPTNfinalSet4TrainValTest_withLeverage.csv"
 CSV.write(savePath, inputTPTNdf)
 
 function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, RiCol = true)
@@ -132,12 +129,11 @@ dfTestSet
 savePath = "D:\\dataframe_TPTNdfTestSet.csv"
 CSV.write(savePath, dfTestSet)
 
-# inputing 693677*0.3 x (3+22357+1)
-# columns: SMILES, INCHIKEY, CNLs, predictRi
+# preparing Matrix for ML
 X_inputDB_test = deepcopy(dfTestSet[:, 2:end-1])
 size(X_inputDB_test)
 Y_inputDB_test = deepcopy(dfTestSet[:, end])
-size(YY_inputDB_test)
+size(Y_inputDB_test)
 
 # inputing 693677*0.7 x (3+22357+1)
 X_inputDB_train = deepcopy(dfTrainSet[:, 2:end-1])
@@ -157,33 +153,33 @@ end
 ## Maximum absolute error
 ## mean square error (MSE) calculation
 ## Root mean square error (RMSE) calculation
-function errorDetermination(arrRi, predictedRi)
+function errorDetermination(arrY, predictedY)
     sumAE = 0
     maxAE = 0
-    for i = 1:size(predictedRi, 1)
-        AE = abs(arrRi[i] - predictedRi[i])
+    for i = 1:size(predictedY, 1)
+        AE = abs(arrY[i] - predictedY[i])
         if (AE > maxAE)
             maxAE = AE
         end
         sumAE += (AE ^ 2)
     end
-    MSE = sumAE / size(predictedRi, 1)
+    MSE = sumAE / size(predictedY, 1)
     RMSE = MSE ^ 0.5
     return maxAE, MSE, RMSE
 end
 
 ## R-square value
-function rSquareDetermination(arrRi, predictedRi)
+function rSquareDetermination(arrY, predictedY)
     sumY = 0
-    for i = 1:size(predictedRi, 1)
-        sumY += predictedRi[i]
+    for i = 1:size(predictedY, 1)
+        sumY += predictedY[i]
     end
-    meanY = sumY / size(predictedRi, 1)
+    meanY = sumY / size(predictedY, 1)
     sumAE = 0
     sumRE = 0
-    for i = 1:size(predictedRi, 1)
-        AE = abs(arrRi[i] - predictedRi[i])
-        RE = abs(arrRi[i] - meanY)
+    for i = 1:size(predictedY, 1)
+        AE = abs(arrY[i] - predictedY[i])
+        RE = abs(arrY[i] - meanY)
         sumAE += (AE ^ 2)
         sumRE += (RE ^ 2)
     end
@@ -215,11 +211,11 @@ function optimRandomForestRegressor(df_train, df_test)
                 MaxFeat = Int64((ceil(size(df_train,2)-1)/3))
                 println("## split ##")
                 M_train, M_val = partitionTrainVal(df_train, 0.67)
-                Xx_train = deepcopy(M_train[:, 4:end-1])
+                Xx_train = deepcopy(M_train[:, 2:end-1])
                 Yy_train = deepcopy(M_train[:, end])
-                Xx_val = deepcopy(M_val[:, 4:end-1])
+                Xx_val = deepcopy(M_val[:, 2:end-1])
                 Yy_val = deepcopy(M_val[:, end])
-                xx_test = deepcopy(df_test[:, 4:end-1])
+                xx_test = deepcopy(df_test[:, 2:end-1])
                 yy_test = deepcopy(df_test[:, end])
                 println("## Regression ##")
                 reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
@@ -230,9 +226,9 @@ function optimRandomForestRegressor(df_train, df_test)
                     z[1,2] = t
                     z[1,3] = state
                     z[1,4] = score(reg, Matrix(Xx_train), Vector(Yy_train))
-                    z[1,5] = score(reg, Matrix(df_train[:, 4:end-1]), Vector(df_train[:, end]))
+                    z[1,5] = score(reg, Matrix(df_train[:, 2:end-1]), Vector(df_train[:, end]))
                     println("## CV ##")
-                    acc5_train = cross_val_score(reg, Matrix(df_train[:, 4:end-1]), Vector(df_train[:, end]); cv = 3)
+                    acc5_train = cross_val_score(reg, Matrix(df_train[:, 2:end-1]), Vector(df_train[:, end]); cv = 3)
                     z[1,5] = avgAcc(acc5_train, 3)
                     z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
                     z[1,7] = score(reg, Matrix(xx_test), Vector(yy_test))
@@ -240,8 +236,8 @@ function optimRandomForestRegressor(df_train, df_test)
                 else
                     println("## CV ##")
                     itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
-                    traintrain = score(reg, Matrix(df_train[:, 4:end-1]), Vector(df_train[:, end]))
-                    acc5_train = cross_val_score(reg, Matrix(df_train[:, 4:end-1]), Vector(df_train[:, end]); cv = 3)
+                    traintrain = score(reg, Matrix(df_train[:, 2:end-1]), Vector(df_train[:, end]))
+                    acc5_train = cross_val_score(reg, Matrix(df_train[:, 2:end-1]), Vector(df_train[:, end]); cv = 3)
                     traincvtrain = avgAcc(acc5_train, 3) 
                     ival = score(reg, Matrix(Xx_val), Vector(Yy_val)) 
                     etest = score(reg, Matrix(xx_test), Vector(yy_test))
@@ -258,10 +254,10 @@ function optimRandomForestRegressor(df_train, df_test)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestRegressor(inputDB, inputDB_test)
+optiSearch_df = optimRandomForestRegressor(dfTrainSet, dfTestSet)
 
 # save, ouputing 72 x 8 df
-savePath = "D:\\0_data\\hyperparameterTuning_RFwithStratification.csv"
+savePath = "D:\\hyperparameterTuning_dfTPTN.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
@@ -287,43 +283,43 @@ model = RandomForestRegressor(
       oob_score = true, 
       random_state = 42
       )
-fit!(model, Matrix(inputDB[:, 4:end-1]), Vector(inputDB[:, end]))
+fit!(model, Matrix(dfTrainSet[:, 2:end-1]), Vector(dfTrainSet[:, end]))
 
 # saving model
-modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi_RFwithStratification.joblib"
+modelSavePath = "D:\\RFmodel4TPTN.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
 # training performace, CNL-predictedRi vs. FP-predictedRi
-predictedRi_train = predict(model, Matrix(inputDB[:, 4:end-1]))
-inputDB[!, "CNLpredictRi"] = predictedRi_train
+predictedY_train = predict(model, Matrix(dfTrainSet[:, 2:end-1]))
+dfTrainSet[!, "LABEL"] = predictedY_train
 # save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi.csv"
-CSV.write(savePath, inputDB)
+savePath = "D:\\dataframe_TPTNdfTrainSet_withPredictedY.csv"
+CSV.write(savePath, dfTrainSet)
 
-maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end], predictedRi_train)
-rSquare_train = rSquareDetermination(inputDB[:, end], predictedRi_train)
+maxAE_train, MSE_train, RMSE_train = errorDetermination(dfTrainSet[:, end], predictedY_train)
+rSquare_train = rSquareDetermination(dfTrainSet[:, end], predictedY_train)
 ## accuracy
-acc1_train = score(model, Matrix(inputDB[:, 4:end-1]), Vector(inputDB[:, end]))
-acc5_train = cross_val_score(model, Matrix(inputDB[:, 4:end-1]), Vector(inputDB[:, end]); cv = 5)
+acc1_train = score(model, Matrix(dfTrainSet[:, 2:end-1]), Vector(dfTrainSet[:, end]))
+acc5_train = cross_val_score(model, Matrix(dfTrainSet[:, 2:end-1]), Vector(dfTrainSet[:, end]); cv = 5)
 avgAcc_train = avgAcc(acc5_train, 5)
 
 # model validation
 #load a model
 # requires python 3.11 or 3.12
-modelRF_CNL = jl.load("D:\\1_model\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
-size(modelRF_CNL)
+modelRF_TPTN = jl.load("D:\\RFmodel4TPTN.joblib")
+size(modelRF_TPTN)
 
-predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 4:end-1]))
-inputDB_test[!, "CNLpredictRi"] = predictedRi_test
-# save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification_withCNLPredictedRi.csv"
-CSV.write(savePath, inputDB_test)
+predictedY_test = predict(modelRF_TPTN, Matrix(dfTestSet[:, 2:end-1]))
+dfTestSet[!, "LABEL"] = predictedY_test
+# save, ouputing testSet df 0.3 x (3+15994+1)
+savePath = "D:\\dataframe_TPTNdfTestSet_withPredictedY.csv"
+CSV.write(savePath, dfTestSet)
 
-maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end], predictedRi_test)
-rSquare_val = rSquareDetermination(inputDB_test[:, end], predictedRi_test)
+maxAE_val, MSE_val, RMSE_val = errorDetermination(dfTestSet[:, end], predictedY_test)
+rSquare_val = rSquareDetermination(dfTestSet[:, end], predictedY_test)
 ## accuracy
-acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 4:end-1]), Vector(inputDB_test[:, end]))
-acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 4:end-1]), Vector(inputDB_test[:, end]); cv = 5)
+acc1_val = score(modelRF_TPTN, Matrix(dfTestSet[:, 2:end-1]), Vector(dfTestSet[:, end]))
+acc5_val = cross_val_score(modelRF_TPTN, Matrix(dfTestSet[:, 2:end-1]), Vector(dfTestSet[:, end]); cv = 5)
 avgAcc_val = avgAcc(acc5_val, 5)
 
 # plots
@@ -352,52 +348,52 @@ end
 
 trainCocamide = []
 trainNonCocamide = []
-inputDB[!, "Cocamides"] = ""
-for i in 1:size(inputDB, 1)
-    if (cocamidesOrNot(inputDB, i) == true)
-        inputDB[i, "Cocamides"] = "yes"
+dfTrainSet[!, "Cocamides"] = ""
+for i in 1:size(dfTrainSet, 1)
+    if (cocamidesOrNot(dfTrainSet, i) == true)
+        dfTrainSet[i, "Cocamides"] = "yes"
         push!(trainCocamide, i)
-    elseif (cocamidesOrNot(inputDB, i) == false)
-        inputDB[i, "Cocamides"] = "no"
+    elseif (cocamidesOrNot(dfTrainSet, i) == false)
+        dfTrainSet[i, "Cocamides"] = "no"
         push!(trainNonCocamide, i)
     end
 end
-savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv"
-CSV.write(savePath, inputDB)
+savePath = "D:\\dataframe_TPTNdfTrainSet_withPredictedY_withCocamides.csv"
+CSV.write(savePath, dfTrainSet)
 
 testCocamide = []
 testNonCocamide = []
-inputDB_test[!, "Cocamides"] = ""
-for i in 1:size(inputDB_test, 1)
-    if (cocamidesOrNot(inputDB_test, i) == true)
-        inputDB_test[i, "Cocamides"] = "yes"
+dfTestSet[!, "Cocamides"] = ""
+for i in 1:size(dfTestSet, 1)
+    if (cocamidesOrNot(dfTestSet, i) == true)
+        dfTestSet[i, "Cocamides"] = "yes"
         push!(testCocamide, i)
-    elseif (cocamidesOrNot(inputDB, i) == false)
-        inputDB_test[i, "Cocamides"] = "no"
+    elseif (cocamidesOrNot(dfTestSet, i) == false)
+        dfTestSet[i, "Cocamides"] = "no"
         push!(testNonCocamide, i)
     end
 end
-savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv"
-CSV.write(savePath, inputDB_test)
+savePath = "D:\\dataframe_TPTNdfTestSet_withPredictedY_withCocamides.csv"
+CSV.write(savePath, dfTestSet)
 
 plotTrain = marginalkde(
-        inputDB[:, end], 
-        predictedRi_train, 
-        xlabel = "FP-derived Ri values", 
-        ylabel = "CNL-derived Ri values", 
+        dfTrainSet[:, end], 
+        predictedY_train, 
+        xlabel = "Ground-Truth Labels", 
+        ylabel = "Predicted Labels", 
         label = false, 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300
         )
 plot!(plotTrain.spmap[:contour], 
-        inputDB[:, end] -> inputDB[:, end], c=:red, 
+        dfTrainSet[:, end] -> dfTrainSet[:, end], c=:red, 
         label = false, 
-        title = "RF Model Training With Stratification", 
+        title = "RF Model Training", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
-scatter!(inputDB[trainCocamide, end], predictedRi_train[trainCocamide], 
+scatter!(dfTrainSet[trainCocamide, end], predictedY_train[trainCocamide], 
         markershape = :star, 
         c = :yellow, 
         label = "Cocamides", 
@@ -405,7 +401,7 @@ scatter!(inputDB[trainCocamide, end], predictedRi_train[trainCocamide],
         size = (600,600), 
         dpi = 300
         )
-scatter!(inputDB[trainNonCocamide, end], predictedRi_train[trainNonCocamide], 
+scatter!(dfTrainSet[trainNonCocamide, end], predictedY_train[trainNonCocamide], 
         markershape = :star, 
         c = :orange, 
         label = "Non-Cocamides", 
@@ -414,26 +410,26 @@ scatter!(inputDB[trainNonCocamide, end], predictedRi_train[trainNonCocamide],
         dpi = 300
         )
         # Saving
-savefig(plotTrain, "D:\\2_output\\CNLRiPrediction_RFTrainWithStratification.png")
+savefig(plotTrain, "D:\\TPTNPrediction_RFTrain.png")
 
 plotTest = marginalkde(
-        inputDB_test[:, end], 
-        predictedRi_test, 
-        xlabel = "FP-derived Ri values", 
-        ylabel = "CNL-derived Ri values", 
+        dfTestSet[:, end], 
+        predictedY_test, 
+        xlabel = "Ground-Truth Labels", 
+        ylabel = "Predicted Labels", 
         label = false, 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300
         )
 plot!(plotTest.spmap[:contour], 
-        inputDB_test[:, end] -> inputDB_test[:, end], c=:red, 
+        dfTestSet[:, end] -> dfTestSet[:, end], c=:red, 
         label = false, 
-        title = "RF Model Test With Stratification", 
+        title = "RF Model Test", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
-scatter!(inputDB_test[testCocamide, end], predictedRi_test[testCocamide], 
+scatter!(dfTestSet[testCocamide, end], predictedY_test[testCocamide], 
         markershape = :star, 
         c = :yellow, 
         label = "Cocamides", 
@@ -441,7 +437,7 @@ scatter!(inputDB_test[testCocamide, end], predictedRi_test[testCocamide],
         size = (600,600), 
         dpi = 300
         )
-scatter!(inputDB[testNonCocamide, end], predictedRi_test[testNonCocamide], 
+scatter!(dfTestSet[testNonCocamide, end], predictedY_test[testNonCocamide], 
         markershape = :star, 
         c = :orange, 
         label = "Non-Cocamides", 
@@ -450,4 +446,4 @@ scatter!(inputDB[testNonCocamide, end], predictedRi_test[testNonCocamide],
         dpi = 300
         )
         # Saving
-savefig(plotVal, "D:\\2_output\\CNLRiPrediction_RFTestWithStratification.png")
+savefig(plotVal, "D:\\TPTNPrediction_RFTest.png")
