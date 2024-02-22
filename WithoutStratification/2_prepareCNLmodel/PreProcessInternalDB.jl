@@ -246,6 +246,7 @@ size(dfCNLs)  # 693685 x (3+1+15961)
 # ouputing df 693685 x (3+1+15961)
 savePath = "D:\\0_data\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
+println("done for saving csv")
 
 desStat = describe(dfCNLs)  # 15965 x 7
 desStat[5,:]
