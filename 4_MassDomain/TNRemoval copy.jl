@@ -34,20 +34,116 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 using ScikitLearn.GridSearch: GridSearchCV
 
+# inputing 693677 x 3+21567 df
+# columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
+inputTPTNdf = CSV.read("D:\\Cand_search_rr0_0612_TEST_100-400_extractedWithDeltaRi.csv", DataFrame)
+sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID, :DeltaRi, :FinalScore])
+
+inputDfOnlyTP = inputTPTNdf[inputTPTNdf.LABEL .== 1, :]
+inputDfOnlyTN = inputTPTNdf[inputTPTNdf.LABEL .== 0, :]
+
+# Train/Test Split by Leverage
+## calculating how large the portion of TN is needed to be removed
+X = deepcopy(inputDfOnlyTN[:, 2:end-1])  # 693677 x 790 df
+size(X)
+Y = deepcopy(inputDfOnlyTN[:, end])  #693677,
+size(Y)
+
+using ProgressBars
+using LinearAlgebra
+using ScikitLearn
+using ScikitLearn.CrossValidation: train_test_split
+function leverage_dist(X)   # Set x1 and x2 to your FPs variables
+    h = zero(xxx,1)
+    for i in ProgressBar(1: size(X,1)) #check dimensions
+        x = X[i,:] 
+        hi = x'*pinv(X'*X)*x
+        #push!(h,hi)
+        h[i,1] = hi
+    end
+    return h
+end
+
+h = leverage_dist(Matrix(X))
+
+function strat_split(leverage=h; limits = limits)
+    n = length(leverage)
+    bin = collect(1:n)
+    for i = 1: (length(limits)-1)
+        bin[limits[i].<= leverage].= i
+    end
+    X_train, X_test, y_train, y_test = train_test_split(collect(1:length(leverage)), leverage, test_size = 0.30, random_state = 42, stratify = bin)
+    return  X_train, X_test, y_train, y_test
+end
+
+X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(h, limits = collect(0.0:0.2:1))
+inputTPTNdf[!, "GROUP"] .= ""
+inputTPTNdf[!, "Leverage"] .= float(0)
+inputTPTNdf[X_trainIdx, "GROUP"] .= "train"
+inputTPTNdf[X_testIdx, "GROUP"] .= "test"
+count = 1
+for i in X_trainIdx
+  inputTPTNdf[i, "Leverage"] = train_lev[count]
+    count += 1
+end
+count = 1
+for i in X_testIdx
+  inputTPTNdf[i, "Leverage"] = test_lev[count]
+    count += 1
+end
+
+# output csv is a 693677 x 3+790+2 df
+savePath = "D:\\Cand_search_rr0_0612_TEST_100-400_extractedWithDeltaRi_SplitByLeverage.csv"
+CSV.write(savePath, inputTPTNdf)
+
+function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, RiCol = true)
+    #X_train_ind, X_test_ind, train_lev, test_lev = strat_split(leverage, limits = limits)
+    # Create train test split of total DataFrame and dependent variables using the chosen parameters
+    X_trainTPTN = total_df[X_trainIdx,:]
+    X_testTPTN = total_df[X_testIdx,:]
+    if (RiCol == true)
+        Y_trainLabel = y_data[X_trainIdx]
+        Y_testLabel = y_data[X_testIdx]
+        return  X_trainTPTN, X_testTPTN, Y_trainLabel, Y_testLabel
+    end
+    # # Select train and test set of independent variables 
+    # X_train = total_train[:, start_col_X_data:end]
+    # X_test = total_test[:, start_col_X_data:end]
+    return  X_trainTPTN, X_testTPTN
+end
+
+X_trainTPTN, X_testTPTN, Y_trainLabel, Y_testLabel = create_train_test_split_strat(X, Y, X_trainIdx, X_testIdx, true)
+
+inputTPTNdf
+
+df_info = inputTPTNdf[:, 1:1]
+df_info
+X_trainInfo, X_testInfo = create_train_test_split_strat(df_info, df_info, X_trainIdx, X_testIdx, false)
+
+dfTrainSet = hcat(X_trainInfo, X_trainTPTN, Y_trainLabel)
+dfTrainSet
+# output csv is a 693677*0.7 x 3+22357+1 df
+savePath = "D:\\dataframe_TPTNdfTrainSet.csv"
+CSV.write(savePath, dfTrainSet)
+
+dfTestSet = hcat(X_testInfo, X_testTPTN, Y_testLabel)
+dfTestSet
+# output csv is a 693677*0.3 x 3+22357+1 df
+savePath = "D:\\dataframe_TPTNdfTestSet.csv"
+CSV.write(savePath, dfTestSet)
+
 # inputing 693677*0.3 x (3+22357+1)
 # columns: SMILES, INCHIKEY, CNLs, predictRi
-inputDB_test = CSV.read("D:\\0_data\\dataframe_dfTestSetWithStratification.csv", DataFrame)
-sort!(inputDB_test, [:ENTRY])
-# inputing 693677*0.7 x (3+22357+1)
-inputDB = CSV.read("D:\\0_data\\dataframe_dfTrainSetWithStratification.csv", DataFrame)
-sort!(inputDB, [:ENTRY])
+X_inputDB_test = deepcopy(dfTestSet[:, 2:end-1])
+size(X_inputDB_test)
+Y_inputDB_test = deepcopy(dfTestSet[:, end])
+size(YY_inputDB_test)
 
-# internal train/test split by Leverage values
-# 22361 -> 22357
-X = deepcopy(inputDB[:, 4:end-1])
-size(X)
-Y = deepcopy(inputDB[:, end])
-size(Y)
+# inputing 693677*0.7 x (3+22357+1)
+X_inputDB_train = deepcopy(dfTrainSet[:, 2:end-1])
+size(X_inputDB_train)
+Y_inputDB_train = deepcopy(dfTrainSet[:, end])
+size(Y_inputDB_train)
 
 function partitionTrainVal(df, ratio = 0.67)
     noOfRow = nrow(df)

@@ -63,3 +63,33 @@ sort!(inputAllRi_TrainSet, [:INCHIKEY, :SMILES])
 inputAllRi_TestSet = CSV.read("D:\\0_data\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
 sort!(inputAllRi_TestSet, [:INCHIKEY, :SMILES])
 
+outputDf[!, "predictRi"] = float(0)
+outputDf[!, "CNLpredictRi"] = float(0)
+outputDf[!, "DeltaRi"] = float(0)
+for i in 1:size(outputDf, 1)
+    if outputDf[i, "INCHIKEY"] in Array(inputAllRi_TrainSet[:, "INCHIKEY"])
+        rowNo = findall(inputAllRi_TrainSet.INCHIKEY .== outputDf[i, "INCHIKEY"])
+        outputDf[!, "predictRi"] = inputAllRi_TrainSet[rowNo[end:end], "predictRi"][1]
+        outputDf[!, "CNLpredictRi"] = inputAllRi_TrainSet[rowNo[end:end], "CNLpredictRi"][1]
+        outputDf[!, "DeltaRi"] = outputDf[!, "CNLpredictRi"] - outputDf[!, "predictRi"]
+    elseif outputDf[i, "INCHIKEY"] in Array(inputAllRi_TestSet[:, "INCHIKEY"])
+        rowNo = findall(inputAllRi_TestSet.INCHIKEY .== outputDf[i, "INCHIKEY"])
+        outputDf[!, "predictRi"] = inputAllRi_TestSet[rowNo[end:end], "predictRi"][1]
+        outputDf[!, "CNLpredictRi"] = inputAllRi_TestSet[rowNo[end:end], "CNLpredictRi"][1]
+        outputDf[!, "DeltaRi"] = outputDf[!, "CNLpredictRi"] - outputDf[!, "predictRi"]
+    else
+        outputDf[!, "predictRi"] = float(888888)
+        outputDf[!, "CNLpredictRi"] = float(888888)
+        outputDf[!, "DeltaRi"] = float(0)
+    end
+end
+
+# filtering in INCHIKEY_ID with Ri values
+outputDf = outputDf[outputDf.predictRi .!= float(888888), ["INCHIKEY_ID", 
+    "RefMatchFrag", "UsrMatchFrag", "MS1Error", "MS2Error", "MS2ErrorStd", 
+    "DirectMatch", "ReversMatch", "FinalScore", "DeltaRi", "LABEL"]]
+sort!(outputDf, [:LABEL, :INCHIKEY_ID, :DeltaRi, :FinalScore])
+
+# output csv is a xxx x 1+8+1+1 df
+savePath = "D:\\Cand_search_rr0_0612_TEST_100-400_extractedWithDeltaRi.csv"
+CSV.write(savePath, outputDf)

@@ -82,12 +82,12 @@
 # try CatBoost
 
 ## 4_MassDomain
-### DataSplitMatch.jl ***working***
+### DataSplitMatch.jl ***pending to run***
 #### - step 1: import results from ULSA
 #### - step 2: extract useful columns including 7+1 features
 #### - step 3: combine different .csv files
-####           -> new .csv
 #### - step 4: add ground-truth labels based on INCHIKEYreal vs. INCHIKEY
+####           -> new .csv
 #### - step 5: calculate and join delta Ri
 ####           -> new .csv
 ### TPTNmodelTrainValTest.jl ***working***

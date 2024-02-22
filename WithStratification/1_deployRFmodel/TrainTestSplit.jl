@@ -11,12 +11,12 @@ using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
 #pd = pyimport("padelpy")
 #jl = pyimport("joblib")
 
-# inputing 693677 x 4 df
+# inputing 693685 x 4 df
 # columns: SMILES, INCHIKEY, PRECURSOR_ION, CNLmasses...
 inputDB = CSV.read("D:\\0_data\\databaseOfInternal_withNLs.csv", DataFrame)
 sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 
-# inputing 693677 x 3+21567 df
+# inputing 693685 x 3+21567 df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputCNLs = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
