@@ -16,10 +16,10 @@ using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
 inputDB = CSV.read("D:\\0_data\\databaseOfInternal_withNLs.csv", DataFrame)
 sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 
-# inputing 693685 x 3+21567 df
+# inputing 693685 x 3+1+15961 df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputCNLs = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
-sort!(inputDB, [:ENTRY])
+sort!(inputCNLs, [:ENTRY])
 
 # creating a table with 2 columns
 dfOutput = DataFrame([[],[]], ["INCHIKEY", "FREQUENCY"])
@@ -110,17 +110,17 @@ for ID in 1:size(dfOutput, 1)
     end
 end
 
-# 693677 x 1+790+1 df
+# 693685 x 1+790+1 df
 dfOutputFP
 # save
-# output csv is a 693677 x 792 df
+# output csv is a 693685 x 792 df
 savePath = "D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv"
 CSV.write(savePath, dfOutputFP)
 
 # Train/Test Split by Leverage
-X = deepcopy(dfOutputFP[:, 2:end-1])  # 693677 x 790 df
+X = deepcopy(dfOutputFP[:, 2:end-1])  # 693685 x 790 df
 size(X)
-Y = deepcopy(dfOutputFP[:, end])  #693677,
+Y = deepcopy(dfOutputFP[:, end])  #693685,
 size(Y)
 
 using ProgressBars
@@ -128,7 +128,7 @@ using LinearAlgebra
 using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zero(693677,1)
+    h = zeros(693685,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:] 
         hi = x'*pinv(X'*X)*x
@@ -166,7 +166,7 @@ for i in X_testIdx
     count += 1
 end
 
-# output csv is a 693677 x 3+790+2 df
+# output csv is a 693685 x 1+790+1+2 df
 savePath = "D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_FreqAndLeverage.csv"
 CSV.write(savePath, dfOutputFP)
 
@@ -200,12 +200,12 @@ X_trainInfo, X_testInfo = create_train_test_split_strat(df_info, df_info, X_trai
 
 dfTrainSetWithStratification = hcat(X_trainInfo, X_trainCNL, Y_trainFPRi)
 dfTrainSetWithStratification
-# output csv is a 693677*0.7 x 3+22357+1 df
+# output csv is a 693685*0.7 x 3+1+15961+1 df
 savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification.csv"
 CSV.write(savePath, dfTrainSetWithStratification)
 
 dfTestSetWithStratification = hcat(X_testInfo, X_testCNL, Y_testFPRi)
 dfTestSetWithStratification
-# output csv is a 693677*0.3 x 3+22357+1 df
+# output csv is a 693685*0.3 x 3+1+15961+1 df
 savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification.csv"
 CSV.write(savePath, dfTestSetWithStratification)
