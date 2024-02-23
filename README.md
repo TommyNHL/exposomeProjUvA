@@ -75,12 +75,6 @@
 ####           -> new performance metrics
 ####           -> new .png
 
-# set min. no. of CNL (3, pre-ion inclusive)  ***v***
-# include pre-ion  ***v***
-# perform stratification(mixing) for the FP data, not CNL  ***v***
-# CV=3 for modeling  ***v***
-# try CatBoost
-
 ## 4_MassDomain
 ### DataSplitMatch.jl  ***pending to run***
 #### - step 1: import results from ULSA
