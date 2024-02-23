@@ -118,6 +118,11 @@ savePath = "D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv"
 CSV.write(savePath, dfOutputFP)
 
 # Train/Test Split by Leverage
+using ProgressBars
+using LinearAlgebra
+using ScikitLearn
+using ScikitLearn.CrossValidation: train_test_split
+
 dfOutputFP = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv", DataFrame)
 
 X = deepcopy(dfOutputFP[:, 2:end-1])  # 693685 x 790 df
@@ -127,13 +132,9 @@ size(Y)
 Xmat = Matrix(X)
 
 # 693685 x 693685
-hipinv = zeros(693685,693685)
+hipinv = zeros(790, 790)
 hipinv[:,:] .= pinv(Xmat'*Xmat)
 
-using ProgressBars
-using LinearAlgebra
-using ScikitLearn
-using ScikitLearn.CrossValidation: train_test_split
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
     h = zeros(693685,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
