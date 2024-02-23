@@ -30,178 +30,28 @@ using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: RandomForestClassifier
 
-# inputing 693685 x 4 df
-# columns: SMILES, INCHIKEY, PRECURSOR_ION, CNLmasses...
-inputDB = CSV.read("D:\\0_data\\databaseOfInternal_withNLs.csv", DataFrame)
-sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
+# inputing 693685 x 1...1+15961 df
+CNLsInfo = CSV.read("F:\\databaseOfInternal_withInfoOnly.csv", DataFrame)
 
-# inputing 693685 x 3+1+15961 df
-# columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
-inputCNLs = CSV.read("D:\\0_data\\dataframeCNLsRows.csv", DataFrame)
-sort!(inputCNLs, [:ENTRY])
+# inputing a 693685 x 2 df
+CNLsInfo2 = CSV.read("F:\\databaseOfInternal_withInfoIsotopicMassOnly.csv", DataFrame)
 
-# creating a table with 2 columns
-dfOutput = DataFrame([[],[]], ["INCHIKEY", "FREQUENCY"])
-size(dfOutput)
+# inputing 693685 x 15961 df
+CNLs = CSV.read("F:\\databaseOfInternal_withNLsOnly.csv", DataFrame)
 
-count = 0
-str = inputDB[1, "INCHIKEY"]
-for i in 1:size(inputDB, 1)
-    if (i == size(inputDB, 1))
-        temp = []
-        count += 1
-        push!(temp, inputDB[i, "INCHIKEY"])
-        push!(temp, count)
-        push!(dfOutput, temp)
-    elseif (inputDB[i, "INCHIKEY"] == str)
-        count += 1
-    else
-        temp = []
-        push!(temp, inputDB[i-1, "INCHIKEY"])
-        push!(temp, count)
-        push!(dfOutput, temp)
-        str = inputDB[i, "INCHIKEY"]
-        count = 1
-    end
-end
+# inputing 693685 x 1 df
+CNLsY = CSV.read("F:\\databaseOfInternal_withYOnly.csv", DataFrame)
 
-# 27211 x 2
-dfOutput
-# save
-# output csv is a 27211 x 2 df
-savePath = "D:\\0_data\\countingRows4Leverage.csv"
-CSV.write(savePath, dfOutput)
+### inputing Index for Train/Test Split
+# 485579 x 1
+X_trainIdxDf = CSV.read("F:\\dataframe_dfTrainSetWithStratification_index.csv", DataFrame)
+X_trainIdx = X_trainIdxDf[:, "INDEX"]
 
-# comparing, 30684 x 793 df
-inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
-sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
+# 208106 x 1
+X_testIdxDf = CSV.read("F:\\dataframe_dfTestSetWithStratification_index.csv", DataFrame)
+X_testIdx = X_testIdxDf[:, "INDEX"]
 
-# creating a table with 2 columns
-dfOutput2 = DataFrame([[],[]], ["INCHIKEY", "FREQUENCY"])
-size(dfOutput2)
 
-count = 0
-str = inputAllFPDB[1, "INCHIKEY"]
-for i in 1:size(inputAllFPDB, 1)
-    if (i == size(inputAllFPDB, 1))
-        temp = []
-        count += 1
-        push!(temp, inputAllFPDB[i, "INCHIKEY"])
-        push!(temp, count)
-        push!(dfOutput2, temp)
-    elseif (inputAllFPDB[i, "INCHIKEY"] == str)
-        count += 1
-    else
-        temp = []
-        push!(temp, inputAllFPDB[i-1, "INCHIKEY"])
-        push!(temp, count)
-        push!(dfOutput2, temp)
-        str = inputAllFPDB[i, "INCHIKEY"]
-        count = 1
-    end
-end
-
-# 28536 x 2
-dfOutput2
-# save
-# output csv is a 28536 x 2 df
-savePath = "D:\\0_data\\countingRowsInFP4Leverage.csv"
-CSV.write(savePath, dfOutput2)
-
-# creating FP df taking frequency into accounut
-# creating a table with 1+FPs+Ri columns
-dfOutputFP = DataFrame([[]], ["INCHIKEY"])
-for col in names(inputAllFPDB)[3:end]
-    dfOutputFP[:, col] = []
-end
-size(dfOutputFP)  # 0 x 792
-
-for ID in 1:size(dfOutput, 1)
-    println(ID)
-    for i = 1:dfOutput[ID, "FREQUENCY"]
-        temp = []
-        push!(temp, dfOutput[ID, "INCHIKEY"])
-        rowNo = findall(inputAllFPDB.INCHIKEY .== dfOutput[ID, "INCHIKEY"])[end:end]
-        for col in names(inputAllFPDB)[3:end]
-            push!(temp, inputAllFPDB[rowNo, col][1])
-        end
-        push!(dfOutputFP, temp)
-    end
-end
-
-# 693685 x 1+790+1 df
-dfOutputFP
-# save
-# output csv is a 693685 x 792 df
-savePath = "D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv"
-CSV.write(savePath, dfOutputFP)
-
-# Train/Test Split by Leverage
-using ProgressBars
-using LinearAlgebra
-using ScikitLearn
-using ScikitLearn.CrossValidation: train_test_split
-
-dfOutputFP = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv", DataFrame)
-
-X = deepcopy(dfOutputFP[:, 2:end-1])  # 693685 x 790 df
-size(X)
-Y = deepcopy(dfOutputFP[:, end])  #693685,
-size(Y)
-Xmat = Matrix(X)
-
-# 693685 x 693685
-hipinv = zeros(790, 790)
-hipinv[:,:] .= pinv(Xmat'*Xmat)
-
-function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zeros(693685,1)
-    for i in ProgressBar(1: size(X,1)) #check dimensions
-        x = X[i,:]
-        #hi = x'*pinv(X'*X)*x
-        hi = x'* hipinv *x
-        #push!(h,hi)
-        h[i,1] = hi
-    end
-    return h
-end
-
-h = leverage_dist(Matrix(X))
-ht = Vector(transpose(h)[1,:])
-
-function strat_split(leverage=ht; limits = limits)
-    n = length(leverage)
-    bin = collect(1:n)
-    for i = 1: (length(limits)-1)
-        bin[limits[i] .<= leverage] .= i
-    end
-    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.30, random_state = 42, stratify = bin)
-    return  X_train, X_test, y_train, y_test
-end
-
-X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(ht, limits = collect(0.0:0.2:1))
-
-dfOutputFP[!, "GROUP"] .= ""
-dfOutputFP[!, "Leverage"] .= float(0)
-dfOutputFP[X_trainIdx, "GROUP"] .= "train"  # 0.7 > 485579
-dfOutputFP[X_testIdx, "GROUP"] .= "test"  # 0.3 > 208106
-
-count = 1
-for i in X_trainIdx
-    dfOutputFP[i, "Leverage"] = train_lev[count]
-    count += 1
-end
-
-count = 1
-for i in X_testIdx
-    dfOutputFP[i, "Leverage"] = test_lev[count]
-    count += 1
-end
-
-# output csv is a 693685 x 1+790+1+2 df
-dfOutputFP
-savePath = "D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_FreqAndLeverage.csv"
-CSV.write(savePath, dfOutputFP)
 
 function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, RiCol = true)
     #X_train_ind, X_test_ind, train_lev, test_lev = strat_split(leverage, limits = limits)
@@ -219,31 +69,23 @@ function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, 
     return  X_trainFP, X_testFP
 end
 
-# 485579 x 790
-X_trainFP, X_testFP, Y_trainFPRi, Y_testFPRi = create_train_test_split_strat(X, Y, X_trainIdx, X_testIdx, true)
+X_trainInfo, X_testInfo = create_train_test_split_strat(CNLsInfo, CNLsInfo, X_trainIdx, X_testIdx, false)
 
-# 693685 x 3+1+15961
-inputCNLs
-
-# 693685 x 15962
-CNLs = deepcopy(inputCNLs[:, 4:end])
-size(CNLs)
+X_trainInfo2, X_testInfo2 = create_train_test_split_strat(CNLsInfo2, CNLsInfo2, X_trainIdx, X_testIdx, false)
 
 X_trainCNL, X_testCNL = create_train_test_split_strat(CNLs, CNLs, X_trainIdx, X_testIdx, false)
 
-df_info = hcat(inputCNLs[:, 1:1], dfOutputFP[:,1:2])
-df_info  # 693685 x 3
-# 485579 x 3
-X_trainInfo, X_testInfo = create_train_test_split_strat(df_info, df_info, X_trainIdx, X_testIdx, false)
+Y_trainFPRi, Y_testFPRi = create_train_test_split_strat(CNLsY, CNLsY, X_trainIdx, X_testIdx, false)
 
-dfTrainSetWithStratification = hcat(X_trainInfo, X_trainCNL, Y_trainFPRi)
+
+dfTrainSetWithStratification = hcat(X_trainInfo, X_trainInfo2, X_trainCNL, Y_trainFPRi)
 dfTrainSetWithStratification
 # output csv is a 693685*0.7 x 3+1+15961+1 df = 485579 x 15966
-savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification.csv"
+savePath = "F:\\dataframe_dfTrainSetWithStratification.csv"
 CSV.write(savePath, dfTrainSetWithStratification)
 
-dfTestSetWithStratification = hcat(X_testInfo, X_testCNL, Y_testFPRi)
+dfTestSetWithStratification = hcat(X_testInfo, X_testInfo2, X_testCNL, Y_testFPRi)
 dfTestSetWithStratification
 # output csv is a 693685*0.3 x 3+1+15961+1 df = 208106 x 15966
-savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification.csv"
+savePath = "F:\\dataframe_dfTestSetWithStratification.csv"
 CSV.write(savePath, dfTestSetWithStratification)
