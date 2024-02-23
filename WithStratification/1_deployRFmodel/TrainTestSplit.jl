@@ -31,10 +31,10 @@ using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestClassifier
 
 # inputing 693685 x 1 df
-CNLsInfo = CSV.read("F:\\databaseOfInternal_withInfoOnly.csv", DataFrame)
+CNLsInfo = CSV.read("F:\\databaseOfInternal_withEntryInfoOnly.csv", DataFrame)
 
 # inputing a 693685 x 1 df
-CNLsInfo2 = CSV.read("F:\\databaseOfInternal_withInfoIsotopicMassOnly.csv", DataFrame)
+CNLsInfo2 = CSV.read("F:\\databaseOfInternal_withINCHIKEYInfoOnly.csv", DataFrame)
 
 # inputing 693685 x 1+15961 df
 CNLs = CSV.read("F:\\databaseOfInternal_withNLsOnly.csv", DataFrame)
