@@ -20,15 +20,18 @@ using ProgressBars
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
 #Conda.add("joblib")
+Conda.add("sklearn.metrics")
 ## import packages ##
 #using PyCall, Conda                 #using python packages
 pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")            #calculation of FP
 jl = pyimport("joblib")             # used for loading models
+sklearnmetrics = pyimport("sklearn.metrics")
 
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: RandomForestClassifier
+@sk_import metrics: recall_score
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
@@ -215,7 +218,7 @@ function optimRandomForestClassifier(df_train, df_test)
     leaf_r = collect(8:8:32)
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
     tree_r = collect(50:50:300)
-    z = zeros(1,8)
+    z = zeros(1,11)
     itr = 1
     for l in leaf_r
         for t in tree_r
@@ -245,6 +248,10 @@ function optimRandomForestClassifier(df_train, df_test)
                     z[1,5] = avgAcc(acc5_train, 3)
                     z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
                     z[1,7] = score(reg, Matrix(xx_test), Vector(yy_test))
+                    z[1,8] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+                    z[1,9] = f1_score(Vector(yy_test), predict(reg, Matrix(xx_test)))
+                    z[1,10] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+                    z[1,11] = matthews_corrcoef(Vector(yy_test), predict(reg, Matrix(xx_test)))
                     println(z)
                 else
                     println("## CV ##")
@@ -254,7 +261,11 @@ function optimRandomForestClassifier(df_train, df_test)
                     traincvtrain = avgAcc(acc5_train, 3) 
                     ival = score(reg, Matrix(Xx_val), Vector(Yy_val)) 
                     etest = score(reg, Matrix(xx_test), Vector(yy_test))
-                    z = vcat(z, [l t state itrain traintrain traincvtrain ival etest])
+                    f1Val = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+                    f1Test = f1_score(Vector(yy_test), predict(reg, Matrix(xx_test)))
+                    mccVal = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+                    mccTest = matthews_corrcoef(Vector(yy_test), predict(reg, Matrix(xx_test)))
+                    z = vcat(z, [l t state itrain traintrain traincvtrain ival etest f1Val f1Test mccVal mccTest])
                     println(z)
                 end
                 #println("End of $itr iterations")
@@ -262,8 +273,8 @@ function optimRandomForestClassifier(df_train, df_test)
             end
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], state=z[:,3], accuracy_3Ftrain = z[:,4], accuracy_train = z[:,5], avgAccuracy3FCV_train = z[:,6], accuracy_val = z[:,7],  accuracy_ext_test = z[:,8])
-    z_df_sorted = sort(z_df, [:accuracy_ext_test, :accuracy_val, :avgAccuracy3FCV_train, :accuracy_train, :accuracy_3Ftrain], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], state=z[:,3], accuracy_3Ftrain = z[:,4], accuracy_train = z[:,5], avgAccuracy3FCV_train = z[:,6], accuracy_val = z[:,7], F1_val = z[:,8] F1_test = z[:,9] MCC_val = z[:,10] MCC_test = z[:,11])
+    z_df_sorted = sort(z_df, [:MCC_test, :F1_test, :MCC_val, :F1_val], rev=true)
     return z_df_sorted
 end
 
@@ -306,6 +317,9 @@ jl.dump(model, modelSavePath, compress = 5)
 # training performace, CNL-predictedRi vs. FP-predictedRi
 predictedY_train = predict(model, Matrix(dfTrainSet[:, 2:end-1]))
 dfTrainSet[!, "LABEL"] = predictedY_train
+pTP_train = predict_proba(model, Matrix(dfTrainSet[:, 2:end-1]))
+f1_train = f1_score(Vector(dfTrainSet[:, end]), predictedY_train)
+mcc_train = matthews_corrcoef(Vector(dfTrainSet[:, end]), predictedY_train)
 # save, ouputing trainSet df 0.7 x (3+15994+1)
 savePath = "D:\\dataframe_TPTNdfTrainSet_withPredictedY.csv"
 CSV.write(savePath, dfTrainSet)
@@ -325,6 +339,9 @@ size(modelRF_TPTN)
 
 predictedY_test = predict(modelRF_TPTN, Matrix(dfTestSet[:, 2:end-1]))
 dfTestSet[!, "LABEL"] = predictedY_test
+pTP_test = predict_proba(modelRF_TPTN, Matrix(dfTestSet[:, 2:end-1]))
+f1_test = f1_score(Vector(dfTestSet[:, end]), predictedY_test)
+mcc_test = matthews_corrcoef(Vector(dfTestSet[:, end]), predictedY_test)
 # save, ouputing testSet df 0.3 x (3+15994+1)
 savePath = "D:\\dataframe_TPTNdfTestSet_withPredictedY.csv"
 CSV.write(savePath, dfTestSet)
