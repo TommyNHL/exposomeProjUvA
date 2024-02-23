@@ -20,7 +20,7 @@ CSV.write(savePath, CNLsInfo)
 # ==============================================================================
 # inputing a 693685 x 792 df
 dfOutputFP = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv", DataFrame)
-CNLsInfo2 = deepcopy(dfOutputFP[:, 1:2])
+CNLsInfo2 = deepcopy(dfOutputFP[:, 1:1])
 savePath = "F:\\databaseOfInternal_withInfoIsotopicMassOnly.csv"
 CSV.write(savePath, CNLsInfo2)
 
