@@ -240,8 +240,18 @@ sort!(inputCocamidesTrain, :SMILES)
 inputCocamidesTest = CSV.read("D:\\0_data\\CocamideExtWithStartification_Fingerprints_test.csv", DataFrame)
 sort!(inputCocamidesTest, :SMILES)
 
+# comparing, 30684 x 793 df
+inputAllFPDB = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
+
+function id2id(plotdf, i)
+    inchikeyID = plotdf[i, "INCHIKEY"]
+    idx = findall(inputAllFPDB.INCHIKEY .== inchikeyID)
+    return inputAllFPDB[idx[end:end], "SMILES"][1]
+end
+
 function cocamidesOrNot(plotdf, i)
-    if (plotdf[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || plotdf[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
+    if (id2id(plotdf, i) in Array(inputCocamidesTrain[:, "SMILES"]) || id2id(plotdf, i) in Array(inputCocamidesTest[:, "SMILES"]))
         return true
     else
         return false
