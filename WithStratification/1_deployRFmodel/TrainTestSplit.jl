@@ -238,12 +238,12 @@ X_trainInfo, X_testInfo = create_train_test_split_strat(df_info, df_info, X_trai
 
 dfTrainSetWithStratification = hcat(X_trainInfo, X_trainCNL, Y_trainFPRi)
 dfTrainSetWithStratification
-# output csv is a 693685*0.7 x 3+1+15961+1 df = 485579 x 19566
+# output csv is a 693685*0.7 x 3+1+15961+1 df = 485579 x 15966
 savePath = "D:\\0_data\\dataframe_dfTrainSetWithStratification.csv"
 CSV.write(savePath, dfTrainSetWithStratification)
 
 dfTestSetWithStratification = hcat(X_testInfo, X_testCNL, Y_testFPRi)
 dfTestSetWithStratification
-# output csv is a 693685*0.3 x 3+1+15961+1 df = 208106 x 19566
+# output csv is a 693685*0.3 x 3+1+15961+1 df = 208106 x 15966
 savePath = "D:\\0_data\\dataframe_dfTestSetWithStratification.csv"
 CSV.write(savePath, dfTestSetWithStratification)
