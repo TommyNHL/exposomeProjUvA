@@ -183,14 +183,15 @@ X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(ht, limits = collect(0.
 
 dfOutputFP[!, "GROUP"] .= ""
 dfOutputFP[!, "Leverage"] .= float(0)
-dfOutputFP[X_trainIdx, "GROUP"] .= "train"
-dfOutputFP[X_testIdx, "GROUP"] .= "test"
+dfOutputFP[X_trainIdx, "GROUP"] .= "train"  # 0.7 > 485579
+dfOutputFP[X_testIdx, "GROUP"] .= "test"  # 0.3 > 208106
 
 count = 1
 for i in X_trainIdx
     dfOutputFP[i, "Leverage"] = train_lev[count]
     count += 1
 end
+
 count = 1
 for i in X_testIdx
     dfOutputFP[i, "Leverage"] = test_lev[count]
@@ -198,6 +199,7 @@ for i in X_testIdx
 end
 
 # output csv is a 693685 x 1+790+1+2 df
+dfOutputFP
 savePath = "D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification_FreqAndLeverage.csv"
 CSV.write(savePath, dfOutputFP)
 
@@ -217,6 +219,7 @@ function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, 
     return  X_trainFP, X_testFP
 end
 
+# 485579 x 790
 X_trainFP, X_testFP, Y_trainFPRi, Y_testFPRi = create_train_test_split_strat(X, Y, X_trainIdx, X_testIdx, true)
 
 inputCNLs
