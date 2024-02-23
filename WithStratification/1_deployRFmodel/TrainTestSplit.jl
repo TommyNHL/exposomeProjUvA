@@ -1,15 +1,34 @@
+VERSION
 using Pkg
-#Pkg.add("BSON")
+#Pkg.add("ScikitLearn")
+#Pkg.add("Plots")
+#Pkg.add("ProgressBars")
+import Conda
+Conda.PYTHONDIR
+ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+Pkg.build("PyCall")
+Pkg.status()
 #Pkg.add(PackageSpec(url=""))
-#using BSON
-using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
+using Random
+using BSON
+using CSV, DataFrames, Conda, LinearAlgebra, Statistics
+using PyCall
+using StatsPlots
+using Plots
+using ProgressBars
+#using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
 #Conda.add("joblib")
 ## import packages ##
+#using PyCall, Conda                 #using python packages
 #pcp = pyimport("pubchempy")
-#pd = pyimport("padelpy")
-#jl = pyimport("joblib")
+pd = pyimport("padelpy")            #calculation of FP
+jl = pyimport("joblib")             # used for loading models
+
+using ScikitLearn  #: @sk_import, fit!, predict
+@sk_import ensemble: RandomForestRegressor
+@sk_import ensemble: RandomForestClassifier
 
 # inputing 693685 x 4 df
 # columns: SMILES, INCHIKEY, PRECURSOR_ION, CNLmasses...
@@ -148,22 +167,25 @@ function leverage_dist(X)   # Set x1 and x2 to your FPs variables
 end
 
 h = leverage_dist(Matrix(X))
+ht = Vector(transpose(h)[1,:])
 
-function strat_split(leverage=h; limits = limits)
+function strat_split(leverage=ht; limits = limits)
     n = length(leverage)
     bin = collect(1:n)
     for i = 1: (length(limits)-1)
-        bin[limits[i].<= leverage].= i
+        bin[limits[i] .<= leverage] .= i
     end
-    X_train, X_test, y_train, y_test = train_test_split(collect(1:length(leverage)), leverage, test_size = 0.30, random_state = 42, stratify = bin)
+    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.30, random_state = 42, stratify = bin)
     return  X_train, X_test, y_train, y_test
 end
 
-X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(h, limits = collect(0.0:0.2:1))
+X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(ht, limits = collect(0.0:0.2:1))
+
 dfOutputFP[!, "GROUP"] .= ""
 dfOutputFP[!, "Leverage"] .= float(0)
 dfOutputFP[X_trainIdx, "GROUP"] .= "train"
 dfOutputFP[X_testIdx, "GROUP"] .= "test"
+
 count = 1
 for i in X_trainIdx
     dfOutputFP[i, "Leverage"] = train_lev[count]
