@@ -10,11 +10,11 @@
 ####           -> new .csv
 
 ## 1_deployRFmodel (folder)
-### ModelDeploy4FPbasedRi.jl  ***re-predict***
+### ModelDeploy4FPbasedRi.jl  ***done***
 #### - step 1: load the pre-train RF-based model- CocamideExtended.joblib
 #### - step 2: predict the FP-derived Ri values
 ####           -> new .csv
-### TrainTestSplit.jl  ***running***
+### DfPre4FPs.jl  ***done***
 #### - step 1: find distinct INCHIKEYs
 ####           -> new .csv
 ####           -> new .csv
@@ -22,10 +22,21 @@
 ####           -> new .csv
 #### - step 3: creat a FP df after taking INCHIKEY frequency into account
 ####           -> new .csv
-#### - step 4: calculate leverage value
+### TrainTestSplitPre.jl  ***done***
+#### - step 4: extract column-of-interests for CNL df construction
 ####           -> new .csv
-#### - step 5: perform 7:3 train/test split by index
-#### - step 6: gather and join ID informaiton and FP and FP-Ri
+####           -> new .csv
+####           -> new .csv
+####           -> new .csv
+### LeverageGetIdx.jl  ***done***
+#### - step 5: calculate leverage value
+#### - step 6: record leverage value and train/test group information
+####           -> new .csv
+####           -> new .csv
+####           -> new .csv
+### TrainTestSplit.jl  ***done***
+#### - step 7: perform 7:3 train/test split by index
+#### - step 8: gather and join ID informaiton and FP and FP-Ri
 ####           -> new .csv
 ####           -> new .csv
 
@@ -65,7 +76,8 @@
 ####           -> new .csv
 ####           -> new performance metrics
 ####           -> new performance metrics
-#### - step 6: plot scatter plots for Cocamides & Non-Cocamides
+#### - step 6: match SMILES ID to each INCHIKEY ID
+#### - step 7: plot scatter plots for Cocamides & Non-Cocamides via SMILES ID
 ####           -> new .png
 ####           -> new .png
 ### CNLmodelTest.jl  ***old version***
@@ -84,10 +96,10 @@
 ####           -> new .csv
 #### - step 5: calculate and join delta Ri
 ####           -> new .csv
-### TNRemoval.jl  ***pending to run***
+### TNRemoval.jl  ***skipped***
 #### - step 6: remove a portion of rows of TN by leverage values
 ####           -> new .csv
-### TPTNmodelTrainValTest.jl  ***working***
+### TPTNmodelTrainValTest.jl  ***pending to run***
 #### - step 7: split the table for train & test by leverage values ***new version***
 #### - step 8: tune hyper-parameters via CV = 3
 #### - step 9: train model
@@ -97,6 +109,7 @@
 ####           -> new .csv
 ####           -> new performance metrics
 ####           -> new performance metrics
-#### - step 12: plot scatter plots for Cocamides & Non-Cocamides
+#### - step 12: match SMILES ID to each INCHIKEY ID
+#### - step 13: plot scatter plots for Cocamides & Non-Cocamides via SMILES ID
 ####           -> new .png
 ####           -> new .png

@@ -34,27 +34,36 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 693677 x 3+21567 df
-# columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
-inputTPTNdf = CSV.read("D:\\dataframe_dfTPTNfinalSet4TrainValTest", DataFrame)
+# inputing 693677 x 1+8+1+1 df
+# columns: "INCHIKEY_ID", "RefMatchFrag", "UsrMatchFrag", "MS1Error", "MS2Error", "MS2ErrorStd", 
+    #"DirectMatch", "ReversMatch", "FinalScore", "DeltaRi", "LABEL"
+#= inputTPTNdf = CSV.read("D:\\dataframe_dfTPTNfinalSet4TrainValTest", DataFrame)
+sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID, :DeltaRi, :FinalScore]) =#
+inputTPTNdf = CSV.read("D:\\Cand_search_rr0_0612_TEST_100-400_extractedWithDeltaRi", DataFrame)
 sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID, :DeltaRi, :FinalScore])
 
 # Train/Test Split by Leverage
-## calculating how large the portion of TN is needed to be removed
-X = deepcopy(inputTPTNdf[:, 2:end-1])  # 693677 x 790 df
-size(X)
-Y = deepcopy(inputTPTNdf[:, end])  #693677,
-size(Y)
-
 using ProgressBars
 using LinearAlgebra
 using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
+
+X = deepcopy(inputTPTNdf[:, 2:end-1])  # 693677 x 790 df
+size(X)
+Y = deepcopy(inputTPTNdf[:, end])  #693677,
+size(Y)
+Xmat = Matrix(X)
+
+# 9 x 9
+hipinv = zeros(9, 9)
+hipinv[:,:] .= pinv(Xmat'*Xmat)
+
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
     h = zeros(xxx,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:] 
-        hi = x'*pinv(X'*X)*x
+        #hi = x'*pinv(X'*X)*x
+        hi = x'* hipinv *x
         #push!(h,hi)
         h[i,1] = hi
     end
@@ -62,6 +71,7 @@ function leverage_dist(X)   # Set x1 and x2 to your FPs variables
 end
 
 h = leverage_dist(Matrix(X))
+ht = Vector(transpose(h)[1,:])
 
 function strat_split(leverage=h; limits = limits)
     n = length(leverage)
@@ -76,20 +86,23 @@ end
 X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(h, limits = collect(0.0:0.2:1))
 inputTPTNdf[!, "GROUP"] .= ""
 inputTPTNdf[!, "Leverage"] .= float(0)
-inputTPTNdf[X_trainIdx, "GROUP"] .= "train"
-inputTPTNdf[X_testIdx, "GROUP"] .= "test"
+inputTPTNdf[X_trainIdx, "GROUP"] .= "train"  # 0.7 > 485579
+inputTPTNdf[X_testIdx, "GROUP"] .= "test"  # 0.3 > 208106
+
 count = 1
 for i in X_trainIdx
   inputTPTNdf[i, "Leverage"] = train_lev[count]
     count += 1
 end
+
 count = 1
 for i in X_testIdx
   inputTPTNdf[i, "Leverage"] = test_lev[count]
     count += 1
 end
 
-# output csv is a 693677 x 3+790+2 df
+# output csv is a 693677 x 1+9+1+2 df
+inputTPTNdf
 savePath = "D:\\dataframe_dfTPTNfinalSet4TrainValTest_withLeverage.csv"
 CSV.write(savePath, inputTPTNdf)
 
@@ -109,9 +122,9 @@ function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, 
     return  X_trainTPTN, X_testTPTN
 end
 
-X_trainTPTN, X_testTPTN, Y_trainLabel, Y_testLabel = create_train_test_split_strat(X, Y, X_trainIdx, X_testIdx, true)
-
 inputTPTNdf
+
+X_trainTPTN, X_testTPTN, Y_trainLabel, Y_testLabel = create_train_test_split_strat(X, Y, X_trainIdx, X_testIdx, true)
 
 df_info = inputTPTNdf[:, 1:1]
 df_info
@@ -197,7 +210,7 @@ function avgAcc(arrAcc, cv)
 end
 
 # modeling, 4 x 6 x 3 times
-function optimRandomForestRegressor(df_train, df_test)
+function optimRandomForestClassifier(df_train, df_test)
     #leaf_r = [collect(4:2:10);15;20]
     leaf_r = collect(8:8:32)
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
@@ -218,7 +231,7 @@ function optimRandomForestRegressor(df_train, df_test)
                 xx_test = deepcopy(df_test[:, 2:end-1])
                 yy_test = deepcopy(df_test[:, end])
                 println("## Regression ##")
-                reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+                reg = RandomForestClassifier(class_weight={0: 1, 1: w}, n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
                 println("## fit ##")
                 fit!(reg, Matrix(Xx_train), Vector(Yy_train))
                 if itr == 1
@@ -254,7 +267,7 @@ function optimRandomForestRegressor(df_train, df_test)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestRegressor(dfTrainSet, dfTestSet)
+optiSearch_df = optimRandomForestClassifier(dfTrainSet, dfTestSet)
 
 # save, ouputing 72 x 8 df
 savePath = "D:\\hyperparameterTuning_dfTPTN.csv"
@@ -274,7 +287,8 @@ gridsearch = GridSearchCV(model, param_dist)
 @time fit!(gridsearch, Matrix(x_train), Vector(y_train))
 println("Best parameters: $(gridsearch.best_params_)") =#
 
-model = RandomForestRegressor(
+model = RandomForestClassifier(
+      class_weight={0: 1, 1: w}, 
       n_estimators = 300, 
       #max_depth = 10, 
       min_samples_leaf = 8, 

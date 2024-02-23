@@ -16,7 +16,7 @@ Y = deepcopy(dfOutputFP[:, end])  #693685,
 size(Y)
 Xmat = Matrix(X)
 
-# 693685 x 693685
+# 790 x 790
 hipinv = zeros(790, 790)
 hipinv[:,:] .= pinv(Xmat'*Xmat)
 
