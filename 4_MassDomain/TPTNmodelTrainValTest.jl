@@ -231,7 +231,7 @@ function optimRandomForestClassifier(df_train, df_test)
                 xx_test = deepcopy(df_test[:, 2:end-1])
                 yy_test = deepcopy(df_test[:, end])
                 println("## Regression ##")
-                reg = RandomForestClassifier(class_weight={0: 1, 1: w}, n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+                reg = RandomForestClassifier(class_weight={0: 2, 1: 1}, n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
                 println("## fit ##")
                 fit!(reg, Matrix(Xx_train), Vector(Yy_train))
                 if itr == 1
@@ -288,7 +288,7 @@ gridsearch = GridSearchCV(model, param_dist)
 println("Best parameters: $(gridsearch.best_params_)") =#
 
 model = RandomForestClassifier(
-      class_weight={0: 1, 1: w}, 
+      class_weight={0: 2, 1: 1}, 
       n_estimators = 300, 
       #max_depth = 10, 
       min_samples_leaf = 8, 
@@ -346,8 +346,18 @@ sort!(inputCocamidesTrain, :SMILES)
 inputCocamidesTest = CSV.read("D:\\0_data\\CocamideExtWithStartification_Fingerprints_test.csv", DataFrame)
 sort!(inputCocamidesTest, :SMILES)
 
+# comparing, 30684 x 793 df
+inputAllFPDB = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
+
+function id2id(plotdf, i)
+    inchikeyID = plotdf[i, "INCHIKEY"]
+    idx = findall(inputAllFPDB.INCHIKEY .== inchikeyID)
+    return inputAllFPDB[idx[end:end], "SMILES"][1]
+end
+
 function cocamidesOrNot(plotdf, i)
-    if (plotdf[i, "SMILES"] in Array(inputCocamidesTrain[:, "SMILES"]) || plotdf[i, "SMILES"] in Array(inputCocamidesTest[:, "SMILES"]))
+    if (id2id(plotdf, i) in Array(inputCocamidesTrain[:, "SMILES"]) || id2id(plotdf, i) in Array(inputCocamidesTest[:, "SMILES"]))
         return true
     else
         return false
