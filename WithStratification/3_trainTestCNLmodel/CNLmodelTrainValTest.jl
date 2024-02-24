@@ -115,7 +115,7 @@ function optimRandomForestRegressor(df_train, df_test)
         for t in tree_r
             for state = 1:3
                 println("itr=", itr, ", leaf=", l, ", tree=", t, ", s=", state)
-                MaxFeat = Int64((ceil(size(df_train,2)-1)/3))
+                MaxFeat = Int64(ceil((size(df_train,2)-1)/3))
                 println("## split ##")
                 M_train, M_val = partitionTrainVal(df_train, 0.67)
                 Xx_train = deepcopy(M_train[:, 3:end-1])
