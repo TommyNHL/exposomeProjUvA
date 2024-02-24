@@ -224,7 +224,7 @@ function optimRandomForestClassifier(df_train, df_test)
         for t in tree_r
             for state = 1:3
                 println("itr=", itr, ", leaf=", l, ", tree=", t, ", s=", state)
-                MaxFeat = Int64((ceil(size(df_train,2)-1)/3))
+                MaxFeat = Int64(ceil((size(df_train,2)-1)/3))
                 println("## split ##")
                 M_train, M_val = partitionTrainVal(df_train, 0.67)
                 Xx_train = deepcopy(M_train[:, 2:end-1])
@@ -289,7 +289,7 @@ param_dist = Dict(
       "n_estimators" => 50:50:300, 
       #"max_depth" => 2:2:10, 
       "min_samples_leaf" => 8:8:32, 
-      "max_features" => [Int64(ceil(size(x_train,2)/3))], 
+      "max_features" => [Int64(ceil((size(x_train,2)-1)/3))], 
       "n_jobs" => [-1], 
       "oob_score" => [true], 
       "random_state" => [1]
@@ -303,7 +303,7 @@ model = RandomForestClassifier(
       n_estimators = 300, 
       #max_depth = 10, 
       min_samples_leaf = 8, 
-      max_features = Int64(ceil(size(x_train,2)/3)), 
+      max_features = Int64(ceil((size(x_train,2)-1)/3)), 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42
