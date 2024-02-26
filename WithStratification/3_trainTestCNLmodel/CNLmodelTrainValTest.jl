@@ -10,12 +10,12 @@ Pkg.build("PyCall")
 Pkg.status()
 #Pkg.add(PackageSpec(url=""))
 using Random
-using BSON
+#using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-using ProgressBars
+#using ProgressBars
 #using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
@@ -32,7 +32,7 @@ using ScikitLearn  #: @sk_import, fit!, predict
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
-using ScikitLearn.GridSearch: GridSearchCV
+#using ScikitLearn.GridSearch: GridSearchCV
 
 # inputing 693685*0.3 x 1+1+1+15961+1 df = 208106 x 15965
 # columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi
@@ -103,65 +103,58 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 6 x 10 x 3 = 180 times
-function optimRandomForestRegressor(df_train, df_test)
+# modeling, 6 x 6 = 36 times
+function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
     leaf_r = vcat(collect(4:2:8), collect(12:4:20))
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
-    tree_r = vcat(collect(50:50:400), collect(500:100:600))
-    z = zeros(1,8)
+    tree_r = collect(50:50:300)
+    z = zeros(1,6)
     itr = 1
-    for l in leaf_r
-        for t in tree_r
-            for state = 1:3
-                println("itr=", itr, ", leaf=", l, ", tree=", t, ", s=", state)
-                MaxFeat = Int64(ceil((size(df_train,2)-1)/3))
-                println("## split ##")
-                M_train, M_val = partitionTrainVal(df_train, 0.67)
-                Xx_train = deepcopy(M_train[:, 3:end-1])
-                Yy_train = deepcopy(M_train[:, end])
-                Xx_val = deepcopy(M_val[:, 3:end-1])
-                Yy_val = deepcopy(M_val[:, end])
-                xx_test = deepcopy(df_test[:, 3:end-1])
-                yy_test = deepcopy(df_test[:, end])
-                println("## Regression ##")
-                reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
-                println("## fit ##")
-                fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-                if itr == 1
-                    z[1,1] = l
-                    z[1,2] = t
-                    z[1,3] = state
-                    z[1,4] = score(reg, Matrix(Xx_train), Vector(Yy_train))
-                    z[1,5] = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
-                    println("## CV ##")
-                    acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
-                    z[1,5] = avgAcc(acc5_train, 3)
-                    z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
-                    z[1,7] = score(reg, Matrix(xx_test), Vector(yy_test))
-                    println(z)
-                else
-                    println("## CV ##")
-                    itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
-                    traintrain = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
-                    acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
-                    traincvtrain = avgAcc(acc5_train, 3) 
-                    ival = score(reg, Matrix(Xx_val), Vector(Yy_val)) 
-                    etest = score(reg, Matrix(xx_test), Vector(yy_test))
-                    z = vcat(z, [l t state itrain traintrain traincvtrain ival etest])
-                    println(z)
-                end
-                #println("End of $itr iterations")
-                itr += 1
-            end
+    while itr < 6
+        l = rand(leaf_r)
+        t = rand(tree_r)
+        println("itr=", itr, ", leaf=", l, ", tree=", t)
+        MaxFeat = Int64(ceil((size(df_train,2)-1)/3))
+        println("## split ##")
+        M_train, M_val = partitionTrainVal(df_train, 0.67)
+        Xx_train = deepcopy(M_train[:, 3:end-1])
+        Yy_train = deepcopy(M_train[:, end])
+        Xx_val = deepcopy(M_val[:, 3:end-1])
+        Yy_val = deepcopy(M_val[:, end])
+        println("## Regression ##")
+        reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+        println("## fit ##")
+        fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+        if itr == 1
+            z[1,1] = l
+            z[1,2] = t
+            z[1,3] = score(reg, Matrix(Xx_train), Vector(Yy_train))
+            z[1,4] = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
+            println("## CV ##")
+            acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
+            z[1,5] = avgAcc(acc5_train, 3)
+            z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
+            println(z[end, :])
+        else
+            println("## CV ##")
+            itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
+            traintrain = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
+            acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
+            traincvtrain = avgAcc(acc5_train, 3) 
+            ival = score(reg, Matrix(Xx_val), Vector(Yy_val)) 
+            z = vcat(z, [l t itrain traintrain traincvtrain ival])
+            println(z[end, :])
         end
+        println("End of ", itr, " iterations")
+        itr += 1
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], state=z[:,3], accuracy_3Ftrain = z[:,4], accuracy_train = z[:,5], avgAccuracy3FCV_train = z[:,6], accuracy_val = z[:,7],  accuracy_ext_test = z[:,8])
-    z_df_sorted = sort(z_df, [:accuracy_ext_test, :accuracy_val, :avgAccuracy3FCV_train, :accuracy_train, :accuracy_3Ftrain], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], accuracy_3Ftrain = z[:,3], accuracy_train = z[:,4], avgAccuracy3FCV_train = z[:,5], accuracy_val = z[:,6])
+    z_df_sorted = sort(z_df, [:accuracy_val, :avgAccuracy3FCV_train, :accuracy_train, :accuracy_3Ftrain], rev=true)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestRegressor(inputDB, inputDB_test)
+optiSearch_df = optimRandomForestRegressor(inputDB)
 
 # save, ouputing 180 x 8 df
 savePath = "F:\\hyperparameterTuning_RFwithStratification.csv"
@@ -172,7 +165,7 @@ param_dist = Dict(
       "n_estimators" => 50:50:300, 
       #"max_depth" => 2:2:10, 
       "min_samples_leaf" => 8:8:32, 
-      "max_features" => [Int64(ceil(size(x_train,2)/3))], 
+      "max_features" => [Int64(ceil((size(x_train,2)-1)/3))], 
       "n_jobs" => [-1], 
       "oob_score" => [true], 
       "random_state" => [1]
@@ -182,10 +175,10 @@ gridsearch = GridSearchCV(model, param_dist)
 println("Best parameters: $(gridsearch.best_params_)") =#
 
 model = RandomForestRegressor(
-      n_estimators = 300, 
+      n_estimators = 250, 
       #max_depth = 10, 
-      min_samples_leaf = 8, 
-      max_features = Int64(ceil(size(x_train,2)/3)), 
+      min_samples_leaf = 4, 
+      max_features = Int64(ceil((size(inputDB[:, 3:end-1],2)-1)/3)), 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42
@@ -207,8 +200,8 @@ maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end], predict
 rSquare_train = rSquareDetermination(inputDB[:, end], predictedRi_train)
 ## accuracy
 acc1_train = score(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]))
-acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]); cv = 5)
-avgAcc_train = avgAcc(acc5_train, 5)
+acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]); cv = 3)
+avgAcc_train = avgAcc(acc5_train, 3)
 
 # model validation
 #load a model
@@ -226,8 +219,8 @@ maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end], predicte
 rSquare_val = rSquareDetermination(inputDB_test[:, end], predictedRi_test)
 ## accuracy
 acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]), Vector(inputDB_test[:, end]))
-acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]), Vector(inputDB_test[:, end]); cv = 5)
-avgAcc_val = avgAcc(acc5_val, 5)
+acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]), Vector(inputDB_test[:, end]); cv = 3)
+avgAcc_val = avgAcc(acc5_val, 3)
 
 # plots
 # inputing dfs for separation of the cocamides and non-cocamides datasets
