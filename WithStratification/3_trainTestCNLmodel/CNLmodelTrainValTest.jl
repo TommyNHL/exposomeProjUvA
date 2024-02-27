@@ -196,17 +196,18 @@ inputDB[!, "CNLpredictRi"] = predictedRi_train
 savePath = "F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, inputDB)
 
-maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end], predictedRi_train)
-rSquare_train = rSquareDetermination(inputDB[:, end], predictedRi_train)
+maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
+rSquare_train = rSquareDetermination(inputDB[:, end-1], predictedRi_train)
 ## accuracy
-acc1_train = score(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]))
-acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]); cv = 3)
+acc1_train = score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]))
+acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 3)
 avgAcc_train = avgAcc(acc5_train, 3)
 
 # model validation
 #load a model
 # requires python 3.11 or 3.12
 modelRF_CNL = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
+model = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
 size(modelRF_CNL)
 
 predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]))
@@ -215,11 +216,11 @@ inputDB_test[!, "CNLpredictRi"] = predictedRi_test
 savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, inputDB_test)
 
-maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end], predictedRi_test)
-rSquare_val = rSquareDetermination(inputDB_test[:, end], predictedRi_test)
+maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
+rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
 ## accuracy
-acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]), Vector(inputDB_test[:, end]))
-acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]), Vector(inputDB_test[:, end]); cv = 3)
+acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
+acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 3)
 avgAcc_val = avgAcc(acc5_val, 3)
 
 # plots
@@ -287,7 +288,7 @@ savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCoc
 CSV.write(savePath, inputDB_test)
 
 plotTrain = marginalkde(
-        inputDB[:, end], 
+        inputDB[:, end-1], 
         predictedRi_train, 
         xlabel = "FP-derived Ri values", 
         ylabel = "CNL-derived Ri values", 
@@ -297,13 +298,13 @@ plotTrain = marginalkde(
         dpi = 300
         )
 plot!(plotTrain.spmap[:contour], 
-        inputDB[:, end] -> inputDB[:, end], c=:red, 
+        inputDB[:, end-1] -> inputDB[:, end-1], c=:red, 
         label = false, 
         title = "RF Model Training With Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
-scatter!(inputDB[trainCocamide, end], predictedRi_train[trainCocamide], 
+scatter!(inputDB[trainCocamide, end-1], predictedRi_train[trainCocamide], 
         markershape = :star, 
         c = :yellow, 
         label = "Cocamides", 
@@ -311,7 +312,7 @@ scatter!(inputDB[trainCocamide, end], predictedRi_train[trainCocamide],
         size = (600,600), 
         dpi = 300
         )
-scatter!(inputDB[trainNonCocamide, end], predictedRi_train[trainNonCocamide], 
+scatter!(inputDB[trainNonCocamide, end-1], predictedRi_train[trainNonCocamide], 
         markershape = :star, 
         c = :orange, 
         label = "Non-Cocamides", 
@@ -323,7 +324,7 @@ scatter!(inputDB[trainNonCocamide, end], predictedRi_train[trainNonCocamide],
 savefig(plotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification.png")
 
 plotTest = marginalkde(
-        inputDB_test[:, end], 
+        inputDB_test[:, end-1], 
         predictedRi_test, 
         xlabel = "FP-derived Ri values", 
         ylabel = "CNL-derived Ri values", 
@@ -333,13 +334,13 @@ plotTest = marginalkde(
         dpi = 300
         )
 plot!(plotTest.spmap[:contour], 
-        inputDB_test[:, end] -> inputDB_test[:, end], c=:red, 
+        inputDB_test[:, end-1] -> inputDB_test[:, end-1], c=:red, 
         label = false, 
         title = "RF Model Test With Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
-scatter!(inputDB_test[testCocamide, end], predictedRi_test[testCocamide], 
+scatter!(inputDB_test[testCocamide, end-1], predictedRi_test[testCocamide], 
         markershape = :star, 
         c = :yellow, 
         label = "Cocamides", 
@@ -347,7 +348,7 @@ scatter!(inputDB_test[testCocamide, end], predictedRi_test[testCocamide],
         size = (600,600), 
         dpi = 300
         )
-scatter!(inputDB_test[testNonCocamide, end], predictedRi_test[testNonCocamide], 
+scatter!(inputDB_test[testNonCocamide, end-1], predictedRi_test[testNonCocamide], 
         markershape = :star, 
         c = :orange, 
         label = "Non-Cocamides", 
@@ -356,4 +357,4 @@ scatter!(inputDB_test[testNonCocamide, end], predictedRi_test[testNonCocamide],
         dpi = 300
         )
         # Saving
-savefig(plotVal, "F:\\CNLRiPrediction_RFTestWithStratification.png")
+savefig(plotTest, "F:\\CNLRiPrediction_RFTestWithStratification.png")
