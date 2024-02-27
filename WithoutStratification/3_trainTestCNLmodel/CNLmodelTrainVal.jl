@@ -10,19 +10,19 @@ Pkg.build("PyCall")
 Pkg.status()
 #Pkg.add(PackageSpec(url=""))
 using Random
-using BSON
+#using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-using ProgressBars
+#using ProgressBars
 #using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")
 #Conda.add("joblib")
 ## import packages ##
 #using PyCall, Conda                 #using python packages
-pcp = pyimport("pubchempy")
+#pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")            #calculation of FP
 jl = pyimport("joblib")             # used for loading models
 
@@ -32,56 +32,29 @@ using ScikitLearn  #: @sk_import, fit!, predict
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
-using ScikitLearn.GridSearch: GridSearchCV
+#using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 4987 x (3+21567+1)
-# columns: SMILES, INCHIKEY, CNLs, predictRi
-inputDB_test = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOnlyCocamides.csv", DataFrame)
-inputDB = CSV.read("D:\\0_data\\dataframeCNLsRows_dfOutsideCocamides.csv", DataFrame)
+# inputing 693685*0.3 x 1+1+1+15961+1 df = 208106 x 15965
+# columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi
+inputDB_test = CSV.read("F:\\dataframe_dfTestSetWithStratification.csv", DataFrame)
+sort!(inputDB_test, [:ENTRY])
+# inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
+inputDB = CSV.read("F:\\dataframe_dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
-# internal train/test split by Leverage values
-X = deepcopy(inputDB)
-select!(X, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]))
+# internal train/test split
+X = deepcopy(inputDB[:, 3:end-1])
 size(X)
 Y = deepcopy(inputDB[:, end])
 size(Y)
 
-function partitionTrainVal(df, ratio = 0.7)
+function partitionTrainVal(df, ratio = 0.67)
     noOfRow = nrow(df)
     idx = shuffle(1:noOfRow)
     train_idx = view(idx, 1:floor(Int, ratio*noOfRow))
     test_idx = view(idx, (floor(Int, ratio*noOfRow)+1):noOfRow)
     df[train_idx,:], df[test_idx,:]
 end
-
-# give 3+21567+1 = 21571 columns
-trainSet, valSet = partitionTrainVal(inputDB, 0.7)  # 70% train 30% Val/Test
-size(trainSet)
-size(valSet)
-
-# ouputing trainSet df 0.7 x (3+21567+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain_withoutStratification.csv"
-CSV.write(savePath, trainSet)
-
-# ouputing trainSet df 0.3 x (3+21567+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal_withoutStratification.csv"
-CSV.write(savePath, valSet)
-
-# 21571 -> 21567 columns
-## data for model training
-x_train = deepcopy(trainSet)
-select!(x_train, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
-size(x_train)
-y_train = deepcopy(trainSet[:, end])
-size(y_train)
-
-## data for internal model validation
-x_val = deepcopy(valSet)
-select!(x_val, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
-size(x_val)
-y_val = deepcopy(valSet[:, end])
-size(y_val)
 
 # performace
 ## Maximum absolute error
@@ -130,75 +103,61 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 4 x 6 x 3 times
-function optimRandomForestRegressor(df_train, df_val, df_test)
+# modeling, 6 x 6 = 36 times
+function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
-    leaf_r = collect(8:8:32)
+    leaf_r = vcat(collect(4:2:8), collect(12:4:20))
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
     tree_r = collect(50:50:300)
-    z = zeros(1,8)
+    z = zeros(1,6)
     itr = 1
-    for l in leaf_r
-        for t in tree_r
-            for state = 1:3
-                println("itr=", itr, ", leaf=", l, ", tree=", t, ", s=", state)
-                MaxFeat = Int64((ceil(size(df_train,2)-1)/3))
-                println("## split ##")
-                M_train, M_test = partitionTrainVal(df_train, 0.80)
-                Xx_train = deepcopy(M_train)
-                select!(Xx_train, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
-                Yy_train = deepcopy(M_train[:, end])
-                Xx_test = deepcopy(M_test)
-                select!(Xx_test, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]));
-                Yy_test = deepcopy(M_test[:, end])
-                xx_val = deepcopy(df_val)
-                select!(xx_val, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]))
-                yy_val = deepcopy(df_val[:, end])
-                xx_test = deepcopy(inputDB_test)
-                select!(xx_test, Not([:ENTRY, :SMILES, :INCHIKEY, :FPpredictRi]))
-                yy_test = deepcopy(inputDB_test[:, end])
-                #Xx_train, Xx_test, Yy_train, Yy_test = train_test_split(Features, RIs, test_size=0.20, random_state=42)
-                println("## Regression ##")
-                reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
-                println("## fit ##")
-                fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-                if itr == 1
-                    z[1,1] = l
-                    z[1,2] = t
-                    z[1,3] = state
-                    z[1,4] = score(reg, Matrix(Xx_train), Vector(Yy_train))
-                    println("## CV ##")
-                    acc5_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3)
-                    z[1,5] = avgAcc(acc5_train, 3)
-                    z[1,6] = score(reg, Matrix(Xx_test), Vector(Yy_test))
-                    z[1,7] = score(reg, Matrix(xx_val), Vector(yy_val))
-                    z[1,8] = score(reg, Matrix(xx_test), Vector(yy_test))
-                    println(z)
-                else
-                    println("## CV ##")
-                    itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
-                    acc5_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3)
-                    icvtrain = avgAcc(acc5_train, 3) 
-                    itest = score(reg, Matrix(Xx_test), Vector(Yy_test)) 
-                    ival = score(reg, Matrix(xx_val), Vector(yy_val)) 
-                    etest = score(reg, Matrix(xx_test), Vector(yy_test))
-                    z = vcat(z, [l t state itrain icvtrain itest ival etest])
-                    println(z)
-                end
-                #println("End of $itr iterations")
-                itr += 1
-            end
+    while itr < 6
+        l = rand(leaf_r)
+        t = rand(tree_r)
+        println("itr=", itr, ", leaf=", l, ", tree=", t)
+        MaxFeat = Int64(ceil((size(df_train,2)-1)/3))
+        println("## split ##")
+        M_train, M_val = partitionTrainVal(df_train, 0.67)
+        Xx_train = deepcopy(M_train[:, 3:end-1])
+        Yy_train = deepcopy(M_train[:, end])
+        Xx_val = deepcopy(M_val[:, 3:end-1])
+        Yy_val = deepcopy(M_val[:, end])
+        println("## Regression ##")
+        reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+        println("## fit ##")
+        fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+        if itr == 1
+            z[1,1] = l
+            z[1,2] = t
+            z[1,3] = score(reg, Matrix(Xx_train), Vector(Yy_train))
+            z[1,4] = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
+            println("## CV ##")
+            acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
+            z[1,5] = avgAcc(acc5_train, 3)
+            z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
+            println(z[end, :])
+        else
+            println("## CV ##")
+            itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
+            traintrain = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
+            acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
+            traincvtrain = avgAcc(acc5_train, 3) 
+            ival = score(reg, Matrix(Xx_val), Vector(Yy_val)) 
+            z = vcat(z, [l t itrain traintrain traincvtrain ival])
+            println(z[end, :])
         end
+        println("End of ", itr, " iterations")
+        itr += 1
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], state=z[:,3], accuracy_train = z[:,4], avgAccuracy_train = z[:,5], accuracy_test = z[:,6], accuracy_val = z[:,7],  accuracy_ext_test = z[:,8])
-    z_df_sorted = sort(z_df, [:accuracy_ext_test, :accuracy_val, :accuracy_test, :avgAccuracy_train], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], accuracy_3Ftrain = z[:,3], accuracy_train = z[:,4], avgAccuracy3FCV_train = z[:,5], accuracy_val = z[:,6])
+    z_df_sorted = sort(z_df, [:accuracy_val, :avgAccuracy3FCV_train, :accuracy_train, :accuracy_3Ftrain], rev=true)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestRegressor(trainSet, valSet, inputDB_test)
+optiSearch_df = optimRandomForestRegressor(inputDB)
 
-# save, ouputing 72 x 8 df
-savePath = "D:\\0_data\\hyperparameterTuning_RFwithoutStratification.csv"
+# save, ouputing 180 x 8 df
+savePath = "F:\\hyperparameterTuning_RFwithStratification.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
@@ -206,7 +165,7 @@ param_dist = Dict(
       "n_estimators" => 50:50:300, 
       #"max_depth" => 2:2:10, 
       "min_samples_leaf" => 8:8:32, 
-      "max_features" => [Int64(ceil(size(x_train,2)/3))], 
+      "max_features" => [Int64(ceil((size(x_train,2)-1)/3))], 
       "n_jobs" => [-1], 
       "oob_score" => [true], 
       "random_state" => [1]
@@ -216,51 +175,120 @@ gridsearch = GridSearchCV(model, param_dist)
 println("Best parameters: $(gridsearch.best_params_)") =#
 
 model = RandomForestRegressor(
-      n_estimators = 300, 
+      n_estimators = 250, 
       #max_depth = 10, 
-      min_samples_leaf = 8, 
-      max_features = Int64(ceil(size(x_train,2)/3)), 
+      min_samples_leaf = 4, 
+      max_features = Int64(ceil((size(inputDB[:, 3:end-1],2)-1)/3)), 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42
       )
-fit!(model, Matrix(x_train), Vector(y_train))
+fit!(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]))
 
 # saving model
-modelSavePath = "D:\\1_model\\CocamideExtended_CNLsRi_RFwithoutStratification.joblib"
+modelSavePath = "F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
 # training performace, CNL-predictedRi vs. FP-predictedRi
-predictedRi_train = predict(model, Matrix(x_train))
-trainSet[!, "CNLpredictRi"] = predictedRi_train
+predictedRi_train = predict(model, Matrix(inputDB[:, 3:end-1]))
+inputDB[!, "CNLpredictRi"] = predictedRi_train
 # save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesTrain_RFwithoutStratification_withCNLPredictedRi.csv"
-CSV.write(savePath, trainSet)
+savePath = "F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi.csv"
+CSV.write(savePath, inputDB)
 
-maxAE_train, MSE_train, RMSE_train = errorDetermination(y_train, predictedRi_train)
-rSquare_train = rSquareDetermination(y_train, predictedRi_train)
+maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
+rSquare_train = rSquareDetermination(inputDB[:, end-1], predictedRi_train)
 ## accuracy
-acc1_train = score(model, Matrix(x_train), Vector(y_train))
-acc5_train = cross_val_score(model, Matrix(x_train), Vector(y_train); cv = 5)
-avgAcc_train = avgAcc(acc5_train, 5)
+acc1_train = score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]))
+acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 3)
+avgAcc_train = avgAcc(acc5_train, 3)
 
-# internal validation
-predictedRi_val = predict(model, Matrix(x_val))
-valSet[!, "CNLpredictRi"] = predictedRi_val
-# save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "D:\\0_data\\dataframeCNLsRows_dfOnlyCocamidesVal_RFwithoutStratification_withCNLPredictedRi.csv"
-CSV.write(savePath, valSet)
+# model validation
+#load a model
+# requires python 3.11 or 3.12
+modelRF_CNL = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
+model = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
+size(modelRF_CNL)
 
-maxAE_val, MSE_val, RMSE_val = errorDetermination(y_val, predictedRi_val)
-rSquare_val = rSquareDetermination(y_val, predictedRi_val)
+predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]))
+inputDB_test[!, "CNLpredictRi"] = predictedRi_test
+# save, ouputing testSet df 0.3 x (3+15994+1)
+savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi.csv"
+CSV.write(savePath, inputDB_test)
+
+maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
+rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
 ## accuracy
-acc1_val = score(model, Matrix(x_val), Vector(y_val))
-acc5_val = cross_val_score(model, Matrix(x_val), Vector(y_val); cv = 5)
-avgAcc_val = avgAcc(acc5_val, 5)
+acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
+acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 3)
+avgAcc_val = avgAcc(acc5_val, 3)
 
 # plots
+# inputing dfs for separation of the cocamides and non-cocamides datasets
+## 5364 x 931 df 
+inputCocamidesTrain = CSV.read("F:\\CocamideExtWithStartification_Fingerprints_train.csv", DataFrame)
+sort!(inputCocamidesTrain, :SMILES)
+
+## 947 x 931 df
+inputCocamidesTest = CSV.read("F:\\CocamideExtWithStratification_Fingerprints_test.csv", DataFrame)
+sort!(inputCocamidesTest, :SMILES)
+
+# comparing, 30684 x 793 df
+inputAllFPDB = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
+
+function id2id(plotdf, i)
+    inchikeyID = plotdf[i, "INCHIKEY"]
+    idx = findall(inputAllFPDB.INCHIKEY .== inchikeyID)
+    return inputAllFPDB[idx[end:end], "SMILES"][1]
+end
+
+function cocamidesOrNot(plotdf, i)
+    if (id2id(plotdf, i) in Array(inputCocamidesTrain[:, "SMILES"]) || id2id(plotdf, i) in Array(inputCocamidesTest[:, "SMILES"]))
+        return true
+    else
+        return false
+    end
+end
+
+function findDots(plotdf, i)
+    if (cocamidesOrNot(plotdf, i) == true)
+        return plotdf[i, "predictRi"], plotdf[i, "CNLpredictRi"]
+    end
+end
+
+trainCocamide = []
+trainNonCocamide = []
+inputDB[!, "Cocamides"] .= ""
+for i in 1:size(inputDB, 1)
+    if (cocamidesOrNot(inputDB, i) == true)
+        inputDB[i, "Cocamides"] = "yes"
+        push!(trainCocamide, i)
+    elseif (cocamidesOrNot(inputDB, i) == false)
+        inputDB[i, "Cocamides"] = "no"
+        push!(trainNonCocamide, i)
+    end
+end
+savePath = "F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv"
+CSV.write(savePath, inputDB)
+
+testCocamide = []
+testNonCocamide = []
+inputDB_test[!, "Cocamides"] .= ""
+for i in 1:size(inputDB_test, 1)
+    if (cocamidesOrNot(inputDB_test, i) == true)
+        inputDB_test[i, "Cocamides"] = "yes"
+        push!(testCocamide, i)
+    elseif (cocamidesOrNot(inputDB_test, i) == false)
+        inputDB_test[i, "Cocamides"] = "no"
+        push!(testNonCocamide, i)
+    end
+end
+savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv"
+CSV.write(savePath, inputDB_test)
+
 plotTrain = marginalkde(
-        y_train, 
+        inputDB[:, end-1], 
         predictedRi_train, 
         xlabel = "FP-derived Ri values", 
         ylabel = "CNL-derived Ri values", 
@@ -270,18 +298,34 @@ plotTrain = marginalkde(
         dpi = 300
         )
 plot!(plotTrain.spmap[:contour], 
-        y_train -> y_train, c=:red, 
+        Array(inputDB[:, end-1]) -> Array(inputDB[:, end-1]), c=:red, 
         label = false, 
-        title = "RF Model Training Without Stratification", 
+        title = "RF Model Training With Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
+scatter!(inputDB[trainCocamide, end-1], predictedRi_train[trainCocamide], 
+        markershape = :star, 
+        c = :yellow, 
+        label = "Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+scatter!(inputDB[trainNonCocamide, end-1], predictedRi_train[trainNonCocamide], 
+        markershape = :star, 
+        c = :orange, 
+        label = "Non-Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
         # Saving
-savefig(plotTrain, "D:\\2_output\\CNLRiPrediction_RFTrainWithoutStratification.png")
+savefig(plotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification.png")
 
-plotVal = marginalkde(
-        y_val, 
-        predictedRi_val, 
+plotTest = marginalkde(
+        inputDB_test[:, end-1], 
+        predictedRi_test, 
         xlabel = "FP-derived Ri values", 
         ylabel = "CNL-derived Ri values", 
         label = false, 
@@ -289,12 +333,28 @@ plotVal = marginalkde(
         size = (600,600), 
         dpi = 300
         )
-plot!(plotVal.spmap[:contour], 
-        y_val -> y_val, c=:red, 
+plot!(plotTest.spmap[:contour], 
+        Array(inputDB_test[:, end-1]) -> Array(inputDB_test[:, end-1]), c=:red, 
         label = false, 
-        title = "RF Model Val Without Stratification", 
+        title = "RF Model Test With Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
+scatter!(inputDB_test[testCocamide, end-1], predictedRi_test[testCocamide], 
+        markershape = :star, 
+        c = :yellow, 
+        label = "Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+scatter!(inputDB_test[testNonCocamide, end-1], predictedRi_test[testNonCocamide], 
+        markershape = :star, 
+        c = :orange, 
+        label = "Non-Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
         # Saving
-savefig(plotVal, "D:\\2_output\\CNLRiPrediction_RFValWithoutStratification.png")
+savefig(plotTest, "F:\\CNLRiPrediction_RFTestWithStratification.png")
