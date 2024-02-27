@@ -230,7 +230,7 @@ inputCocamidesTrain = CSV.read("F:\\CocamideExtWithStartification_Fingerprints_t
 sort!(inputCocamidesTrain, :SMILES)
 
 ## 947 x 931 df
-inputCocamidesTest = CSV.read("F:\\CocamideExtWithStartification_Fingerprints_test.csv", DataFrame)
+inputCocamidesTest = CSV.read("F:\\CocamideExtWithStratification_Fingerprints_test.csv", DataFrame)
 sort!(inputCocamidesTest, :SMILES)
 
 # comparing, 30684 x 793 df
@@ -259,7 +259,7 @@ end
 
 trainCocamide = []
 trainNonCocamide = []
-inputDB[!, "Cocamides"] = ""
+inputDB[!, "Cocamides"] .= ""
 for i in 1:size(inputDB, 1)
     if (cocamidesOrNot(inputDB, i) == true)
         inputDB[i, "Cocamides"] = "yes"
@@ -274,7 +274,7 @@ CSV.write(savePath, inputDB)
 
 testCocamide = []
 testNonCocamide = []
-inputDB_test[!, "Cocamides"] = ""
+inputDB_test[!, "Cocamides"] .= ""
 for i in 1:size(inputDB_test, 1)
     if (cocamidesOrNot(inputDB_test, i) == true)
         inputDB_test[i, "Cocamides"] = "yes"
@@ -287,6 +287,7 @@ end
 savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv"
 CSV.write(savePath, inputDB_test)
 
+tempDfTrain = inputDB[:, end-1]
 plotTrain = marginalkde(
         inputDB[:, end-1], 
         predictedRi_train, 
@@ -297,32 +298,41 @@ plotTrain = marginalkde(
         size = (600,600), 
         dpi = 300
         )
-plot!(plotTrain.spmap[:contour], 
-        inputDB[:, end-1] -> inputDB[:, end-1], c=:red, 
+plotTrain = plot!(plotTrain.spmap[:contour], 
+        tempDfTrain -> tempDfTrain, c=:red, 
         label = false, 
-        title = "RF Model Training With Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
-scatter!(inputDB[trainCocamide, end-1], predictedRi_train[trainCocamide], 
+trainScatter = scatter(inputDB[trainNonCocamide, end-1], predictedRi_train[trainNonCocamide], 
         markershape = :star, 
-        c = :yellow, 
-        label = "Cocamides", 
-        margin = (5, :mm), 
-        size = (600,600), 
-        dpi = 300
-        )
-scatter!(inputDB[trainNonCocamide, end-1], predictedRi_train[trainNonCocamide], 
-        markershape = :star, 
-        c = :orange, 
+        c = :skyblue, 
+        markerstrokewidth = 0, 
+        alpha = 0.1, 
         label = "Non-Cocamides", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300
         )
+trainScatter = scatter!(inputDB[trainCocamide, end-1], predictedRi_train[trainCocamide], 
+        title = "RF Model Training With Stratification", 
+        markershape = :star, 
+        c = :green, 
+        markerstrokewidth = 0, 
+        alpha = 0.1, 
+        label = "Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+outplotTrain = plot!(plotTrain, trainScatter, 
+        margin = (5, :mm), 
+        size = (1200,600), 
+        dpi = 300)
         # Saving
-savefig(plotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification.png")
+savefig(outplotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification.png")
 
+tempDfTest = inputDB_test[:, end-1]
 plotTest = marginalkde(
         inputDB_test[:, end-1], 
         predictedRi_test, 
@@ -333,28 +343,36 @@ plotTest = marginalkde(
         size = (600,600), 
         dpi = 300
         )
-plot!(plotTest.spmap[:contour], 
-        inputDB_test[:, end-1] -> inputDB_test[:, end-1], c=:red, 
+plotTest = plot!(plotTest.spmap[:contour], 
+        tempDfTest -> tempDfTest, c=:red, 
         label = false, 
-        title = "RF Model Test With Stratification", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300)
-scatter!(inputDB_test[testCocamide, end-1], predictedRi_test[testCocamide], 
+testScatter = scatter(inputDB_test[testNonCocamide, end-1], predictedRi_test[testNonCocamide], 
         markershape = :star, 
-        c = :yellow, 
-        label = "Cocamides", 
-        margin = (5, :mm), 
-        size = (600,600), 
-        dpi = 300
-        )
-scatter!(inputDB_test[testNonCocamide, end-1], predictedRi_test[testNonCocamide], 
-        markershape = :star, 
-        c = :orange, 
+        c = :skyblue, 
+        markerstrokewidth = 0, 
+        alpha = 0.1, 
         label = "Non-Cocamides", 
         margin = (5, :mm), 
         size = (600,600), 
         dpi = 300
         )
+testScatter = scatter!(inputDB_test[testCocamide, end-1], predictedRi_test[testCocamide], 
+        title = "RF Model Testing With Stratification", 
+        markershape = :star, 
+        c = :green, 
+        markerstrokewidth = 0, 
+        alpha = 0.1, 
+        label = "Cocamides", 
+        margin = (5, :mm), 
+        size = (600,600), 
+        dpi = 300
+        )
+outplotTest = plot!(plotTest, testScatter, 
+        margin = (5, :mm), 
+        size = (1200,600), 
+        dpi = 300)
         # Saving
-savefig(plotTest, "F:\\CNLRiPrediction_RFTestWithStratification.png")
+savefig(outplotTest, "F:\\CNLRiPrediction_RFTestWithStratification.png")
