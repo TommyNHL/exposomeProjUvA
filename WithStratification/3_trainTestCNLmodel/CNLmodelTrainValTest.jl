@@ -271,6 +271,8 @@ for i in 1:size(inputDB, 1)
 end
 savePath = "F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv"
 CSV.write(savePath, inputDB)
+trainNonCocamide = findall(inputDB[:, "Cocamides"] .== "no")
+trainCocamide = findall(inputDB[:, "Cocamides"] .== "yes")
 
 testCocamide = []
 testNonCocamide = []
@@ -286,93 +288,110 @@ for i in 1:size(inputDB_test, 1)
 end
 savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv"
 CSV.write(savePath, inputDB_test)
+testNonCocamide = findall(inputDB_test[:, "Cocamides"] .== "no")
+testCocamide = findall(inputDB_test[:, "Cocamides"] .== "yes")
 
+# inputing 693685*0.3 x 1+1+1+15961+1+1+1 df = 208106 x 15965
+# columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi, CNLpredictRi, Cocamides
+inputDB_test = CSV.read("F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+
+# inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
+inputDB = CSV.read("F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+
+#Pkg.add("Distributions")
+using Distributions
 tempDfTrain = inputDB[:, end-1]
-plotTrain = marginalkde(
-        inputDB[:, end-1], 
-        predictedRi_train, 
-        xlabel = "FP-derived Ri values", 
-        ylabel = "CNL-derived Ri values", 
-        label = false, 
-        margin = (5, :mm), 
-        size = (600,600), 
-        dpi = 300
-        )
-plotTrain = plot!(plotTrain.spmap[:contour], 
-        tempDfTrain -> tempDfTrain, c=:red, 
-        label = false, 
-        margin = (5, :mm), 
-        size = (600,600), 
-        dpi = 300)
-trainScatter = scatter(inputDB[trainNonCocamide, end-1], predictedRi_train[trainNonCocamide], 
+layout = @layout [a{0.8w,0.2h}            _
+                  b{0.8w,0.8h} c{0.2w,0.8h}]
+describe(inputDB[:, "CNLpredictRi"])
+default(fillcolor = :lightgrey, grid = false, legend = false)
+outplotTrain = plot(layout = layout, link = :both, 
+        size = (600, 600), margin = -2Plots.px, dpi = 300)
+scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1], 
+        subplot = 2, framestyle = :box, 
+        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
         markershape = :star, 
         c = :skyblue, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
         label = "Non-Cocamides", 
-        margin = (5, :mm), 
+        margin = -2Plots.px, 
         size = (600,600), 
-        dpi = 300
-        )
-trainScatter = scatter!(inputDB[trainCocamide, end-1], predictedRi_train[trainCocamide], 
-        title = "RF Model Training With Stratification", 
+        dpi = 300)
+scatter!(inputDB[trainCocamide, end-2], inputDB[trainCocamide, end-1], 
+        subplot = 2, framestyle = :box, 
+        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
         markershape = :star, 
         c = :green, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
         label = "Cocamides", 
-        margin = (5, :mm), 
+        margin = -2Plots.px, 
         size = (600,600), 
-        dpi = 300
-        )
-outplotTrain = plot!(plotTrain, trainScatter, 
-        margin = (5, :mm), 
-        size = (1200,600), 
         dpi = 300)
+plot!(tempDfTrain -> tempDfTrain, c=:red, subplot = 2, 
+        label = false, 
+        margin = -2Plots.px, 
+        size = (600,600), 
+        dpi = 300)
+histogram!(inputDB[:, end-2], subplot = 1, 
+        xlims = (-150, 1500), 
+        orientation = :v, 
+        framestyle = :none, 
+        dpi = 300)
+histogram!(inputDB[:, end-1], subplot = 3, 
+        ylims = (-150, 1500), 
+        orientation = :h, 
+        framestyle = :none, 
+        dpi = 300)
+plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
         # Saving
-savefig(outplotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification.png")
+savefig(outplotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification_v2.png")
 
 tempDfTest = inputDB_test[:, end-1]
-plotTest = marginalkde(
-        inputDB_test[:, end-1], 
-        predictedRi_test, 
-        xlabel = "FP-derived Ri values", 
-        ylabel = "CNL-derived Ri values", 
-        label = false, 
-        margin = (5, :mm), 
-        size = (600,600), 
-        dpi = 300
-        )
-plotTest = plot!(plotTest.spmap[:contour], 
-        tempDfTest -> tempDfTest, c=:red, 
-        label = false, 
-        margin = (5, :mm), 
-        size = (600,600), 
-        dpi = 300)
-testScatter = scatter(inputDB_test[testNonCocamide, end-1], predictedRi_test[testNonCocamide], 
+layout = @layout [a{0.8w,0.2h}            _
+                  b{0.8w,0.8h} c{0.2w,0.8h}]
+describe(inputDB_test[:, "CNLpredictRi"])
+default(fillcolor = :lightgrey, grid = false, legend = false)
+outplotTest = plot(layout = layout, link = :both, 
+        size = (600, 600), margin = -2Plots.px, dpi = 300)
+scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end-1], 
+        subplot = 2, framestyle = :box, 
+        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
         markershape = :star, 
         c = :skyblue, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
         label = "Non-Cocamides", 
-        margin = (5, :mm), 
+        margin = -2Plots.px, 
         size = (600,600), 
-        dpi = 300
-        )
-testScatter = scatter!(inputDB_test[testCocamide, end-1], predictedRi_test[testCocamide], 
-        title = "RF Model Testing With Stratification", 
+        dpi = 300)
+scatter!(inputDB_test[testCocamide, end-2], inputDB_test[testCocamide, end-1], 
+        subplot = 2, framestyle = :box, 
+        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
         markershape = :star, 
         c = :green, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
         label = "Cocamides", 
-        margin = (5, :mm), 
+        margin = -2Plots.px, 
         size = (600,600), 
-        dpi = 300
-        )
-outplotTest = plot!(plotTest, testScatter, 
-        margin = (5, :mm), 
-        size = (1200,600), 
         dpi = 300)
+plot!(tempDfTest -> tempDfTest, c=:red, subplot = 2, 
+        label = false, 
+        margin = -2Plots.px, 
+        size = (600,600), 
+        dpi = 300)
+histogram!(inputDB_test[:, end-2], subplot = 1, 
+        xlims = (-150, 1500), 
+        orientation = :v, 
+        framestyle = :none, 
+        dpi = 300)
+histogram!(inputDB_test[:, end-1], subplot = 3, 
+        ylims = (-150, 1500), 
+        orientation = :h, 
+        framestyle = :none, 
+        dpi = 300)
+plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
         # Saving
-savefig(outplotTest, "F:\\CNLRiPrediction_RFTestWithStratification.png")
+savefig(outplotTest, "F:\\CNLRiPrediction_RFTestWithStratification_v2.png")

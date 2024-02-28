@@ -49,7 +49,7 @@ function getVec(matStr)
 end
 
 # inputing 1095389 x 31 df
-inputDB = CSV.read("D:\\0_data\\Database_INTERNAL_2022-11-17.csv", DataFrame)
+inputDB = CSV.read("C:\\github\\exposomeProjUvA\\Database_INTERNAL_2022-11-17.csv", DataFrame)
 
 # filtering out NEGATIVE ionization mode -> 1078844 x 4
 # filtering out NEGATIVE ionization mode -> 817512 x 4
@@ -70,7 +70,7 @@ size(inputData)
 # NLs calculation, filtering CNL-in-interest, storing in Vector{Any}
         # filtering in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
         # inputing 16022 candidates
-        candidates_df = CSV.read("D:\\0_data\\CNLs_10mDa.csv", DataFrame)
+        candidates_df = CSV.read("C:\\github\\exposomeProjUvA\\CNLs_10mDa.csv", DataFrame)
         candidatesList = []
         for can in candidates_df[:, 1]
             push!(candidatesList, round(float(can), digits = 2))
@@ -96,7 +96,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 # inputing 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
-        inputAllFPDB = CSV.read("D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+        inputAllFPDB = CSV.read("C:\\github\\exposomeProjUvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
         sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
         
         # finding missing features
@@ -116,7 +116,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
         test
         test = getMasses(inputData, 1, test)
         test
-        
+
         featuresCNLs = []
         for i in 1:size(inputData, 1)
             println(i)
@@ -150,7 +150,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
             push!(dfMissed, list)
         end
 
-        savePath = "D:\\0_data\\CNLs_10mDa_missed.csv"
+        savePath = "C:\\github\\exposomeProjUvA\\CNLs_10mDa_missed.csv"
         CSV.write(savePath, dfMissed)
         
         # filtering in row entries according to the presence of FPs in .csv DB
@@ -193,7 +193,7 @@ dfOutput
 
 # save
 # output csv is a 693685 x 4 df
-savePath = "D:\\0_data\\databaseOfInternal_withNLs.csv"
+savePath = "C:\\github\\exposomeProjUvA\\databaseOfInternal_withNLs.csv"
 CSV.write(savePath, dfOutput)
 
 # transform table as row(ID copounds) x column(CNLs masses)
@@ -231,7 +231,7 @@ for i in 1:size(dfOutput, 1)
         if (col <= mumIon)
             X[i, mz] .= 1
         elseif (col > mumIon)
-            X[i, mz1] .= -1
+            X[i, mz] .= -1
         end
     end
 end
@@ -244,7 +244,7 @@ insertcols!(dfCNLs, 4, ("ISOTOPICMASS"=>dfOutput[:, "PRECURSOR_ION"] .- 1.007276
 size(dfCNLs)  # 693685 x (3+1+15961)
 
 # ouputing df 693685 x (3+1+15961)
-savePath = "D:\\0_data\\dataframeCNLsRows.csv"
+savePath = "C:\\github\\exposomeProjUvA\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 println("done for saving csv")
 
@@ -277,4 +277,4 @@ massesCNLsDistrution = bar(names(dfCNLs)[5:end], Vector(dfCNLs[end, 5:end]),
     xlabel!("CNLs features")
     ylabel!("Summation")
     # Saving
-    savefig(massesCNLsDistrution, "D:\\2_output\\massesCNLsDistrution.png")
+    savefig(massesCNLsDistrution, "C:\\github\\exposomeProjUvA\\massesCNLsDistrution.png")

@@ -10,12 +10,12 @@ Pkg.build("PyCall")
 Pkg.status()
 #Pkg.add(PackageSpec(url=""))
 using Random
-using BSON
+#using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-using ProgressBars
+#using ProgressBars
 #using PyPlot
 #Conda.add("pubchempy")
 #Conda.add("padelpy")

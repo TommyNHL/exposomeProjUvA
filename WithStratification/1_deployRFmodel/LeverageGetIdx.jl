@@ -41,7 +41,7 @@ function strat_split(leverage=ht; limits = limits)
     for i = 1: (length(limits)-1)
         bin[limits[i] .<= leverage] .= i
     end
-    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.30, random_state = 42, stratify = bin)
+    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.50, random_state = 42, stratify = bin)
     return  X_train, X_test, y_train, y_test
 end
 
@@ -70,11 +70,11 @@ savePath = "F:\\dataAllFP_withNewPredictedRiWithStratification_FreqAndLeverage.c
 CSV.write(savePath, dfOutputFP)
 
 # 485579 x 1
-X_trainIdxDf = DataFrame(X_trainIdx, "INDEX")
+X_trainIdxDf = DataFrame([X_trainIdx], ["INDEX"])
 savePath = "F:\\dataframe_dfTrainSetWithStratification_index.csv"
 CSV.write(savePath, X_trainIdxDf)
 
 # 208106 x 1
-X_testIdxDf = DataFrame(X_testIdx, "INDEX")
+X_testIdxDf = DataFrame([X_testIdx], ["INDEX"])
 savePath = "F:\\dataframe_dfTestSetWithStratification_index.csv"
 CSV.write(savePath, X_testIdxDf)
