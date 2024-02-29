@@ -16,12 +16,12 @@ using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
     ## RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
     ## DirectMatch, ReversMatch, FinalScore, 
     ## SpecType, MatchedFrags, INCHIKEY, FragMZ, FragInt
-inputDB1 = CSV.read("F:\\Cand_search_rr0_0612_TEST_100-200.csv", DataFrame) 
-inputDB2 = CSV.read("F:\\Cand_search_rr0_0612_TEST_200-300.csv", DataFrame)
-inputDB3 = CSV.read("F:\\Cand_search_rr0_0612_TEST_300-400.csv", DataFrame)
-#= inputDB4 = CSV.read("D:\\Cand_synth_rr10_3001_4000.csv", DataFrame)
-inputDB5 = CSV.read("D:\\Cand_synth_rr10_4001_5000.csv", DataFrame) =#
-combinedDB = vcat(inputDB1, inputDB2, inputDB3) #, inputDB4, inputDB5)
+inputDB1 = CSV.read("F:\\Cand_synth_rr10_1_1000.csv", DataFrame)
+inputDB2 = CSV.read("F:\\Cand_synth_rr10_1001_2000.csv", DataFrame)
+inputDB3 = CSV.read("F:\\Cand_synth_rr10_2001_3000.csv", DataFrame)
+inputDB4 = CSV.read("F:\\Cand_synth_rr10_3001_4000.csv", DataFrame)
+inputDB5 = CSV.read("F:\\Cand_synth_rr10_4001_5000.csv", DataFrame)
+combinedDB = vcat(inputDB1, inputDB2, inputDB3, inputDB4, inputDB5)
 combinedDB = combinedDB[:, ["ID", "INCHIKEYreal", "INCHIKEY", 
     "RefMatchFrag", "UsrMatchFrag", 
     "MS1Error", "MS2Error", "MS2ErrorStd", 
@@ -83,7 +83,7 @@ outputDf = combinedDB[:, ["INCHIKEY_ID", "INCHIKEY", "RefMatchFragRatio", "UsrMa
 
 outputDf
 # output csv is a 107024 x 1+8+1 df
-savePath = "F:\\Cand_search_rr0_0612_TEST_100-400.csv"
+savePath = "F:\\Cand_synth_rr10_1-5000.csv"
 CSV.write(savePath, outputDf)
 
 
@@ -109,7 +109,7 @@ for i in 1:size(outputDf, 1)
         #outputDf[!, "CNLpredictRi"] = inputAllRi_TestSet[rowNo[end:end], "CNLpredictRi"][1]
         #outputDf[!, "DeltaRi"] = outputDf[!, "CNLpredictRi"] - outputDf[!, "predictRi"]
     else
-        outputDf[i, "predictRi"] = float(888888)
+        outputDf[i, "predictRi"] = float(8888888)
         #outputDf[!, "CNLpredictRi"] = float(888888)
         #outputDf[!, "DeltaRi"] = float(0)
     end
@@ -120,9 +120,9 @@ outputDf
 describe(outputDf)
 # filtering in INCHIKEY_ID with Ri values
 # 105558 x 16 df
-outputDf = outputDf[outputDf.predictRi .!= float(888888), :]
+outputDf = outputDf[outputDf.predictRi .!= float(8888888), :]
 sort!(outputDf, [:LABEL, :INCHIKEY_ID])
 
 # output csv is a xxx x 1+8+1+1 df
-savePath = "F:\\Cand_search_rr0_0612_TEST_100-400_extractedWithoutDeltaRi.csv"
+savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv"
 CSV.write(savePath, outputDf)

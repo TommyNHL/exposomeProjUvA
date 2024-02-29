@@ -36,7 +36,7 @@ using ScikitLearn.CrossValidation: train_test_split
 
 # inputing 693677 x 3+21567 df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
-inputTPTNdf = CSV.read("F:\\Cand_search_rr0_0612_TEST_100-400_extractedWithoutDeltaRi.csv", DataFrame)
+inputTPTNdf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv", DataFrame)
 sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID])
 
 function getVec(matStr)
@@ -130,7 +130,7 @@ candidatesList
 inputTPTNdf
 
 # storing data in a Matrix
-X = zeros(105558, 15961)
+X = zeros(4307198, 15961)
 
 for i in 1:size(inputTPTNdf, 1)
     println(i)
@@ -148,7 +148,7 @@ for i in 1:size(inputTPTNdf, 1)
 end
 
 dfCNLs = DataFrame(X, CNLfeaturesStr)
-insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:105558)))
+insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:4307198)))
 insertcols!(dfCNLs, 2, ("INCHIKEY1_ID"=>inputTPTNdf[:, "INCHIKEY_ID"]))
 insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[:, "INCHIKEY"]))
 insertcols!(dfCNLs, 4, ("RefMatchFragRatio"=>inputTPTNdf[:, "RefMatchFragRatio"]))
@@ -172,18 +172,18 @@ desStat = describe(dfCNLs)  # 15965 x 7
 desStat[13,:]
 
 sumUp = []
-push!(sumUp, 888888)
+push!(sumUp, 8888888)
 push!(sumUp, "summation")
 push!(sumUp, "summation")
-push!(sumUp, 888888)
-push!(sumUp, 888888)
-push!(sumUp, 888888)
-push!(sumUp, 888888)
-push!(sumUp, 888888)
-push!(sumUp, 888888)
-push!(sumUp, 888888)
-push!(sumUp, 888888)
-push!(sumUp, 888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
+push!(sumUp, 8888888)
 for col in names(dfCNLs)[13:end-1]
     count = 0
     for i in 1:size(dfCNLs, 1)
@@ -191,7 +191,7 @@ for col in names(dfCNLs)[13:end-1]
     end
     push!(sumUp, count)
 end
-push!(sumUp, 888888)
+push!(sumUp, 8888888)
 push!(dfCNLs, sumUp)
 # 693685 -> 693686 rows
 dfCNLs[end,:]  #693686
@@ -219,5 +219,5 @@ dfCNLs[!, "CNLpredictRi"] = CNLpredictedRi
 dfCNLs[!, "DeltaRi"] = (CNLpredictedRi - dfCNLs[:, "predictRi"]) / 1000
 dfCNLs[!, "LABEL"] = inputTPTNdf[:, "LABEL"]
 # save, ouputing testSet df 0.3 x (3+15994+1)
-savePath = "F:\\Cand_search_rr0_0612_TEST_100-400_extractedWithDeltaRi.csv"
+savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithDeltaRi.csv"
 CSV.write(savePath, dfCNLs)
