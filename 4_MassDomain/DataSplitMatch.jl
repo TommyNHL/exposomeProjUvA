@@ -11,7 +11,7 @@ using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
 #pd = pyimport("padelpy")
 #jl = pyimport("joblib")
 
-# inputing 863582, 865290, 881258, 881919, 876853 x 19 dfs -> 4368902 x 2+13+1+1 df
+# inputing 863582, 865290, 881258, 881919, 876853 x 19 dfs -> 4368902 x 13+4+1 df
     ## ID, NAMEreal, INCHIKEYreal, ACCESSIONreal, MS1Mass, Name, 
     ## RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
     ## DirectMatch, ReversMatch, FinalScore, 
@@ -75,25 +75,28 @@ combinedDB[!, "UsrMatchFragRatio"] = ratioUsr
 combinedDB[!, "FinalScoreRatio"] = ratioScore
 combinedDB[!, "LABEL"] = trueOrFalse
 
+# 4368902 x 18 df
 combinedDB
 
-outputDf = combinedDB[:, ["INCHIKEY_ID", "INCHIKEY", "RefMatchFragRatio", "UsrMatchFragRatio", 
+# 4368902 x 3+8+2+1 df
+outputDf = combinedDB[:, ["INCHIKEY_ID", "INCHIKEY", "INCHIKEYreal", "RefMatchFragRatio", "UsrMatchFragRatio", 
     "MS1Error", "MS2Error", "MS2ErrorStd", "DirectMatch", "ReversMatch", 
     "FinalScoreRatio", "MS1Mass", "FragMZ", "LABEL"]]
 
 outputDf
-# output csv is a 107024 x 1+8+1 df
+# output csv is a 4368902 x 3+8+2+1 df
 savePath = "F:\\Cand_synth_rr10_1-5000.csv"
 CSV.write(savePath, outputDf)
 
 
-# creating a 107024 x 1+8+2+1+1 df, 
-    ## columns: INCHIKEY_ID, 8+1 ULSA features, LABEL
-    ## added columns: FP->Ri, CNL->Ri, deltaRi ^
+# creating a 4368902 x 3+8+2+1+1 df, 
+    ## columns: INCHIKEY_ID, INCHIKEYreal, 8+1 ULSA features, LABEL
+    ##                      FP->Ri, CNL->Ri ^
 # matching INCHIKEY, 30684 x 793 df
 inputFP2Ri = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
 sort!(inputFP2Ri, [:INCHIKEY, :SMILES])
 
+# FP-derived Ri values
 outputDf[!, "predictRi"] .= float(0)
 
 for i in 1:size(outputDf, 1)
@@ -101,28 +104,22 @@ for i in 1:size(outputDf, 1)
     if outputDf[i, "INCHIKEY"] in Array(inputFP2Ri[:, "INCHIKEY"])
         rowNo = findall(inputFP2Ri.INCHIKEY .== outputDf[i, "INCHIKEY"])
         outputDf[i, "predictRi"] = inputFP2Ri[rowNo[end:end], "predictRi"][1]
-        #outputDf[!, "CNLpredictRi"] = inputAllRi_TrainSet[rowNo[end:end], "CNLpredictRi"][1]
-        #outputDf[!, "DeltaRi"] = outputDf[!, "CNLpredictRi"] - outputDf[!, "predictRi"]
     elseif outputDf[i, "INCHIKEY"] in Array(inputFP2Ri[:, "INCHIKEY"])
         rowNo = findall(inputFP2Ri.INCHIKEY .== outputDf[i, "INCHIKEY"])
         outputDf[!, "predictRi"] = inputFP2Ri[rowNo[end:end], "predictRi"][1]
-        #outputDf[!, "CNLpredictRi"] = inputAllRi_TestSet[rowNo[end:end], "CNLpredictRi"][1]
-        #outputDf[!, "DeltaRi"] = outputDf[!, "CNLpredictRi"] - outputDf[!, "predictRi"]
     else
         outputDf[i, "predictRi"] = float(8888888)
-        #outputDf[!, "CNLpredictRi"] = float(888888)
-        #outputDf[!, "DeltaRi"] = float(0)
     end
 end
 
-# 107024 x 16
+# 4368902 x 3+8+2+1+1
 outputDf
 describe(outputDf)
 # filtering in INCHIKEY_ID with Ri values
-# 105558 x 16 df
+# 4307198 x 15 df
 outputDf = outputDf[outputDf.predictRi .!= float(8888888), :]
 sort!(outputDf, [:LABEL, :INCHIKEY_ID])
 
-# output csv is a xxx x 1+8+1+1 df
+# output csv is a 4307198 x 3+8+2+1+1 df
 savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv"
 CSV.write(savePath, outputDf)
