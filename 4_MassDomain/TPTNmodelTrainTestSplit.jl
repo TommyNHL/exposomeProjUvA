@@ -9,7 +9,7 @@ using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 
 dfOutput = CSV.read("F:\\Cand_search_rr0_0612_TEST_100-400_trainValDf.csv", DataFrame)
-names(dfOutput)[10:15]
+
 X = deepcopy(dfOutput[:, vcat(collect(4:11), end-1)])  # 693685 x 790 df
 size(X)
 Y = deepcopy(dfOutput[:, end])  #693685,
@@ -21,7 +21,7 @@ hipinv = zeros(9, 9)
 hipinv[:,:] .= pinv(Xmat'*Xmat)
 
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zeros(693685,1)
+    h = zeros(103778,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:]
         #hi = x'*pinv(X'*X)*x
