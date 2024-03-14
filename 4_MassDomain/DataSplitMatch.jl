@@ -52,7 +52,7 @@ function takeRatio(str)
     return ratio
 end
 
-
+takeRatio(combinedDB[4368902, "RefMatchFrag"])
 ratioRef = []
 ratioUsr = []
 ratioScore = []
@@ -120,6 +120,43 @@ describe(outputDf)
 outputDf = outputDf[outputDf.predictRi .!= float(8888888), :]
 sort!(outputDf, [:LABEL, :INCHIKEY_ID])
 
-# output csv is a 4307198 x 3+8+2+1+1 df
+outputDf = outputDf[outputDf.MS2ErrorStd .!== NaN, :]
+
+# output csv is a 4272788 x 3+8+2+1+1 df
 savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv"
 CSV.write(savePath, outputDf)
+
+inputDf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv", DataFrame)
+
+testIDsDf = CSV.read("F:\\generated_susp.csv", DataFrame)
+testIDsDf = testIDsDf[testIDsDf.ION_MODE .== "POSITIVE", :]
+
+testIDs = Set()
+for i in 1:size(testIDsDf, 1)
+    push!(testIDs, testIDsDf[i, "INCHIKEY"])
+end
+distinctTestIDs = sort!(collect(testIDs))
+
+keepIdx = []
+isolateIdx = []
+for i in 1:size(inputDf, 1)
+    println(i)
+    if (inputDf[i, "INCHIKEY"] in distinctTestIDs || inputDf[i, "INCHIKEYreal"] in distinctTestIDs)
+        push!(isolateIdx, i)
+    else
+        push!(keepIdx, i)
+    end
+end
+
+keepIdx  # 4135721
+isolateIdx  # 137067
+
+trainValDf = inputDf[keepIdx, :]
+# save, ouputing testSet df 4135721 x 15
+savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv"
+CSV.write(savePath, trainValDf)
+
+testDf = inputDf[isolateIdx, :]
+# save, ouputing testSet df 137067 x 15
+savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv"
+CSV.write(savePath, testDf)
