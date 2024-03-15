@@ -25,27 +25,30 @@ using Plots
 #pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")            #calculation of FP
 jl = pyimport("joblib")             # used for loading models
+f1_score = pyimport("sklearn.metrics").f1_score
+matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
 
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: RandomForestClassifier
+@sk_import metrics: recall_score
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 693685*0.3 x 1+1+1+15961+1 df = 208106 x 15965
+# inputing 827145 x 4+9+2+1+2 df
 # columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi
-inputDB_test = CSV.read("F:\\dataframe_dfTestSetWithStratification.csv", DataFrame)
+inputDB_test = CSV.read("F:\\dataframeTPTNModeling_TestDF.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
-# inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
-inputDB = CSV.read("F:\\dataframe_dfTrainSetWithStratification.csv", DataFrame)
+# inputing 3308576 x 4+9+2+1+2 df
+inputDB = CSV.read("F:\\dataframeTPTNModeling_TrainDF.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
 # internal train/test split
-X = deepcopy(inputDB[:, 3:end-1])
+X = deepcopy(inputDB[:, vcat(collect(5:12), end-3)])
 size(X)
-Y = deepcopy(inputDB[:, end])
+Y = deepcopy(inputDB[:, end-2])
 size(Y)
 
 function partitionTrainVal(df, ratio = 0.67)
@@ -103,61 +106,65 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 6 x 6 = 36 times
+# modeling, 6 x 14 = 84 times
 function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
     leaf_r = vcat(collect(4:2:8), collect(12:4:20))
-    #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
-    tree_r = collect(50:50:300)
-    z = zeros(1,6)
+    tree_r = vcat(collect(50:50:400),collect(500:100:1000))
+    #tree_r = collect(50:50:300)
+    z = zeros(1,8)
     itr = 1
-    while itr < 6
+    while itr < 256
         l = rand(leaf_r)
         t = rand(tree_r)
         println("itr=", itr, ", leaf=", l, ", tree=", t)
-        MaxFeat = Int64(ceil((size(df_train,2)-1)/3))
+        MaxFeat = Int64(9)
         println("## split ##")
         M_train, M_val = partitionTrainVal(df_train, 0.67)
-        Xx_train = deepcopy(M_train[:, 3:end-1])
-        Yy_train = deepcopy(M_train[:, end])
-        Xx_val = deepcopy(M_val[:, 3:end-1])
-        Yy_val = deepcopy(M_val[:, end])
+        Xx_train = deepcopy(M_train[:, vcat(collect(5:12), end-3)])
+        Yy_train = deepcopy(M_train[:, end-2])
+        Xx_val = deepcopy(M_val[:, vcat(collect(5:12), end-3)])
+        Yy_val = deepcopy(M_val[:, end-2])
         println("## Regression ##")
-        reg = RandomForestRegressor(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42)
+        reg = RandomForestClassifier(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=42, class_weight=Dict(0=>0.529, 1=>9.021))
         println("## fit ##")
         fit!(reg, Matrix(Xx_train), Vector(Yy_train))
         if itr == 1
             z[1,1] = l
             z[1,2] = t
             z[1,3] = score(reg, Matrix(Xx_train), Vector(Yy_train))
-            z[1,4] = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
+            z[1,4] = score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]))
             println("## CV ##")
-            acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
+            acc5_train = cross_val_score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]); cv = 3)
             z[1,5] = avgAcc(acc5_train, 3)
             z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
+            z[1,7] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+            z[1,8] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
             println(z[end, :])
         else
             println("## CV ##")
             itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
-            traintrain = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
-            acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 3)
+            traintrain = score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]))
+            acc5_train = cross_val_score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]); cv = 3)
             traincvtrain = avgAcc(acc5_train, 3) 
-            ival = score(reg, Matrix(Xx_val), Vector(Yy_val)) 
-            z = vcat(z, [l t itrain traintrain traincvtrain ival])
+            ival = score(reg, Matrix(Xx_val), Vector(Yy_val))
+            f1s = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+            mccs = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+            z = vcat(z, [l t itrain traintrain traincvtrain ival f1s mccs])
             println(z[end, :])
         end
         println("End of ", itr, " iterations")
         itr += 1
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], accuracy_3Ftrain = z[:,3], accuracy_train = z[:,4], avgAccuracy3FCV_train = z[:,5], accuracy_val = z[:,6])
-    z_df_sorted = sort(z_df, [:accuracy_val, :avgAccuracy3FCV_train, :accuracy_train, :accuracy_3Ftrain], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], accuracy_3Ftrain = z[:,3], accuracy_train = z[:,4], avgAccuracy3FCV_train = z[:,5], accuracy_val = z[:,6], f1_val = z[:,7], mcc_val = z[:,8])
+    z_df_sorted = sort(z_df, [:mcc_val, :f1_val, :accuracy_val, :avgAccuracy3FCV_train, :accuracy_train, :accuracy_3Ftrain], rev=true)
     return z_df_sorted
 end
 
 optiSearch_df = optimRandomForestRegressor(inputDB)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\hyperparameterTuning_RFwithStratification.csv"
+savePath = "F:\\hyperparameterTuning_TPTNwithDeltaRi.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
@@ -174,14 +181,15 @@ gridsearch = GridSearchCV(model, param_dist)
 @time fit!(gridsearch, Matrix(x_train), Vector(y_train))
 println("Best parameters: $(gridsearch.best_params_)") =#
 
-model = RandomForestRegressor(
+model = RandomForestClassifier(
       n_estimators = 250, 
       #max_depth = 10, 
       min_samples_leaf = 4, 
-      max_features = Int64(ceil((size(inputDB[:, 3:end-1],2)-1)/3)), 
+      max_features = Int64(9), 
       n_jobs = -1, 
       oob_score = true, 
-      random_state = 42
+      random_state = 42, 
+      class_weight= Dict(0=>0.529, 1=>9.021)
       )
 fit!(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]))
 
