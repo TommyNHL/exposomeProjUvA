@@ -106,15 +106,15 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 6 x 14 = 84 times
+# modeling, 9 x 11 = 99 times
 function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
-    leaf_r = vcat(collect(4:2:8), collect(12:4:20))
-    tree_r = vcat(collect(50:50:400),collect(500:100:1000))
+    leaf_r = vcat(collect(1:1:9))
+    tree_r = vcat(collect(50:50:400),collect(500:100:700))
     #tree_r = collect(50:50:300)
     z = zeros(1,8)
     itr = 1
-    while itr < 256
+    while itr < 66
         l = rand(leaf_r)
         t = rand(tree_r)
         println("itr=", itr, ", leaf=", l, ", tree=", t)
@@ -184,52 +184,79 @@ println("Best parameters: $(gridsearch.best_params_)") =#
 model = RandomForestClassifier(
       n_estimators = 250, 
       #max_depth = 10, 
-      min_samples_leaf = 4, 
+      min_samples_leaf = 2, 
       max_features = Int64(9), 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
       class_weight= Dict(0=>0.529, 1=>9.021)
       )
-fit!(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]))
+fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]))
 
 # saving model
-modelSavePath = "F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib"
+modelSavePath = "J:\\UvA\\1_model\\modelTPTNModeling_withDeltaRi.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
 # training performace, CNL-predictedRi vs. FP-predictedRi
-predictedRi_train = predict(model, Matrix(inputDB[:, 3:end-1]))
-inputDB[!, "CNLpredictRi"] = predictedRi_train
+predictedTPTN_train = predict(model,  Matrix(inputDB[:, vcat(collect(5:12), end-3)]))
+inputDB[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi.csv"
+savePath = "F:\\dataframeTPTNModeling_TrainDF_withDeltaRiandPredictedTPTN.csv"
 CSV.write(savePath, inputDB)
 
-maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
-rSquare_train = rSquareDetermination(inputDB[:, end-1], predictedRi_train)
+maxAE_train, MSE_train, RMSE_train = errorDetermination(Matrix(inputDB[:, vcat(collect(5:12), end-4)]), predictedTPTN_train)
+rSquare_train = rSquareDetermination(Matrix(inputDB[:, vcat(collect(5:12), end-4)]), predictedTPTN_train)
 ## accuracy
-acc1_train = score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]))
-acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 3)
+acc1_train = score(model, Matrix(inputDB[:, vcat(collect(5:12), end-4)]), Vector(inputDB[:, end-3]))
+acc5_train = cross_val_score(model, Matrix(inputDB[:, vcat(collect(5:12), end-4)]), Vector(inputDB[:, end-3]); cv = 3)
 avgAcc_train = avgAcc(acc5_train, 3)
+pTP_train = predict_proba(model, Matrix(inputDB[:, vcat(collect(5:12), end-4)]))
+
+f1_train = f1_score(Vector(inputDB[:, end-3]), predictedTPTN_train)
+
+mcc_train = matthews_corrcoef(Vector(inputDB[:, end-3]), predictedTPTN_train)
+
+inputDB[!, "pTP_train1"] = pTP_train[:, 1]
+inputDB[!, "pTP_train2"] = pTP_train[:, 2]
+# save, ouputing trainSet df 0.7 x (3+15994+1)
+savePath = "F:\\dataframeTPTNModeling_TrainDF_withDeltaRiandPredictedTPTNandpTP.csv"
+CSV.write(savePath, inputDB)
+
+describe((inputDB))[end-4:end, :]
+
+
 
 # model validation
 #load a model
 # requires python 3.11 or 3.12
-modelRF_CNL = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
-model = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
-size(modelRF_CNL)
+modelRF_TPTN = jl.load("J:\\UvA\\1_model\\modelTPTNModeling_withDeltaRi.joblib")
+size(modelRF_TPTN)
 
-predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]))
-inputDB_test[!, "CNLpredictRi"] = predictedRi_test
+predictedTPTN_test = predict(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-3)]))
+inputDB_test[!, "withDeltaRipredictTPTN"] = predictedTPTN_test
 # save, ouputing testSet df 0.3 x (3+15994+1)
-savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi.csv"
+savePath = "F:\\dataframeTPTNModeling_TestDF_withDeltaRiandPredictedTPTN.csv"
 CSV.write(savePath, inputDB_test)
 
-maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
-rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
+maxAE_val, MSE_val, RMSE_val = errorDetermination(Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), predictedTPTN_test)
+rSquare_val = rSquareDetermination(Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), predictedTPTN_test)
 ## accuracy
-acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
-acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 3)
+acc1_val = score(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), Vector(inputDB_test[:, end-3]))
+acc5_val = cross_val_score(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), Vector(inputDB_test[:, end-3]); cv = 3)
 avgAcc_val = avgAcc(acc5_val, 3)
+pTP_train = predict_proba(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]))
+
+f1_train = f1_score(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
+
+mcc_train = matthews_corrcoef(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
+
+inputDB_test[!, "pTP_train1"] = pTP_train[:, 1]
+inputDB_test[!, "pTP_train2"] = pTP_train[:, 2]
+# save, ouputing trainSet df 0.7 x (3+15994+1)
+savePath = "F:\\dataframeTPTNModeling_TestDF_withDeltaRiandPredictedTPTNandpTP.csv"
+CSV.write(savePath, inputDB_test)
+
+describe((inputDB_test))[end-4:end, :]
 
 # plots
 # inputing dfs for separation of the cocamides and non-cocamides datasets
