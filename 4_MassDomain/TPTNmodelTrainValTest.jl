@@ -45,11 +45,7 @@ sort!(inputDB_test, [:ENTRY])
 inputDB = CSV.read("F:\\dataframeTPTNModeling_TrainDF.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
-# internal train/test split
-X = deepcopy(inputDB[:, vcat(collect(5:12), end-3)])
-size(X)
-Y = deepcopy(inputDB[:, end-2])
-size(Y)
+
 
 function partitionTrainVal(df, ratio = 0.67)
     noOfRow = nrow(df)
@@ -191,72 +187,156 @@ model = RandomForestClassifier(
       random_state = 42, 
       class_weight= Dict(0=>0.529, 1=>9.021)
       )
-fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]))
+#fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]))
+fit!(model, Matrix(inputDB[:, 5:12]), Vector(inputDB[:, end-2]))
 
 # saving model
-modelSavePath = "J:\\UvA\\1_model\\modelTPTNModeling_withDeltaRi.joblib"
+#modelSavePath = "J:\\UvA\\1_model\\modelTPTNModeling_withDeltaRi.joblib"
+modelSavePath = "J:\\UvA\\1_model\\modelTPTNModeling_withoutDeltaRi.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
-# training performace, CNL-predictedRi vs. FP-predictedRi
-predictedTPTN_train = predict(model,  Matrix(inputDB[:, vcat(collect(5:12), end-3)]))
+# training performace, withDeltaRi vs. withoutDeltaRi
+#= predictedTPTN_train = predict(model,  Matrix(inputDB[:, vcat(collect(5:12), end-3)]))
 inputDB[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
-# save, ouputing trainSet df 0.7 x (3+15994+1)
+# save, ouputing trainSet df 3308576 x 19 df
 savePath = "F:\\dataframeTPTNModeling_TrainDF_withDeltaRiandPredictedTPTN.csv"
+CSV.write(savePath, inputDB) =#
+# --------------------------------------------------------------------------------------------------
+predictedTPTN_train = predict(model, Matrix(inputDB[:, 5:12]))
+inputDB[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
+# save, ouputing trainSet df 3308576 x 19 df
+savePath = "F:\\dataframeTPTNModeling_TrainDF_withoutDeltaRiandPredictedTPTN.csv"
 CSV.write(savePath, inputDB)
 
+# ==================================================================================================
+
+#= # 1.0, 0.053116907732042806, 0.23047105616984273
 maxAE_train, MSE_train, RMSE_train = errorDetermination(Matrix(inputDB[:, vcat(collect(5:12), end-4)]), predictedTPTN_train)
+# -3.2123231824226766
 rSquare_train = rSquareDetermination(Matrix(inputDB[:, vcat(collect(5:12), end-4)]), predictedTPTN_train)
-## accuracy
+## accuracy, 0.9977256076330119
 acc1_train = score(model, Matrix(inputDB[:, vcat(collect(5:12), end-4)]), Vector(inputDB[:, end-3]))
+# 0.9375740688519566, 0.9334203193699285, 0.9360479771647846
 acc5_train = cross_val_score(model, Matrix(inputDB[:, vcat(collect(5:12), end-4)]), Vector(inputDB[:, end-3]); cv = 3)
+# 0.9356807884622232
 avgAcc_train = avgAcc(acc5_train, 3)
+# 3308576 × 2 Matrix
 pTP_train = predict_proba(model, Matrix(inputDB[:, vcat(collect(5:12), end-4)]))
-
+# 0.9798879068188683
 f1_train = f1_score(Vector(inputDB[:, end-3]), predictedTPTN_train)
-
+# 0.978889452177055
 mcc_train = matthews_corrcoef(Vector(inputDB[:, end-3]), predictedTPTN_train)
 
 inputDB[!, "pTP_train1"] = pTP_train[:, 1]
 inputDB[!, "pTP_train2"] = pTP_train[:, 2]
-# save, ouputing trainSet df 0.7 x (3+15994+1)
+# save, ouputing trainSet df 3308576 x (18+1+2)
 savePath = "F:\\dataframeTPTNModeling_TrainDF_withDeltaRiandPredictedTPTNandpTP.csv"
+CSV.write(savePath, inputDB)
+
+describe((inputDB))[end-4:end, :] =#
+# --------------------------------------------------------------------------------------------------
+# 1.0, 0.10199372858240166, 0.3193645700174045
+maxAE_train, MSE_train, RMSE_train = errorDetermination(Matrix(inputDB[:, 5:12]), predictedTPTN_train)
+# -6.375214361197565
+rSquare_train = rSquareDetermination(Matrix(inputDB[:, 5:12]), predictedTPTN_train)
+## accuracy, 0.9476439410791833
+acc1_train = score(model, Matrix(inputDB[:, 5:12]), Vector(inputDB[:, end-3]))
+#  0.9088469151541584, 0.8994622159315017, 0.9046622502624998
+acc5_train = cross_val_score(model, Matrix(inputDB[:, 5:12]), Vector(inputDB[:, end-3]); cv = 3)
+# 0.9043237937827199
+avgAcc_train = avgAcc(acc5_train, 3)
+# 3308576 × 2 Matrix
+pTP_train = predict_proba(model, Matrix(inputDB[:, 5:12]))
+# 0.6791684724830624
+f1_train = f1_score(Vector(inputDB[:, end-3]), predictedTPTN_train)
+# 0.6968009156974482
+mcc_train = matthews_corrcoef(Vector(inputDB[:, end-3]), predictedTPTN_train)
+
+inputDB[!, "pTP_train1"] = pTP_train[:, 1]
+inputDB[!, "pTP_train2"] = pTP_train[:, 2]
+# save, ouputing trainSet df 3308576 x (18+1+2)
+savePath = "F:\\dataframeTPTNModeling_TrainDF_withoutDeltaRiandPredictedTPTNandpTP.csv"
 CSV.write(savePath, inputDB)
 
 describe((inputDB))[end-4:end, :]
 
-
+# ==================================================================================================
 
 # model validation
-#load a model
+# load a model
 # requires python 3.11 or 3.12
 modelRF_TPTN = jl.load("J:\\UvA\\1_model\\modelTPTNModeling_withDeltaRi.joblib")
 size(modelRF_TPTN)
+# --------------------------------------------------------------------------------------------------
+modelRF_TPTN = jl.load("J:\\UvA\\1_model\\modelTPTNModeling_withoutDeltaRi.joblib")
+size(modelRF_TPTN)
+
+# ==================================================================================================
 
 predictedTPTN_test = predict(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-3)]))
 inputDB_test[!, "withDeltaRipredictTPTN"] = predictedTPTN_test
-# save, ouputing testSet df 0.3 x (3+15994+1)
+# save, ouputing testSet df 827145 x 19 df
 savePath = "F:\\dataframeTPTNModeling_TestDF_withDeltaRiandPredictedTPTN.csv"
 CSV.write(savePath, inputDB_test)
+# --------------------------------------------------------------------------------------------------
+predictedTPTN_test = predict(modelRF_TPTN, Matrix(inputDB_test[:, 5:12]))
+inputDB_test[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_test
+# save, ouputing testSet df 827145 x 19 df
+savePath = "F:\\dataframeTPTNModeling_TestDF_withoutDeltaRiandPredictedTPTN.csv"
+CSV.write(savePath, inputDB_test)
 
+# ==================================================================================================
+# 1.0, 0.050349413021199635, 0.22438674876471568
 maxAE_val, MSE_val, RMSE_val = errorDetermination(Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), predictedTPTN_test)
+# -2.973935605896406
 rSquare_val = rSquareDetermination(Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), predictedTPTN_test)
-## accuracy
+## accuracy, 0.983563945861971
 acc1_val = score(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), Vector(inputDB_test[:, end-3]))
+#  0.9387846145476307, 0.9334203797399488, 0.9374245144442631
 acc5_val = cross_val_score(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]), Vector(inputDB_test[:, end-3]); cv = 3)
+# 0.9365431695772809
 avgAcc_val = avgAcc(acc5_val, 3)
-pTP_train = predict_proba(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]))
+# 827145 × 2 Matrix
+pTP_test = predict_proba(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-4)]))
+# 0.8499895174727179
+f1_test = f1_score(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
+# 0.8413454155937011
+mcc_test = matthews_corrcoef(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
 
-f1_train = f1_score(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
-
-mcc_train = matthews_corrcoef(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
-
-inputDB_test[!, "pTP_train1"] = pTP_train[:, 1]
-inputDB_test[!, "pTP_train2"] = pTP_train[:, 2]
+inputDB_test[!, "pTP_test1"] = pTP_test[:, 1]
+inputDB_test[!, "pTP_test2"] = pTP_test[:, 2]
 # save, ouputing trainSet df 0.7 x (3+15994+1)
 savePath = "F:\\dataframeTPTNModeling_TestDF_withDeltaRiandPredictedTPTNandpTP.csv"
 CSV.write(savePath, inputDB_test)
 
 describe((inputDB_test))[end-4:end, :]
+# --------------------------------------------------------------------------------------------------
+# 1.0, 0.09573077136546966, 0.3094038968168786
+maxAE_val, MSE_val, RMSE_val = errorDetermination(Matrix(inputDB_test[:, 5:12]), predictedTPTN_test)
+# -6.206275194285345
+rSquare_val = rSquareDetermination(Matrix(inputDB_test[:, 5:12]), predictedTPTN_test)
+## accuracy, 0.91616584758416
+acc1_val = score(modelRF_TPTN, Matrix(inputDB_test[:, 5:12]), Vector(inputDB_test[:, end-3]))
+#  0.9095406488584227, 0.899718912645304, 0.9064940246268792
+acc5_val = cross_val_score(modelRF_TPTN, Matrix(inputDB_test[:, 5:12]), Vector(inputDB_test[:, end-3]); cv = 3)
+# 0.9052511953768686
+avgAcc_val = avgAcc(acc5_val, 3)
+# 827145 × 2 Matrix
+pTP_test = predict_proba(modelRF_TPTN, Matrix(inputDB_test[:, 5:12]))
+# 0.4613424685201153
+f1_test = f1_score(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
+# 0.4418821354064598
+mcc_test = matthews_corrcoef(Vector(inputDB_test[:, end-3]), predictedTPTN_test)
+
+inputDB_test[!, "pTP_test1"] = pTP_test[:, 1]
+inputDB_test[!, "pTP_test2"] = pTP_test[:, 2]
+# save, ouputing trainSet df 827145 x 19+2 df 
+savePath = "F:\\dataframeTPTNModeling_TestDF_withoutDeltaRiandPredictedTPTNandpTP.csv"
+CSV.write(savePath, inputDB_test)
+
+describe((inputDB_test))[end-4:end, :]
+
+# ==================================================================================================
 
 # plots
 # inputing dfs for separation of the cocamides and non-cocamides datasets
