@@ -159,7 +159,7 @@ heatmap!(["1", "0"], ["0", "1"], CM_without, cmap = :viridis, cbar = :true,
         savefig(outplotCM, "F:\\TPTNPrediction_RFallCM.png")
 
 # ==================================================================================================
-# prepare plotting P(TP)-to-TPR curve
+# prepare plotting P(TP)threshold-to-TPR curve
 inputDB_WithDeltaRi = CSV.read("F:\\dataframePostPredict_withDeltaRi.csv", DataFrame)
 inputDB_WithDeltaRi_1 = inputDB_WithDeltaRi[inputDB_WithDeltaRi.LABEL .== 1, :]
 sort!(inputDB_WithDeltaRi_1, [:p1], rev = true)
@@ -177,7 +177,7 @@ end
 describe(inputDB_WithDeltaRi_1)[end-5:end, :]
 inputDB_WithDeltaRi_1[210229, "p1"]
 
-function get1TPR(df, thd)
+function get1TPRnFNR(df, thd)
     TP = 0  # 
     FN = 0  # 
     for i in 1:size(df , 1)
@@ -187,23 +187,59 @@ function get1TPR(df, thd)
             FN += 1
         end
     end
-    return (TP / (TP + FN))
+    return (TP / (TP + FN)), (FN / (TP + FN))
 end
 
+
 withDeltaRi_TPR = []
-for prob in Array(inputDB_WithDeltaRi_1[:, "p1"])
-    TPR = get1TPR(inputDB_WithDeltaRi_1, prob)
-    push!(withDeltaRi_TPR, TPR)
+withDeltaRi_FNR = []
+prob = -1
+TPR = 0
+FNR = 0
+for temp in Array(inputDB_WithDeltaRi_1[:, "p1"])
+    if (temp != prob)
+        println(temp)
+        prob = temp
+        TPR, FNR = get1TPRnFNR(inputDB_WithDeltaRi_1, prob)
+        push!(withDeltaRi_TPR, TPR)
+        push!(withDeltaRi_FNR, FNR)
+    else
+        push!(withDeltaRi_TPR, TPR)
+        push!(withDeltaRi_FNR, FNR)
+    end
 end
 
 withoutDeltaRi_TPR = []
-for prob in Array(inputDB_WithoutDeltaRi_1[:, "p1"])
-    TPR = get1TPR(inputDB_WithoutDeltaRi_1, prob)
-    push!(withoutDeltaRi_TPR, TPR)
+withoutDeltaRi_FNR = []
+prob = -1
+TPR = 0
+FNR = 0
+for temp in Array(inputDB_WithoutDeltaRi_1[:, "p1"])
+    if (temp != prob)
+        println(temp)
+        prob = temp
+        TPR, FNR = get1TPRnFNR(inputDB_WithoutDeltaRi_1, prob)
+        push!(withoutDeltaRi_TPR, TPR)
+        push!(withoutDeltaRi_FNR, FNR)
+    else
+        push!(withoutDeltaRi_TPR, TPR)
+        push!(withoutDeltaRi_FNR, FNR)
+    end
 end
 
+inputDB_WithDeltaRi_1[!, "TPR"] = withDeltaRi_TPR
+inputDB_WithDeltaRi_1[!, "FNR"] = withDeltaRi_FNR
+inputDB_WithoutDeltaRi_1[!, "TPR"] = withoutDeltaRi_TPR
+inputDB_WithoutDeltaRi_1[!, "FNR"] = withoutDeltaRi_FNR
+
+# save, ouputing df 4135721 x 22 df 
+savePath = "F:\\dataframePostPredict_withDeltaRiTPRFNR.csv"
+CSV.write(savePath, inputDB_WithDeltaRi_1)
+# save, ouputing df 4135721 x 22 df 
+savePath2 = "F:\\dataframePostPredict_withoutDeltaRiTPRFNR.csv"
+CSV.write(savePath2, inputDB_WithoutDeltaRi_1)
 # --------------------------------------------------------------------------------------------------
-# prepare plotting P(TP)-to-TPR curve
+# prepare plotting P(TP)threshold-to-TPR curve
 inputDB_WithDeltaRi_0 = inputDB_WithDeltaRi[inputDB_WithDeltaRi.LABEL .== 0, :]
 sort!(inputDB_WithDeltaRi_0, [:p1], rev = true)
 for i in 1:size(inputDB_WithDeltaRi_0, 1)
@@ -219,149 +255,90 @@ end
 describe(inputDB_WithDeltaRi_0)[end-5:end, :]
 inputDB_WithDeltaRi_0[210229, "p1"]
 
-function get1TNR(df, thd)
-  TN = 0  # 
-  FP = 0  # 
-  for i in 1:size(df , 1)
-      if (df[i, "p1"] <= thd)
-          TN += 1
-      elseif (df[i, "p1"] > thd)
-          FP += 1
-      end
-  end
-  return (TN / (TN + FP))
+function get1TNRFPR(df, thd)
+    TN = 0  # 
+    FP = 0  # 
+    for i in 1:size(df , 1)
+        if (df[i, "p1"] <= thd)
+            TN += 1
+        elseif (df[i, "p1"] > thd)
+            FP += 1
+        end
+    end
+    return (TN / (TN + FP)), (FP / (TN + FP))
 end
 
 withDeltaRi_TNR = []
-for prob in Array(inputDB_WithDeltaRi_0[:, "p1"])
-  TNR = get1TNR(inputDB_WithDeltaRi_0, prob)
-  push!(withDeltaRi_TNR, TNR)
+withDeltaRi_FPR = []
+prob = -1
+TNR = 0
+FPR = 0
+for temp in Array(inputDB_WithDeltaRi_0[:, "p1"])
+    if (temp != prob)
+        println(temp)
+        prob = temp
+        TNR, FPR = get1TNRFPR(inputDB_WithDeltaRi_0, prob)
+        push!(withDeltaRi_TNR, TNR)
+        push!(withDeltaRi_FPR, FPR)
+    else
+        push!(withDeltaRi_TNR, TNR)
+        push!(withDeltaRi_FPR, FPR)
+    end
 end
 
 withoutDeltaRi_TNR = []
-for prob in Array(inputDB_WithoutDeltaRi_0[:, "p1"])
-  TNR = get1TNR(inputDB_WithoutDeltaRi_0, prob)
-  push!(withoutDeltaRi_TNR, TNR)
+withoutDeltaRi_FPR = []
+prob = -1
+TNR = 0
+FPR = 0
+for temp in Array(inputDB_WithoutDeltaRi_0[:, "p1"])
+    if (temp != prob)
+        println(temp)
+        prob = temp
+        TNR, FPR = get1TNRFPR(inputDB_WithoutDeltaRi_0, prob)
+        push!(withoutDeltaRi_TNR, TNR)
+        push!(withoutDeltaRi_FPR, FPR)
+    else
+        push!(withoutDeltaRi_TNR, TNR)
+        push!(withoutDeltaRi_FPR, FPR)
+    end
 end
 
-
-inputDB_WithDeltaRi_1[!, "TPR"] = withDeltaRi_TPR
-inputDB_WithoutDeltaRi_1[!, "TPR"] = withoutDeltaRi_TPR
 inputDB_WithDeltaRi_0[!, "TNR"] = withDeltaRi_TNR
+inputDB_WithDeltaRi_0[!, "FPR"] = withDeltaRi_FPR
 inputDB_WithoutDeltaRi_0[!, "TNR"] = withoutDeltaRi_TNR
+inputDB_WithoutDeltaRi_0[!, "FPR"] = withoutDeltaRi_FPR
 
 # save, ouputing df 4135721 x 22 df 
-savePath = "F:\\dataframePostPredict_withDeltaRiTPR.csv"
-CSV.write(savePath, inputDB_WithDeltaRi_1)
-# save, ouputing df 4135721 x 22 df 
-savePath2 = "F:\\dataframePostPredict_withoutDeltaRiTPR.csv"
-CSV.write(savePath2, inputDB_WithoutDeltaRi_1)
-# save, ouputing df 4135721 x 22 df 
-savePath3 = "F:\\dataframePostPredict_withDeltaRiTNR.csv"
+savePath3 = "F:\\dataframePostPredict_withDeltaRiTNRFPR.csv"
 CSV.write(savePath3, inputDB_WithDeltaRi_0)
 # save, ouputing df 4135721 x 22 df 
-savePath4 = "F:\\dataframePostPredict_withoutDeltaRiTNR.csv"
+savePath4 = "F:\\dataframePostPredict_withoutDeltaRiTNRFPR.csv"
 CSV.write(savePath4, inputDB_WithoutDeltaRi_0)
 
 # ==================================================================================================
-# plot P(1)-to-TPR
-# plot P(1)-to-TNR
-layout = @layout [a{0.45w,1.0h} b{0.55w,1.0h}]
+# plot P(1)threshold-to-TPR & P(1)threshold-to-TNR
+layout = @layout [a{0.50w,1.0h} b{0.50w,1.0h}]
 default(grid = false, legend = false)
 gr()
-outplotCM = plot(layout = layout, link = :both, 
-        size = (1400, 600), margin = (10, :mm), dpi = 300)
-layout = @layout [a{0.8w,0.2h}            _
-                  b{0.8w,0.8h} c{0.2w,0.8h}]
-describe(inputDB[:, "CNLpredictRi"])
-default(fillcolor = :lightgrey, grid = false, legend = false)
-outplotTrain = plot(layout = layout, link = :both, 
-        size = (600, 600), margin = -2Plots.px, dpi = 300)
-scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1], 
-        subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
-        markershape = :star, 
-        c = :skyblue, 
-        markerstrokewidth = 0, 
-        alpha = 0.1, 
-        label = "Non-Cocamides", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-scatter!(inputDB[trainCocamide, end-2], inputDB[trainCocamide, end-1], 
-        subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
-        markershape = :star, 
-        c = :green, 
-        markerstrokewidth = 0, 
-        alpha = 0.1, 
-        label = "Cocamides", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-plot!(tempDfTrain -> tempDfTrain, c=:red, subplot = 2, 
-        label = false, 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-histogram!(inputDB[:, end-2], subplot = 1, 
-        xlims = (-150, 1500), 
-        orientation = :v, 
-        framestyle = :none, 
-        dpi = 300)
-histogram!(inputDB[:, end-1], subplot = 3, 
-        ylims = (-150, 1500), 
-        orientation = :h, 
-        framestyle = :none, 
-        dpi = 300)
-plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
-        # Saving
-savefig(outplotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification_v2.png")
 
-tempDfTest = inputDB_test[:, end-1]
-layout = @layout [a{0.8w,0.2h}            _
-                  b{0.8w,0.8h} c{0.2w,0.8h}]
-describe(inputDB_test[:, "CNLpredictRi"])
-default(fillcolor = :lightgrey, grid = false, legend = false)
-outplotTest = plot(layout = layout, link = :both, 
-        size = (600, 600), margin = -2Plots.px, dpi = 300)
-scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end-1], 
+outplotP12TR = plot(layout = layout, link = :both, 
+        size = (1200, 600), margin = (8, :mm), dpi = 300)
+
+plot!(inputDB_WithDeltaRi_1[:, end-3], [inputDB_WithDeltaRi_1[:, end-1] inputDB_WithDeltaRi_1[:, end]], 
+        subplot = 1, framestyle = :box, 
+        xlabel = "P(1) threshold", 
+        label = ["True positive rate" "False negative rate"], 
+        legend = :left, 
+        size = (1200,600), 
+        dpi = 300)
+
+plot!(inputDB_WithDeltaRi_0[:, end-3], [inputDB_WithDeltaRi_0[:, end-1] inputDB_WithDeltaRi_0[:, end]], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
-        markershape = :star, 
-        c = :skyblue, 
-        markerstrokewidth = 0, 
-        alpha = 0.1, 
-        label = "Non-Cocamides", 
-        margin = -2Plots.px, 
-        size = (600,600), 
+        xlabel = "P(1) threshold", 
+        label = ["True negative rate" "False positive rate"], 
+        legend = :left, 
+        size = (1200,600), 
         dpi = 300)
-scatter!(inputDB_test[testCocamide, end-2], inputDB_test[testCocamide, end-1], 
-        subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
-        markershape = :star, 
-        c = :green, 
-        markerstrokewidth = 0, 
-        alpha = 0.1, 
-        label = "Cocamides", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-plot!(tempDfTest -> tempDfTest, c=:red, subplot = 2, 
-        label = false, 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-histogram!(inputDB_test[:, end-2], subplot = 1, 
-        xlims = (-150, 1500), 
-        orientation = :v, 
-        framestyle = :none, 
-        dpi = 300)
-histogram!(inputDB_test[:, end-1], subplot = 3, 
-        ylims = (-150, 1500), 
-        orientation = :h, 
-        framestyle = :none, 
-        dpi = 300)
-plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
-        # Saving
-savefig(outplotTest, "F:\\CNLRiPrediction_RFTestWithStratification_v2.png")
+
+savefig(outplotP12TR, "F:\\TPTNPrediction_P1threshold2TPRTNR.png")
