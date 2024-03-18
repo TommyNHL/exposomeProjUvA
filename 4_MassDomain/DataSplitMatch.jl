@@ -104,9 +104,6 @@ for i in 1:size(outputDf, 1)
     if outputDf[i, "INCHIKEY"] in Array(inputFP2Ri[:, "INCHIKEY"])
         rowNo = findall(inputFP2Ri.INCHIKEY .== outputDf[i, "INCHIKEY"])
         outputDf[i, "predictRi"] = inputFP2Ri[rowNo[end:end], "predictRi"][1]
-    elseif outputDf[i, "INCHIKEY"] in Array(inputFP2Ri[:, "INCHIKEY"])
-        rowNo = findall(inputFP2Ri.INCHIKEY .== outputDf[i, "INCHIKEY"])
-        outputDf[!, "predictRi"] = inputFP2Ri[rowNo[end:end], "predictRi"][1]
     else
         outputDf[i, "predictRi"] = float(8888888)
     end
