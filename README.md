@@ -1,47 +1,20 @@
 # exposomeProjUvA
-
 # Procedure
 ## 0_tools (folder)
-### CombinePubchemFP.jl in the sub-directory 1_CombinePubChemFP
+### A_CombinePubchemFP.jl in the sub-directory 1_CombinePubChemFP
 #### - step 1: convert 148 Pubchem FPs features into 10 condensed FPs feastures 
 ####           -> new .csv
-### MergeAp2dPubchem.jl in the sub-directory 2_MergeAp2dPubchem 
+### B_MergeAp2dPubchem.jl in the sub-directory 2_MergeAp2dPubchem 
 #### - step 2: join 780 APC2D FPs features table with the 10 Pubchem-based condensed FPs festures table
 ####           -> new .csv
 
 ## 1_deployRFmodel (folder)
-### ModelDeploy4FPbasedRi.jl  ***done***
+### A_ModelDeploy4FPbasedRi.jl  ***done***
 #### - step 1: load the pre-train RF-based model- CocamideExtended.joblib
 #### - step 2: predict the FP-derived Ri values
 ####           -> new .csv
-### DfPre4FPs.jl  ***done***
-#### - step 1: find distinct INCHIKEYs
-####           -> new .csv
-####           -> new .csv
-#### - step 2: count frequency for each INCHIKEY
-####           -> new .csv
-#### - step 3: creat a FP df after taking INCHIKEY frequency into account
-####           -> new .csv
-### TrainTestSplitPre.jl  ***done***
-#### - step 4: extract column-of-interests for CNL df construction
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-### LeverageGetIdx.jl  ***done***
-#### - step 5: calculate leverage value
-#### - step 6: record leverage value and train/test group information
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-### TrainTestSplit.jl  ***done***
-#### - step 7: perform 7:3 train/test split by index
-#### - step 8: gather and join ID informaiton and FP and FP-Ri
-####           -> new .csv
-####           -> new .csv
-
 ## 2_prepareCNLmodel (folder)
-### PreProcessInternalDB.jl  ***done***
+### B_PreProcessInternalDB.jl  ***done***
 #### - step 1: filter in positive ionization mode
 #### - step 2: filter in precusor ion with measured m/z
 #### - step 3: bin the m/z domain with bin size 0.01 Da (steps)
@@ -55,12 +28,33 @@
 #### - step 11: transform table as row(ID copounds) x column(CNLs masses)
 ####           -> new .csv
 ####           -> new .png
-### Dfs4CNLmodeling.jl  ***old version***
-#### - step 12: split the table with only the cocamides
-#### - step 13: merge the table with only the cocamides with the FP-based Ri
+### C_FPDfPre4Leverage.jl  ***done***
+#### - step 1: find distinct INCHIKEYs
 ####           -> new .csv
-#### - step 14: split the table without the cocamides
 ####           -> new .csv
+#### - step 2: count frequency for each INCHIKEY
+####           -> new .csv
+#### - step 3: creat a FP df after taking INCHIKEY frequency into account
+####           -> new .csv
+### D_rainTestSplitPre.jl  ***done***
+#### - step 4: extract column-of-interests for CNL df construction
+####           -> new .csv
+####           -> new .csv
+####           -> new .csv
+####           -> new .csv
+### E_LeverageGetIdx.jl  ***done***
+#### - step 5: calculate leverage value
+#### - step 6: record leverage value and train/test group information
+####           -> new .csv
+####           -> new .csv
+####           -> new .csv
+### F_TrainTestSplit.jl  ***done***
+#### - step 7: perform 7:3 train/test split by index
+#### - step 8: gather and join ID informaiton and FP and FP-Ri
+####           -> new .csv
+####           -> new .csv
+
+
 
 ## 3_trainTestCNLmodel
 ### CNLmodelTrainVal(Test).jl  ***pending to run***
