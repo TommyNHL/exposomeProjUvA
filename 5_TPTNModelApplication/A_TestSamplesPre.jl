@@ -89,17 +89,72 @@ using ScikitLearn.CrossValidation: train_test_split
     CSV.write(savePath, inputRef)
 
 #gather distinct INCHIKEY IDs
-    distinctKeys = Set()
-    for i in 1:size(inputRef, 1)
-        key = inputRef[i, "INCHIKEY"]
-        if (key !== missing)
-            push!(distinctKeys, key)
+    function setDistinct(df)
+        distinctKeys = Set()
+        for i in 1:size(df, 1)
+            key = df[i, "INCHIKEY"]
+            if (key !== missing)
+                push!(distinctKeys, key)
+            end
         end
+        distinctKeys = sort!(collect(distinctKeys))
+        return distinctKeys
     end
-    distinctKeys = sort!(collect(distinctKeys))
+
+    distinctKeys1to8 = setDistinct(inputRef)
+
+    #export distinct INCHIKEYs by Standard mixture
+    inputRef1 = inputRef[inputRef.PestMixOrNot .== 1, :]
+    inputRef2 = inputRef[inputRef.PestMixOrNot .== 2, :]
+    inputRef3 = inputRef[inputRef.PestMixOrNot .== 3, :]
+    inputRef4 = inputRef[inputRef.PestMixOrNot .== 4, :]
+    inputRef5 = inputRef[inputRef.PestMixOrNot .== 5, :]
+    inputRef6 = inputRef[inputRef.PestMixOrNot .== 6, :]
+    inputRef7 = inputRef[inputRef.PestMixOrNot .== 7, :]
+    inputRef8 = inputRef[inputRef.PestMixOrNot .== 8, :]
+
+    distinctKeys1 = setDistinct(inputRef1)
+    distinctKeys2 = setDistinct(inputRef2)
+    distinctKeys3 = setDistinct(inputRef3)
+    distinctKeys4 = setDistinct(inputRef4)
+    distinctKeys5 = setDistinct(inputRef5)
+    distinctKeys6 = setDistinct(inputRef6)
+    distinctKeys7 = setDistinct(inputRef7)
+    distinctKeys8 = setDistinct(inputRef8)
 
 #export distinct INCHIKEYs
-    outputDf = DataFrame([distinctKeys], ["PesticideMixINCHIKEYs"])
-
+    outputDf = DataFrame([distinctKeys1to8], ["PesticideMixINCHIKEYs"])
     savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv"
     CSV.write(savePath, outputDf)
+
+    outputDf1 = DataFrame([distinctKeys1], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_1.csv"
+    CSV.write(savePath, outputDf1)
+
+    outputDf2 = DataFrame([distinctKeys2], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_2.csv"
+    CSV.write(savePath, outputDf2)
+
+    outputDf3 = DataFrame([distinctKeys3], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_3.csv"
+    CSV.write(savePath, outputDf3)
+
+    outputDf4 = DataFrame([distinctKeys4], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_4.csv"
+    CSV.write(savePath, outputDf4)
+
+    outputDf5 = DataFrame([distinctKeys5], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_5.csv"
+    CSV.write(savePath, outputDf5)
+
+    outputDf6 = DataFrame([distinctKeys6], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_6.csv"
+    CSV.write(savePath, outputDf6)
+
+    outputDf7 = DataFrame([distinctKeys7], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_7.csv"
+    CSV.write(savePath, outputDf7)
+
+    outputDf8 = DataFrame([distinctKeys8], ["PesticideMixINCHIKEYs"])
+    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_8.csv"
+    CSV.write(savePath, outputDf8)
