@@ -133,7 +133,7 @@ using ScikitLearn.CrossValidation: train_test_split
                 rowNo = findall(inputFP2Ri.INCHIKEY .== combinedDB[i, "Inchikey"])
                 combinedDB[i, "FPpredictRi"] = inputFP2Ri[rowNo[end:end], "predictRi"][1]
             else
-              combinedDB[i, "FPpredictRi"] = float(8888888)
+                combinedDB[i, "FPpredictRi"] = float(8888888)
             end
         end
 
@@ -151,6 +151,8 @@ using ScikitLearn.CrossValidation: train_test_split
     
     savePath = "F:\\PestMix1-8_1000ug-L_NoTea_1ul_AllIon_pos_52_report_comp_IDs_ready4CNLdf.csv"
     CSV.write(savePath, outputDf)
+
+    outputDf = CSV.read("F:\\PestMix1-8_1000ug-L_NoTea_1ul_AllIon_pos_52_report_comp_IDs_ready4CNLdf.csv", DataFrame)
 
 #create CNL df
     function getVec(matStr)
@@ -223,7 +225,6 @@ using ScikitLearn.CrossValidation: train_test_split
         outputDf[i, "CNLmasses"] = sort!(collect(arrNL))
     end
     sort!(outputDf, [:LABEL, :INCHIKEY_ID, :CNLmasses])
-    outputDf[:, "CNLmasses"]
     
     # Reducing df size (rows)
     function getMasses(db, i, arr, arrType = "dig")
@@ -250,6 +251,7 @@ using ScikitLearn.CrossValidation: train_test_split
 
     # storing data in a Matrix
     X = zeros(18333, 15961)
+
     for i in 1:18333
         println(i)
         arr = []
@@ -300,9 +302,9 @@ using ScikitLearn.CrossValidation: train_test_split
         CSV.write(savePath, dfCNLs)
         println("done for saving csv")
 
+    dfCNLs = CSV.read("F:\\PestMix1-8_1000ug-L_NoTea_1ul_AllIon_pos_52_report_comp_IDs_withCNLRi.csv", DataFrame)
+
 #TP/TN prediction
-    # input 3+9+2+1+1 df
-    # columns: ENTRY, Inchikey, ISOTOPICMASS, CNLs, FPpredictRi, CNLpredictRi, DeltaRi, LABEL
     inputDB_test = dfCNLs
     sort!(inputDB_test, [:ENTRY])
 
@@ -355,11 +357,12 @@ using ScikitLearn.CrossValidation: train_test_split
 
     # load the pre-trained TP/TN model
         # requires python 3.11 or 3.12
-        modelRF_TPTN = jl.load("F:\\modelTPTNModeling_withDeltaRi.joblib")
+        modelRF_TPTN = jl.load("F:\\modelTPTNModeling_WholeWithDeltaRi.joblib")
         size(modelRF_TPTN)
 
         # predict TP/TN
-        describe(inputDB_test)
+        describe(inputDB_test)[1:5, :]
+        describe(inputDB_test)[end-4:end, :]
         predictedTPTN_test = predict(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(4:11), end-1)]))
         1 in inputDB_test[:, "LABEL"]
         1 in predictedTPTN_test
@@ -369,21 +372,21 @@ using ScikitLearn.CrossValidation: train_test_split
         CSV.write(savePath, inputDB_test)
 
 #show prediction performance
-    # 1.0, 0.007544955597504883, 0.0868617038602449
+    # 1.0, 0.015013666897399802, 0.12253026931089232
     maxAE_val, MSE_val, RMSE_val = errorDetermination(Matrix(inputDB_test[:, vcat(collect(4:11), end-2)]), predictedTPTN_test)
-    # -0.28944539083727316
+    # -0.30707777934049774
     rSquare_val = rSquareDetermination(Matrix(inputDB_test[:, vcat(collect(4:11), end-2)]), predictedTPTN_test)
-    ## accuracy, 0.8709601690273104
+    ## accuracy, 0.8226149566355752
     acc1_val = score(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(4:11), end-2)]), Vector(inputDB_test[:, end-1]))
-    # 0.8387323943661972, 0.8997652582159624, 0.8518431556703452
+    # 0.785305187367043, 0.8037964326624121, 0.8216331206021927
     acc5_val = cross_val_score(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(4:11), end-2)]), Vector(inputDB_test[:, end-1]); cv = 3)
-    # 0.8634469360841682
+    # 0.803578246877216
     avgAcc_val = avgAcc(acc5_val, 3)
-    # 12779 × 2 Matrix
+    # 18333 × 2 Matrix
     pTP_test = predict_proba(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(4:11), end-2)]))
-    # 0.8499895174727179
+    # 0.025286680388121145
     f1_test = f1_score(Vector(inputDB_test[:, end-1]), predictedTPTN_test)
-    # 0.8413454155937011
+    # 0.056934155424103704
     mcc_test = matthews_corrcoef(Vector(inputDB_test[:, end-1]), predictedTPTN_test)
 
     inputDB_test[!, "pTP_test1"] = pTP_test[:, 1]
@@ -393,3 +396,4 @@ using ScikitLearn.CrossValidation: train_test_split
     CSV.write(savePath, inputDB_test)
 
     describe((inputDB_test))[end-4:end, :]
+    
