@@ -8,7 +8,7 @@ using LinearAlgebra
 using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 
-# 516966 x 15978 df -> 16 df
+# 512981 x 15978 df -> 17 df
 #dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_3withCNLRideltaRi.csv", DataFrame)
@@ -18,7 +18,7 @@ using ScikitLearn.CrossValidation: train_test_split
 #dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRi.csv", DataFrame)
 dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
 
-dfOutput = dfOutput[:, vcat(collect(1:13), end-2, end-1, end)]
+dfOutput = dfOutput[:, vcat(collect(1:13), end-3, end-2, end-1, end)]
 savePath = "F:\\dataframeTPTNModeling_8.csv"
 CSV.write(savePath, dfOutput)
 
@@ -34,18 +34,18 @@ dfOutput = vcat(dfOutput1, dfOutput2, dfOutput3, dfOutput4, dfOutput5, dfOutput6
 savePath = "F:\\dataframeTPTNModeling.csv"
 CSV.write(savePath, dfOutput)
 
-X = deepcopy(dfOutput[:, vcat(collect(5:12), end-1)])  # 693685 x 790 df
+X = deepcopy(dfOutput[:, vcat(collect(5:12), end-1)])  # 4103848 x 9 df
 size(X)
-Y = deepcopy(dfOutput[:, end])  #693685,
+Y = deepcopy(dfOutput[:, end])  # 4103848,
 size(Y)
 Xmat = Matrix(X)
 
-# 790 x 790
+# 9 x 9
 hipinv = zeros(9, 9)
 hipinv[:,:] .= pinv(Xmat'*Xmat)
 
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zeros(4135721,1)
+    h = zeros(4103848,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:]
         #hi = x'*pinv(X'*X)*x
@@ -73,8 +73,8 @@ X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(ht, limits = collect(0.
 
 dfOutput[!, "GROUP"] .= ""
 dfOutput[!, "Leverage"] .= float(0)
-dfOutput[X_trainIdx, "GROUP"] .= "train"  # 0.8 > 3308576 333
-dfOutput[X_testIdx, "GROUP"] .= "test"  # 0.2 > 827145
+dfOutput[X_trainIdx, "GROUP"] .= "train"  # 4103848 x 0.8 > 3283078
+dfOutput[X_testIdx, "GROUP"] .= "test"  # 4103848 x 0.2 > 820770
 
 count = 1
 for i in X_trainIdx
@@ -88,29 +88,29 @@ for i in X_testIdx
     count += 1
 end
 
-# output csv is a 4135721 x 18 df
+# output csv is a 4103848 x 17 + 2 df
 dfOutput
 savePath = "F:\\dataframeTPTNModeling_withLeverage.csv"
 CSV.write(savePath, dfOutput)
 
-# 3308576 x 1
+# 3283078 x 1
 X_trainIdxDf = DataFrame([X_trainIdx], ["INDEX"])
 savePath = "F:\\dataframeTPTNModeling_TrainIndex.csv"
 CSV.write(savePath, X_trainIdxDf)
 
-# 827145 x 1
+# 820770 x 1
 X_testIdxDf = DataFrame([X_testIdx], ["INDEX"])
 savePath = "F:\\dataframeTPTNModeling_TestIndex.csv"
 CSV.write(savePath, X_testIdxDf)
 
 # ==============================================================================
-# train 3308576 rows
+# train 3283078 x 17 + 2 rows
 dfOutputTrain = dfOutput[dfOutput.GROUP .== "train", :]
 savePath = "F:\\dataframeTPTNModeling_TrainDF.csv"
 CSV.write(savePath, dfOutputTrain)
 
 # ==============================================================================
-# test 827145 rows
+# test 820770 x 17 + 2 rows
 dfOutputTest = dfOutput[dfOutput.GROUP .== "test", :]
 savePath = "F:\\dataframeTPTNModeling_TestDF.csv"
 CSV.write(savePath, dfOutputTest)
