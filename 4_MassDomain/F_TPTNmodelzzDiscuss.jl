@@ -5,16 +5,13 @@ using ScikitLearn
 using StatsPlots
 using Plots
 
-# 4 + 8 + 1 + 2 + 1
+# 4103848 x 4 + 8 + 1 + 2 + 1 + 1
 outputDf = CSV.read("F:\\dataframeTPTNModeling.csv", DataFrame)
 
 outputDf[!, "FPinchikeyrealRi"] .= float(0)
 outputDf[!, "P1P0RiError"] .= float(0)
-describe(outputDf)[end-5:end, :]
+describe(outputDf)[end-4:end, :]
 
-# creating a 4368902 x 3+8+2+1+1 df, 
-    ## columns: INCHIKEY_ID, INCHIKEYreal, 8+1 ULSA features, LABEL
-    ##                      FP->Ri, CNL->Ri ^
 # matching INCHIKEY, 30684 x 793 df
 inputFP2Ri = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
 sort!(inputFP2Ri, [:INCHIKEY, :SMILES])
@@ -32,14 +29,15 @@ for i in 1:size(outputDf, 1)
 end
 outputDf = outputDf[outputDf.FPinchikeyrealRi .!= float(8888888), :]
 
-# 4086824 x 4 + 8 + 1 + 2 + 1 + 2
+# 4054971 x 4 + 8 + 1 + 2 + 1 + 1 + 2
 outputDf
 describe(outputDf)
 
 savePath = "F:\\dataframe_P1P0RiError.csv"
 CSV.write(savePath, outputDf)
 
-# 4086824 x 4 + 8 + 1 + 2 + 1 + 2
+# ==================================================================================================
+# 4054971 x 4 + 8 + 1 + 2 + 1 + 2
 outputDf = CSV.read("F:\\dataframe_P1P0RiError.csv", DataFrame)
 
 outputDf[!, "P1P0RiErrorRound"] .= Integer(0)
@@ -77,5 +75,5 @@ histogram!(outputDf[ind_0, "LABEL"], outputDf[ind_0, "DeltaRi"],
     margin = (8, :mm), 
     size = (800,600), 
     dpi = 300)
-    # Saving
-    savefig(outplotTPTNdetaRiDistrution, "F:\\outplotTPTNdetaRiDistrution.png")
+# Saving
+savefig(outplotTPTNdetaRiDistrution, "F:\\outplotTPTNdetaRiDistrution.png")
