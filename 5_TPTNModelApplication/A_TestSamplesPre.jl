@@ -35,7 +35,7 @@ using ScikitLearn.CrossValidation: train_test_split
     # Name, Formula, Mass, CAS, ChemSpider, IUPAC, 
     # SubMix, Label, M+H, Frags, Int, INCHIKEY, Name_MB, simple_name, FragsAll
     # Name- 
-    inputRef = CSV.read("J:\\UvA\\CNL_Ref.csv", DataFrame)
+    inputRef = CSV.read("F:\\CNL_Ref.csv", DataFrame)
     describe(inputRef)[7, :]
     describe(inputRef)[8, :]
     inputRef[:, "SubMix"]
