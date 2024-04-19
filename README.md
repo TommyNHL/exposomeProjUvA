@@ -5,7 +5,7 @@
 ### A_CombinePubchemFP.jl  ***(sub-directory folder "1_CombinePubChemFP")***
 #### - step 01: convert 148 Pubchem FPs features into 10 condensed FPs feastures 
 ####           -> new .csv
-### B_MergeAp2dPubchem.jl  ***(sub-directory folder "2_MergeAp2dPubchem")***
+### B_MergeApc2dPubchem.jl  ***(sub-directory folder "2_MergeAp2dPubchem")***
 #### - step 02: join 780 APC2D FPs features table with the 10 Pubchem-based condensed FPs festures table
 ####           -> new .csv
 

@@ -17,11 +17,11 @@ jl = pyimport("joblib")
 # 1 compound entry has an invalid SMILES id -> conversion failed
 # so the updated csv1 input is a 30684 x 782 df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs
-input_ap2d = CSV.read("D:\\0_data\\dataAP2DFingerprinter.csv", DataFrame)
+input_ap2d = CSV.read("F:\\dataAP2DFingerprinter.csv", DataFrame)
 
 # input csv2 is a 30684 x 160 df, columns include 
         #SMILES, INCHIKEY, 148 Pubchem FPs, and 10 newly converted columns
-input_pub = CSV.read("D:\\0_data\\dataPubchemFingerprinter_converted.csv", 
+input_pub = CSV.read("F:\\dataPubchemFingerprinter_converted.csv", 
     DataFrame, select = Symbol.("PubchemFP".*string.(151:160)))
 
 # replacing missing values
@@ -37,5 +37,5 @@ input_pub = input_pub[ind_all .== 0, :]
 allFPs = hcat(input_ap2d, input_pub)
 
 # save
-savePath = "D:\\0_data\\dataAllFingerprinter_4RiPredict.csv"
+savePath = "F:\\UvA\\dataAllFingerprinter_4RiPredict.csv"
 CSV.write(savePath, allFPs)
