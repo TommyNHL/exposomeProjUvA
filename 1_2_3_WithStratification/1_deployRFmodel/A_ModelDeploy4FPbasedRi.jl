@@ -10,11 +10,7 @@ Pkg.status()
 using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
-#Conda.add("padelpy")
 #Conda.add("joblib")
-## import packages ##
-#using PyCall, Conda                 #using python packages
-pd = pyimport("padelpy")            #calculation of FP
 jl = pyimport("joblib")             # used for loading models
 
 using ScikitLearn: @sk_import, fit!, predict
@@ -24,23 +20,23 @@ using ScikitLearn: @sk_import, fit!, predict
 #import csv
 # input csv is a 30684 x (2+790) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs
-inputAll = CSV.read("D:\\0_data\\dataAllFingerprinter_4RiPredict.csv", DataFrame)
+inputAll = CSV.read("F:\\UvA\\dataAllFingerprinter_4RiPredict.csv", DataFrame)
 inputData = Matrix(inputAll[:, 3:end])
 
-#load a model
+#load a model, RandomForestRegressor(max_features=310, min_samples_leaf=8, n_estimators=200), size 200
 # requires python 3.11 or 3.12
-modelRF = jl.load("D:\\1_model\\CocamideExtendedWithStratification.joblib")
+modelRF = jl.load("F:\\CocamideExtendedWithStratification.joblib")
 size(modelRF)
 
 #apply
 # requires sklearn v1.3.1 has been installed on Python 3.11 environment
 predictedRi = predict(modelRF, inputData)
 inputAll[!, "predictRi"] = predictedRi
-#fit!(modelRF, inputData)
 
 # save
 # output csv is a 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
-savePath = "D:\\0_data\\dataAllFP_withNewPredictedRiWithStratification.csv"
+inputAll
+savePath = "F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv"
 CSV.write(savePath, inputAll)
