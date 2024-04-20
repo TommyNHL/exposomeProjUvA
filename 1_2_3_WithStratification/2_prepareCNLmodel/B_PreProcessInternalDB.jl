@@ -1,15 +1,7 @@
 using Pkg
 #Pkg.add("BSON")
 #Pkg.add(PackageSpec(url=""))
-#using BSON
-using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
-#Conda.add("pubchempy")
-#Conda.add("padelpy")
-#Conda.add("joblib")
-## import packages ##
-#pcp = pyimport("pubchempy")
-#pd = pyimport("padelpy")
-#jl = pyimport("joblib")
+using CSV, DataFrames
 
 function getVec(matStr)
     if matStr[1] .== '['
@@ -49,7 +41,7 @@ function getVec(matStr)
 end
 
 # inputing 1095389 x 31 df
-inputDB = CSV.read("C:\\github\\exposomeProjUvA\\Database_INTERNAL_2022-11-17.csv", DataFrame)
+inputDB = CSV.read("F:\\Database_INTERNAL_2022-11-17.csv", DataFrame)
 
 # filtering out NEGATIVE ionization mode -> 1078844 x 4
 # filtering out NEGATIVE ionization mode -> 817512 x 4
@@ -59,6 +51,8 @@ inputData0 = inputDB[inputDB.ION_MODE .!= "NEGATIVE",
 inputData = inputData0[inputData0.ION_MODE .!= "N", 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 inputData = inputData[inputData.PRECURSOR_ION .!== NaN, 
+    ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
+inputData = inputData[inputData.PRECURSOR_ION .!= "NaN", 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]]
 #= inputData = inputData[inputData.PRECURSOR_ION .<= 1000, 
     ["SMILES", "INCHIKEY", "PRECURSOR_ION", "MZ_VALUES"]] =#
@@ -70,7 +64,7 @@ size(inputData)
 # NLs calculation, filtering CNL-in-interest, storing in Vector{Any}
         # filtering in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
         # inputing 16022 candidates
-        candidates_df = CSV.read("C:\\github\\exposomeProjUvA\\CNLs_10mDa.csv", DataFrame)
+        candidates_df = CSV.read("F:\\CNLs_10mDa.csv", DataFrame)
         candidatesList = []
         for can in candidates_df[:, 1]
             push!(candidatesList, round(float(can), digits = 2))
@@ -96,7 +90,7 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 # inputing 30684 x (2+791) df, columns include 
         #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs, 
         #and newly added one (FP-derived predicted Ri)
-        inputAllFPDB = CSV.read("C:\\github\\exposomeProjUvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+        inputAllFPDB = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
         sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
         
         # finding missing features
@@ -150,7 +144,8 @@ sort!(inputData, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
             push!(dfMissed, list)
         end
 
-        savePath = "C:\\github\\exposomeProjUvA\\CNLs_10mDa_missed.csv"
+        dfMissed
+        savePath = "F:\\UvA\\CNLs_10mDa_missed.csv"
         CSV.write(savePath, dfMissed)
         
         # filtering in row entries according to the presence of FPs in .csv DB
@@ -193,7 +188,7 @@ dfOutput
 
 # save
 # output csv is a 693685 x 4 df
-savePath = "C:\\github\\exposomeProjUvA\\databaseOfInternal_withNLs.csv"
+savePath = "F:\\UvA\\databaseOfInternal_withNLs.csv"
 CSV.write(savePath, dfOutput)
 
 # transform table as row(ID copounds) x column(CNLs masses)
@@ -240,11 +235,12 @@ dfCNLs = DataFrame(X, finalColumnsCNLs)
 insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:693685)))
 insertcols!(dfCNLs, 2, ("SMILES"=>dfOutput[:, "SMILES"]))
 insertcols!(dfCNLs, 3, ("INCHIKEY"=>dfOutput[:, "INCHIKEY"]))
-insertcols!(dfCNLs, 4, ("ISOTOPICMASS"=>dfOutput[:, "PRECURSOR_ION"] .- 1.007276))
+insertcols!(dfCNLs, 4, ("MONOISOTOPICMASS"=>((dfOutput[:, "PRECURSOR_ION"] .- 1.007276)/1000)))
 size(dfCNLs)  # 693685 x (3+1+15961)
 
 # ouputing df 693685 x (3+1+15961)
-savePath = "C:\\github\\exposomeProjUvA\\dataframeCNLsRows.csv"
+savePath = "F:\\UvA\\dataframeCNLsRows.csv"
+
 CSV.write(savePath, dfCNLs)
 println("done for saving csv")
 
@@ -265,16 +261,20 @@ for col in names(dfCNLs)[5:end]
 end
 push!(dfCNLs, sumUp)
 # 693685 -> 693686 rows
-dfCNLs[end,:]  #693686
+dfCNLsSum = dfCNLs[end:end,:]  #693686
+savePath = "F:\\UvA\\dfCNLsSumModeling.csv"
+CSV.write(savePath, dfCNLsSum)
 
 using DataSci4Chem
-massesCNLsDistrution = bar(names(dfCNLs)[5:end], Vector(dfCNLs[end, 5:end]), 
+massesCNLsDistrution = bar(finalDistinctFeaturesCNLs, Vector(dfCNLs[end, 5:end]), 
     label = false, 
     lc = "skyblue", 
     margin = (5, :mm), 
     size = (1000,800), 
+    xtickfontsize = 12, 
+    ytickfontsize= 12, 
+    xlabel="Feature CNL mass", xguidefontsize=16, 
+    ylabel="Count", yguidefontsize=16, 
     dpi = 300)
-    xlabel!("CNLs features")
-    ylabel!("Summation")
     # Saving
-    savefig(massesCNLsDistrution, "C:\\github\\exposomeProjUvA\\massesCNLsDistrution.png")
+    savefig(massesCNLsDistrution, "F:\\UvA\\massesCNLsDistrution.png")
