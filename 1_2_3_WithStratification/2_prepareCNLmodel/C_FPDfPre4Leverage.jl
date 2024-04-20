@@ -1,43 +1,18 @@
-VERSION
 using Pkg
 #Pkg.add("ScikitLearn")
-#Pkg.add("Plots")
-#Pkg.add("ProgressBars")
-import Conda
-Conda.PYTHONDIR
-ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
-Pkg.build("PyCall")
-Pkg.status()
 #Pkg.add(PackageSpec(url=""))
 using Random
-using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
-using PyCall
-using StatsPlots
-using Plots
 using ProgressBars
-#using PyPlot
-#Conda.add("pubchempy")
-#Conda.add("padelpy")
-#Conda.add("joblib")
-## import packages ##
-#using PyCall, Conda                 #using python packages
-#pcp = pyimport("pubchempy")
-pd = pyimport("padelpy")            #calculation of FP
-jl = pyimport("joblib")             # used for loading models
-
-using ScikitLearn  #: @sk_import, fit!, predict
-@sk_import ensemble: RandomForestRegressor
-@sk_import ensemble: RandomForestClassifier
 
 # inputing 693685 x 4 df
 # columns: SMILES, INCHIKEY, PRECURSOR_ION, CNLmasses...
-inputDB = CSV.read("F:\\databaseOfInternal_withNLs.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\databaseOfInternal_withNLs.csv", DataFrame)
 sort!(inputDB, [:INCHIKEY, :SMILES, :PRECURSOR_ION, :CNLmasses])
 
 # inputing 693685 x 3+1+15961 df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
-inputCNLs = CSV.read("F:\\dataframeCNLsRows.csv", DataFrame)
+inputCNLs = CSV.read("F:\\UvA\\dataframeCNLsRows.csv", DataFrame)
 sort!(inputCNLs, [:ENTRY])
 
 # creating a table with 2 columns
@@ -69,11 +44,11 @@ end
 dfOutput
 # save
 # output csv is a 27211 x 2 df
-savePath = "F:\\countingRows4Leverage.csv"
+savePath = "F:\\UvA\\countingRows4Leverage.csv"
 CSV.write(savePath, dfOutput)
 
 # comparing, 30684 x 793 df
-inputAllFPDB = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+inputAllFPDB = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
 sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
 
 # creating a table with 2 columns
@@ -105,7 +80,7 @@ end
 dfOutput2
 # save
 # output csv is a 28536 x 2 df
-savePath = "F:\\countingRowsInFP4Leverage.csv"
+savePath = "F:\\UvA\\countingRowsInFP4Leverage.csv"
 CSV.write(savePath, dfOutput2)
 
 # creating FP df taking frequency into accounut
@@ -133,5 +108,5 @@ end
 dfOutputFP
 # save
 # output csv is a 693685 x 792 df
-savePath = "F:\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv"
+savePath = "F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv"
 CSV.write(savePath, dfOutputFP)
