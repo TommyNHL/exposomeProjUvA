@@ -1,6 +1,6 @@
 VERSION
 using Pkg
-using CSV, DataFrames, Conda, LinearAlgebra, Statistics
+using CSV, DataFrames, LinearAlgebra, Statistics
 
 # Train/Test Split by Leverage
 using ProgressBars
@@ -8,7 +8,8 @@ using LinearAlgebra
 using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 
-dfOutputFP = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv", DataFrame)
+# import 693685 x 792 df
+dfOutputFP = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv", DataFrame)
 
 X = deepcopy(dfOutputFP[:, 2:end-1])  # 693685 x 790 df
 size(X)
@@ -41,7 +42,7 @@ function strat_split(leverage=ht; limits = limits)
     for i = 1: (length(limits)-1)
         bin[limits[i] .<= leverage] .= i
     end
-    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.50, random_state = 42, stratify = bin)
+    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.20, random_state = 42, stratify = bin)
     return  X_train, X_test, y_train, y_test
 end
 
@@ -49,8 +50,8 @@ X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(ht, limits = collect(0.
 
 dfOutputFP[!, "GROUP"] .= ""
 dfOutputFP[!, "Leverage"] .= float(0)
-dfOutputFP[X_trainIdx, "GROUP"] .= "train"  # 0.7 > 485579
-dfOutputFP[X_testIdx, "GROUP"] .= "test"  # 0.3 > 208106
+dfOutputFP[X_trainIdx, "GROUP"] .= "train"  # 0.8 > 554948
+dfOutputFP[X_testIdx, "GROUP"] .= "test"  # 0.2 > 138737
 
 count = 1
 for i in X_trainIdx
@@ -66,15 +67,15 @@ end
 
 # output csv is a 693685 x 1+790+1+2 df
 dfOutputFP
-savePath = "F:\\dataAllFP_withNewPredictedRiWithStratification_FreqAndLeverage.csv"
+savePath = "F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification_FreqAndLeverage.csv"
 CSV.write(savePath, dfOutputFP)
 
-# 485579 x 1
+# 554948 x 1
 X_trainIdxDf = DataFrame([X_trainIdx], ["INDEX"])
-savePath = "F:\\dataframe_dfTrainSetWithStratification_index.csv"
+savePath = "F:\\UvA\\dataframe_dfTrainSetWithStratification_index.csv"
 CSV.write(savePath, X_trainIdxDf)
 
-# 208106 x 1
+# 138737 x 1
 X_testIdxDf = DataFrame([X_testIdx], ["INDEX"])
-savePath = "F:\\dataframe_dfTestSetWithStratification_index.csv"
+savePath = "F:\\UvA\\dataframe_dfTestSetWithStratification_index.csv"
 CSV.write(savePath, X_testIdxDf)
