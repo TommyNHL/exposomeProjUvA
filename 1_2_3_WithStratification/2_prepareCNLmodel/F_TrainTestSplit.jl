@@ -17,11 +17,11 @@ CNLs = CSV.read("F:\\UvA\\databaseOfInternal_withNLsOnly.csv", DataFrame)
 CNLsY = CSV.read("F:\\UvA\\databaseOfInternal_withYOnly.csv", DataFrame)
 
 ### inputing Index for Train/Test Split
-# 554948 x 1
+# 485579 x 1
 X_trainIdxDf = CSV.read("F:\\UvA\\dataframe_dfTrainSetWithStratification_index.csv", DataFrame)
 X_trainIdx = X_trainIdxDf[:, "INDEX"]
 
-# 138737 x 1
+# 208106 x 1
 X_testIdxDf = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification_index.csv", DataFrame)
 X_testIdx = X_testIdxDf[:, "INDEX"]
 
