@@ -25,11 +25,11 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 693685*0.2 x 1+1+1+15961+1 df = 138737 x 15965
-# columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi
+# inputing 693685*0.3 x 1+1+1+15961+1 df = 208106 x 15965
+# columns: ENTRY, INCHIKEY, MONOISOTOPICMASS, CNLs, predictRi
 inputDB_test = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
-# inputing 693685*0.8 x 1+1+1+15961+1 df = 554948 x 15965
+# inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
 inputDB = CSV.read("F:\\UvA\\dataframe_dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
