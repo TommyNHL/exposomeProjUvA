@@ -17,11 +17,11 @@ CNLs = CSV.read("F:\\UvA\\databaseOfInternal_withNLsOnly.csv", DataFrame)
 CNLsY = CSV.read("F:\\UvA\\databaseOfInternal_withYOnly.csv", DataFrame)
 
 ### inputing Index for Train/Test Split
-# 416211 x 1
+# 346842 x 1
 X_trainIdxDf = CSV.read("F:\\UvA\\dataframe_dfTrainSetWithStratification_index.csv", DataFrame)
 X_trainIdx = X_trainIdxDf[:, "INDEX"]
 
-# 277474 x 1
+# 346843 x 1
 X_testIdxDf = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification_index.csv", DataFrame)
 X_testIdx = X_testIdxDf[:, "INDEX"]
 
@@ -54,12 +54,12 @@ Y_trainFPRi, Y_testFPRi = create_train_test_split_strat(CNLsY, CNLsY, X_trainIdx
 
 dfTrainSetWithStratification = hcat(X_trainInfo, X_trainInfo2, X_trainCNL, Y_trainFPRi)
 dfTrainSetWithStratification
-# output csv is a 693685*0.6 x 1+1+1+15961+1 df = 416211 x 15965
+# output csv is a 693685*0.5 x 1+1+1+15961+1 df = 346842 x 15965
 savePath = "F:\\UvA\\dataframe_dfTrainSetWithStratification.csv"
 CSV.write(savePath, dfTrainSetWithStratification)
 
 dfTestSetWithStratification = hcat(X_testInfo, X_testInfo2, X_testCNL, Y_testFPRi)
 dfTestSetWithStratification
-# output csv is a 693685*0.4 x 1+1+1+15961+1 df = 277474 x 15965
+# output csv is a 693685*0.5 x 1+1+1+15961+1 df = 346843 x 15965
 savePath = "F:\\UvA\\dataframe_dfTestSetWithStratification.csv"
 CSV.write(savePath, dfTestSetWithStratification)
