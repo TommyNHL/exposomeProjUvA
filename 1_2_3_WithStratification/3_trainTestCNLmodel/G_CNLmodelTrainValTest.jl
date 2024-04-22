@@ -25,11 +25,11 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 693685*0.3 x 1+1+1+15961+1 df = 208106 x 15965
+# inputing 693685*0.4 x 1+1+1+15961+1 df = 277474 x 15965
 # columns: ENTRY, INCHIKEY, MONOISOTOPICMASS, CNLs, predictRi
 inputDB_test = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
-# inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
+# inputing 693685*0.6 x 1+1+1+15961+1 df = 416211 x 15965
 inputDB = CSV.read("F:\\UvA\\dataframe_dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
@@ -103,7 +103,7 @@ function optimRandomForestRegressor(df_train)
     tree_r = collect(50:50:300)
     z = zeros(1,6)
     itr = 1
-    while itr < 6
+    while itr < 10
         l = rand(leaf_r)
         t = rand(tree_r)
         println("itr=", itr, ", leaf=", l, ", tree=", t)
