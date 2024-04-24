@@ -25,11 +25,11 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 693685*0.4 x 1+1+1+15961+1 df = 277474 x 15965
+# inputing 693685*0.5 x 1+1+1+15961+1 df = 346843 x 15965
 # columns: ENTRY, INCHIKEY, MONOISOTOPICMASS, CNLs, predictRi
 inputDB_test = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
-# inputing 693685*0.6 x 1+1+1+15961+1 df = 416211 x 15965
+# inputing 693685*0.5 x 1+1+1+15961+1 df = 346842 x 15965
 inputDB = CSV.read("F:\\UvA\\dataframe_dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
@@ -94,16 +94,16 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 3 x 6 = 18 times
+# modeling, 3 x 8 = 24 times
 function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
     #leaf_r = vcat(collect(4:2:8), collect(12:4:20))
     leaf_r = vcat(collect(4:2:8))
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
-    tree_r = collect(50:50:300)
+    tree_r = collect(50:50:400)
     z = zeros(1,6)
     itr = 1
-    while itr < 10
+    while itr < 11
         l = rand(leaf_r)
         t = rand(tree_r)
         println("itr=", itr, ", leaf=", l, ", tree=", t)
@@ -149,7 +149,7 @@ end
 optiSearch_df = optimRandomForestRegressor(inputDB)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\hyperparameterTuning_RFwithStratification.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
