@@ -87,6 +87,11 @@ X_testIdxDf = DataFrame([X_testIdxArr], ["INDEX"])
 savePath = "F:\\UvA\\dataframe_dfTestSetWithStratification_95index.csv"
 CSV.write(savePath, X_testIdxDf)
 
+X_IdxDf = vcat(X_trainIdxDf, X_testIdxDf)
+sort!(X_IdxDf, [:INDEX])
+savePath = "F:\\UvA\\dataframe_dfWithStratification_95index.csv"
+CSV.write(savePath, X_IdxDf)
+
 # output csv is a 693685-4 x 1+790+1+2 df
 dfOutputFP
 dfOutputFP = dfOutputFP[dfOutputFP.Leverage .<= 0.275, :]
