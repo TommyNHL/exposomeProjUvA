@@ -94,16 +94,16 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 3 x 8 = 24 times
+# modeling, 5 x 8 = 40 times
 function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
     #leaf_r = vcat(collect(4:2:8), collect(12:4:20))
-    leaf_r = vcat(collect(4:2:8))
+    leaf_r = vcat(collect(1:1:2), collect(4:2:8))
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
     tree_r = collect(50:50:400)
     z = zeros(1,6)
     itr = 1
-    while itr < 11
+    while itr < 33
         l = rand(leaf_r)
         t = rand(tree_r)
         println("itr=", itr, ", leaf=", l, ", tree=", t)
@@ -149,7 +149,7 @@ end
 optiSearch_df = optimRandomForestRegressor(inputDB)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification2.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
