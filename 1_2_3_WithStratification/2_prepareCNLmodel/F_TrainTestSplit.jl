@@ -4,24 +4,17 @@ using Pkg
 using Random
 using CSV, DataFrames
 
-# inputing 693685-4 x 1 df
-X_IdxDf = CSV.read("F:\\UvA\\dataframe_dfWithStratification_95index.csv", DataFrame)
-
-# inputing 693685-4 x 1 df
+# inputing 693685 x 1 df
 CNLsInfo = CSV.read("F:\\UvA\\databaseOfInternal_withEntryInfoOnly.csv", DataFrame)
-CNLsInfo = CNLsInfo[X_IdxDf[:,1], :]
 
-# inputing a 693685-4 x 1 df
+# inputing a 693685 x 1 df
 CNLsInfo2 = CSV.read("F:\\UvA\\databaseOfInternal_withINCHIKEYInfoOnly.csv", DataFrame)
-CNLsInfo2 = CNLsInfo2[X_IdxDf[:,1], :]
 
-# inputing 693685-4 x 1+15961 df
+# inputing 693685 x 1+15961 df
 CNLs = CSV.read("F:\\UvA\\databaseOfInternal_withNLsOnly.csv", DataFrame)
-CNLs = CNLs[X_IdxDf[:,1], :]
 
-# inputing 693685-4 x 1 df
+# inputing 693685 x 1 df
 CNLsY = CSV.read("F:\\UvA\\databaseOfInternal_withYOnly.csv", DataFrame)
-CNLsY = CNLsY[X_IdxDf[:,1], :]
 
 ### inputing Index for Train/Test Split
 # 346842-2 x 1
@@ -31,7 +24,6 @@ X_trainIdx = X_trainIdxDf[:, "INDEX"]
 # 346843-2 x 1
 X_testIdxDf = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification_95index.csv", DataFrame)
 X_testIdx = X_testIdxDf[:, "INDEX"]
-
 
 
 function create_train_test_split_strat(total_df, y_data, X_trainIdx, X_testIdx, RiCol = true)
