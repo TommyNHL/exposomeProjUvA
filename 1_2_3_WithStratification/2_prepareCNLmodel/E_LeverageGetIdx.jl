@@ -65,17 +65,30 @@ for i in X_testIdx
     count += 1
 end
 
-# output csv is a 693685 x 1+790+1+2 df
-dfOutputFP
-savePath = "F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification_FreqAndLeverage.csv"
-CSV.write(savePath, dfOutputFP)
-
-# 346842 x 1
-X_trainIdxDf = DataFrame([X_trainIdx], ["INDEX"])
-savePath = "F:\\UvA\\dataframe_dfTrainSetWithStratification_index.csv"
+# 346842-2 x 1
+X_trainIdxArr = []
+for i in X_trainIdx
+    if dfOutputFP[i, "Leverage"] <= 0.275
+        push!(X_trainIdxArr, i)
+    end
+end
+X_trainIdxDf = DataFrame([X_trainIdxArr], ["INDEX"])
+savePath = "F:\\UvA\\dataframe_dfTrainSetWithStratification_95index.csv"
 CSV.write(savePath, X_trainIdxDf)
 
-# 346843 x 1
-X_testIdxDf = DataFrame([X_testIdx], ["INDEX"])
-savePath = "F:\\UvA\\dataframe_dfTestSetWithStratification_index.csv"
+# 346843-2 x 1
+X_testIdxArr = []
+for i in X_testIdx
+    if dfOutputFP[i, "Leverage"] <= 0.275
+        push!(X_testIdxArr, i)
+    end
+end
+X_testIdxDf = DataFrame([X_testIdxArr], ["INDEX"])
+savePath = "F:\\UvA\\dataframe_dfTestSetWithStratification_95index.csv"
 CSV.write(savePath, X_testIdxDf)
+
+# output csv is a 693685-4 x 1+790+1+2 df
+dfOutputFP
+dfOutputFP = dfOutputFP[dfOutputFP.Leverage .<= 0.275, :]
+savePath = "F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification_FreqAnd95Leverage.csv"
+CSV.write(savePath, dfOutputFP)
