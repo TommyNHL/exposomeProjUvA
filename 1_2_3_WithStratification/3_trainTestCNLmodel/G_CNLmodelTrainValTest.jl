@@ -27,10 +27,10 @@ using ScikitLearn.CrossValidation: train_test_split
 
 # inputing 693685*0.5 x 1+1+1+15961+1 df = 346843 x 15965
 # columns: ENTRY, INCHIKEY, MONOISOTOPICMASS, CNLs, predictRi
-inputDB_test = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\dataframe_95dfTestSetWithStratification.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 # inputing 693685*0.5 x 1+1+1+15961+1 df = 346842 x 15965
-inputDB = CSV.read("F:\\UvA\\dataframe_dfTrainSetWithStratification.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\dataframe_95dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
 # internal train/test split
@@ -98,12 +98,14 @@ end
 function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
     #leaf_r = vcat(collect(4:2:8), collect(12:4:20))
-    leaf_r = vcat(collect(1:1:2), collect(4:2:8))
+    #leaf_r = vcat(collect(1:1:2), collect(4:2:8))
+    leaf_r = collect(1:1:2)
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
-    tree_r = collect(50:50:400)
+    #tree_r = collect(50:50:400)
+    tree_r = vcat(collect(50:50:400),collect(500:100:1000))
     z = zeros(1,6)
     itr = 1
-    while itr < 33
+    while itr < 17
         l = rand(leaf_r)
         t = rand(tree_r)
         println("itr=", itr, ", leaf=", l, ", tree=", t)
@@ -149,7 +151,7 @@ end
 optiSearch_df = optimRandomForestRegressor(inputDB)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification2.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification3.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
