@@ -97,3 +97,5 @@ dfOutputFP
 dfOutputFP = dfOutputFP[dfOutputFP.Leverage .<= 0.275, :]
 savePath = "F:\\UvA\\dataAllFP73_withNewPredictedRiWithStratification_FreqAnd95Leverage.csv"
 CSV.write(savePath, dfOutputFP)
+
+# 7:3 -> 485579-2: 208106-2
