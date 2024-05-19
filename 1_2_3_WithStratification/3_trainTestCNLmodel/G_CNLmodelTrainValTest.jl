@@ -39,7 +39,7 @@ size(X)
 Y = deepcopy(inputDB[:, end])
 size(Y)
 
-function partitionTrainVal(df, ratio = 0.80)
+function partitionTrainVal(df, ratio = 0.90)
     noOfRow = nrow(df)
     idx = shuffle(1:noOfRow)
     train_idx = view(idx, 1:floor(Int, ratio*noOfRow))
@@ -100,7 +100,7 @@ function optimRandomForestRegressor(df_train)
     #leaf_r = vcat(collect(4:2:8), collect(12:4:20))
     #leaf_r = vcat(collect(1:1:2), collect(4:2:8))
     #leaf_r = collect(1:1:2)
-    leaf_r = vcat(collect(1:1:2), 4)
+    leaf_r = vcat(collect(1:1:2), collect(4))
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
     #tree_r = collect(50:50:400)
     #tree_r = vcat(collect(50:50:400),collect(500:100:1000))
@@ -108,14 +108,14 @@ function optimRandomForestRegressor(df_train)
     rs = vcat(1, 42)
     z = zeros(1,7)
     itr = 1
-    while itr < 17
+    while itr < 9
         l = rand(leaf_r)
         t = rand(tree_r)
         for s in rs
             println("itr=", itr, ", leaf=", l, ", tree=", t, ", s=", s)
             MaxFeat = Int64(ceil((size(df_train,2)-1)/3))
             println("## split ##")
-            M_train, M_val = partitionTrainVal(df_train, 0.80)
+            M_train, M_val = partitionTrainVal(df_train, 0.90)
             Xx_train = deepcopy(M_train[:, 3:end-1])
             Yy_train = deepcopy(M_train[:, end])
             Xx_val = deepcopy(M_val[:, 3:end-1])
@@ -130,8 +130,8 @@ function optimRandomForestRegressor(df_train)
                 z[1,3] = score(reg, Matrix(Xx_train), Vector(Yy_train))
                 z[1,4] = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
                 println("## CV ##")
-                acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 5)
-                z[1,5] = avgAcc(acc5_train, 5)
+                acc10_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 10)
+                z[1,5] = avgAcc(acc10_train, 10)
                 z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
                 z[1,7] = s
                 println(z[end, :])
@@ -139,8 +139,8 @@ function optimRandomForestRegressor(df_train)
                 println("## CV ##")
                 itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
                 traintrain = score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]))
-                acc5_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 5)
-                traincvtrain = avgAcc(acc5_train, 5) 
+                acc10_train = cross_val_score(reg, Matrix(df_train[:, 3:end-1]), Vector(df_train[:, end]); cv = 10)
+                traincvtrain = avgAcc(acc10_train, 10) 
                 ival = score(reg, Matrix(Xx_val), Vector(Yy_val)) 
                 z = vcat(z, [l t itrain traintrain traincvtrain ival s])
                 println(z[end, :])
@@ -149,15 +149,15 @@ function optimRandomForestRegressor(df_train)
             itr += 1
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], accuracy_5Ftrain = z[:,3], accuracy_train = z[:,4], avgAccuracy5FCV_train = z[:,5], accuracy_val = z[:,6], state = z[:,7])
-    z_df_sorted = sort(z_df, [:accuracy_val, :avgAccuracy5FCV_train, :accuracy_train, :accuracy_5Ftrain], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], accuracy_10Ftrain = z[:,3], accuracy_train = z[:,4], avgAccuracy10FCV_train = z[:,5], accuracy_val = z[:,6], state = z[:,7])
+    z_df_sorted = sort(z_df, [:accuracy_val, :avgAccuracy10FCV_train, :accuracy_train, :accuracy_10Ftrain], rev=true)
     return z_df_sorted
 end
 
 optiSearch_df = optimRandomForestRegressor(inputDB)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification5F.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification10F.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
@@ -175,9 +175,9 @@ gridsearch = GridSearchCV(model, param_dist)
 println("Best parameters: $(gridsearch.best_params_)") =#
 
 model = RandomForestRegressor(
-      n_estimators = 250, 
+      n_estimators = 350, 
       #max_depth = 10, 
-      min_samples_leaf = 4, 
+      min_samples_leaf = 2, 
       max_features = Int64(ceil((size(inputDB[:, 3:end-1],2)-1)/3)), 
       n_jobs = -1, 
       oob_score = true, 

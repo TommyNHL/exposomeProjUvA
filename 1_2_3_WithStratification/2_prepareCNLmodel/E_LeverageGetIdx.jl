@@ -42,7 +42,7 @@ function strat_split(leverage=ht; limits = limits)
     for i = 1: (length(limits)-1)
         bin[limits[i] .<= leverage] .= i
     end
-    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.50, random_state = 42, stratify = bin)
+    X_train, X_test, y_train, y_test = train_test_split(collect(1:n), leverage, test_size = 0.30, random_state = 42, stratify = bin)
     return  X_train, X_test, y_train, y_test
 end
 
@@ -73,7 +73,7 @@ for i in X_trainIdx
     end
 end
 X_trainIdxDf = DataFrame([X_trainIdxArr], ["INDEX"])
-savePath = "F:\\UvA\\dataframe_dfTrainSetWithStratification_95index.csv"
+savePath = "F:\\UvA\\dataframe73_dfTrainSetWithStratification_95index.csv"
 CSV.write(savePath, X_trainIdxDf)
 
 # 346843-2 x 1
@@ -84,16 +84,16 @@ for i in X_testIdx
     end
 end
 X_testIdxDf = DataFrame([X_testIdxArr], ["INDEX"])
-savePath = "F:\\UvA\\dataframe_dfTestSetWithStratification_95index.csv"
+savePath = "F:\\UvA\\dataframe73_dfTestSetWithStratification_95index.csv"
 CSV.write(savePath, X_testIdxDf)
 
 X_IdxDf = vcat(X_trainIdxDf, X_testIdxDf)
 sort!(X_IdxDf, [:INDEX])
-savePath = "F:\\UvA\\dataframe_dfWithStratification_95index.csv"
+savePath = "F:\\UvA\\dataframe73_dfWithStratification_95index.csv"
 CSV.write(savePath, X_IdxDf)
 
 # output csv is a 693685-4 x 1+790+1+2 df
 dfOutputFP
 dfOutputFP = dfOutputFP[dfOutputFP.Leverage .<= 0.275, :]
-savePath = "F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification_FreqAnd95Leverage.csv"
+savePath = "F:\\UvA\\dataAllFP73_withNewPredictedRiWithStratification_FreqAnd95Leverage.csv"
 CSV.write(savePath, dfOutputFP)
