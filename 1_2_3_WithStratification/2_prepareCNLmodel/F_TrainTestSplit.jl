@@ -4,6 +4,7 @@ using Pkg
 using Random
 using CSV, DataFrames
 
+# 7:3 -> 485579-2: 208106-2
 # inputing 693685 x 1 df
 CNLsInfo = CSV.read("F:\\UvA\\databaseOfInternal_withEntryInfoOnly.csv", DataFrame)
 
@@ -18,11 +19,11 @@ CNLsY = CSV.read("F:\\UvA\\databaseOfInternal_withYOnly.csv", DataFrame)
 
 ### inputing Index for Train/Test Split
 # 346842-2 x 1
-X_trainIdxDf = CSV.read("F:\\UvA\\dataframe_dfTrainSetWithStratification_95index.csv", DataFrame)
+X_trainIdxDf = CSV.read("F:\\UvA\\dataframe73_dfTrainSetWithStratification_95index.csv", DataFrame)
 X_trainIdx = X_trainIdxDf[:, "INDEX"]
 
 # 346843-2 x 1
-X_testIdxDf = CSV.read("F:\\UvA\\dataframe_dfTestSetWithStratification_95index.csv", DataFrame)
+X_testIdxDf = CSV.read("F:\\UvA\\dataframe73_dfTestSetWithStratification_95index.csv", DataFrame)
 X_testIdx = X_testIdxDf[:, "INDEX"]
 
 
@@ -54,11 +55,11 @@ Y_trainFPRi, Y_testFPRi = create_train_test_split_strat(CNLsY, CNLsY, X_trainIdx
 dfTrainSetWithStratification = hcat(X_trainInfo, X_trainInfo2, X_trainCNL, Y_trainFPRi)
 dfTrainSetWithStratification
 # output csv is a 693685*0.5 x 1+1+1+15961+1 df = 346842-2 x 15965
-savePath = "F:\\UvA\\dataframe_95dfTrainSetWithStratification.csv"
+savePath = "F:\\UvA\\dataframe73_95dfTrainSetWithStratification.csv"
 CSV.write(savePath, dfTrainSetWithStratification)
 
 dfTestSetWithStratification = hcat(X_testInfo, X_testInfo2, X_testCNL, Y_testFPRi)
 dfTestSetWithStratification
 # output csv is a 693685*0.5 x 1+1+1+15961+1 df = 346843-2 x 15965
-savePath = "F:\\UvA\\dataframe_95dfTestSetWithStratification.csv"
+savePath = "F:\\UvA\\dataframe73_95dfTestSetWithStratification.csv"
 CSV.write(savePath, dfTestSetWithStratification)
