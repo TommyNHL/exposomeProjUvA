@@ -1,15 +1,7 @@
 using Pkg
 #Pkg.add("BSON")
 #Pkg.add(PackageSpec(url=""))
-#using BSON
-using CSV, DataFrames #, PyCall, Conda, LinearAlgebra, Statistics
-#Conda.add("pubchempy")
-#Conda.add("padelpy")
-#Conda.add("joblib")
-## import packages ##
-#pcp = pyimport("pubchempy")
-#pd = pyimport("padelpy")
-#jl = pyimport("joblib")
+using CSV, DataFrames
 
 # inputing 863582, 865290, 881258, 881919, 876853 x 19 dfs -> 4368902 x 13+4+1 df
     ## ID, NAMEreal, INCHIKEYreal, ACCESSIONreal, MS1Mass, Name, 
@@ -93,7 +85,7 @@ CSV.write(savePath, outputDf)
     ## columns: INCHIKEY_ID, INCHIKEYreal, 8+1 ULSA features, LABEL
     ##                      FP->Ri, CNL->Ri ^
 # matching INCHIKEY, 30684 x 793 df
-inputFP2Ri = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+inputFP2Ri = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
 sort!(inputFP2Ri, [:INCHIKEY, :SMILES])
 
 # FP-derived Ri values
