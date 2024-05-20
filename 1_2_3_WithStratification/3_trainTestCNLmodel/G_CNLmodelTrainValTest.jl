@@ -221,8 +221,8 @@ maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predic
 rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
 ## accuracy
 acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
-acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 10)
-avgAcc_val = avgAcc(acc5_val, 10)
+#acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 10)
+#avgAcc_val = avgAcc(acc5_val, 10)
 
 # plots
 # inputing dfs for separation of the cocamides and non-cocamides datasets
