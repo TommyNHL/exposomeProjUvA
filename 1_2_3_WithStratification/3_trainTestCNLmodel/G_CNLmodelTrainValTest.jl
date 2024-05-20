@@ -25,12 +25,13 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
+# 7:3 -> 485579-2: 208106-2
 # inputing 693685*0.5 x 1+1+1+15961+1 df = 346843 x 15965
 # columns: ENTRY, INCHIKEY, MONOISOTOPICMASS, CNLs, predictRi
-inputDB_test = CSV.read("F:\\UvA\\dataframe_95dfTestSetWithStratification.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\dataframe73_95dfTestSetWithStratification.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 # inputing 693685*0.5 x 1+1+1+15961+1 df = 346842 x 15965
-inputDB = CSV.read("F:\\UvA\\dataframe_95dfTrainSetWithStratification.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\dataframe73_95dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
 # internal train/test split
@@ -186,42 +187,42 @@ model = RandomForestRegressor(
 fit!(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]))
 
 # saving model
-modelSavePath = "F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib"
+modelSavePath = "F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
 # training performace, CNL-predictedRi vs. FP-predictedRi
+model = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
 predictedRi_train = predict(model, Matrix(inputDB[:, 3:end-1]))
 inputDB[!, "CNLpredictRi"] = predictedRi_train
 # save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi.csv"
+savePath = "F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, inputDB)
 
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
 rSquare_train = rSquareDetermination(inputDB[:, end-1], predictedRi_train)
 ## accuracy
 acc1_train = score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]))
-acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 3)
-avgAcc_train = avgAcc(acc5_train, 3)
+#acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 10)
+#avgAcc_train = avgAcc(acc5_train, 10)
 
 # model validation
 #load a model
 # requires python 3.11 or 3.12
-modelRF_CNL = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
-model = jl.load("F:\\CocamideExtended_CNLsRi_RFwithStratification.joblib")
+modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
 size(modelRF_CNL)
 
 predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]))
 inputDB_test[!, "CNLpredictRi"] = predictedRi_test
 # save, ouputing testSet df 0.3 x (3+15994+1)
-savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi.csv"
+savePath = "F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv"
 CSV.write(savePath, inputDB_test)
 
 maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
 rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
 ## accuracy
 acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
-acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 3)
-avgAcc_val = avgAcc(acc5_val, 3)
+acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 10)
+avgAcc_val = avgAcc(acc5_val, 10)
 
 # plots
 # inputing dfs for separation of the cocamides and non-cocamides datasets
@@ -234,7 +235,7 @@ inputCocamidesTest = CSV.read("F:\\CocamideExtWithStratification_Fingerprints_te
 sort!(inputCocamidesTest, :SMILES)
 
 # comparing, 30684 x 793 df
-inputAllFPDB = CSV.read("F:\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+inputAllFPDB = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
 sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
 
 function id2id(plotdf, i)
@@ -269,7 +270,7 @@ for i in 1:size(inputDB, 1)
         push!(trainNonCocamide, i)
     end
 end
-savePath = "F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv"
+savePath = "F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv"
 CSV.write(savePath, inputDB)
 trainNonCocamide = findall(inputDB[:, "Cocamides"] .== "no")
 trainCocamide = findall(inputDB[:, "Cocamides"] .== "yes")
@@ -286,18 +287,20 @@ for i in 1:size(inputDB_test, 1)
         push!(testNonCocamide, i)
     end
 end
-savePath = "F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv"
+savePath = "F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv"
 CSV.write(savePath, inputDB_test)
 testNonCocamide = findall(inputDB_test[:, "Cocamides"] .== "no")
 testCocamide = findall(inputDB_test[:, "Cocamides"] .== "yes")
 
 # inputing 693685*0.3 x 1+1+1+15961+1+1+1 df = 208106 x 15965
 # columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi, CNLpredictRi, Cocamides
-inputDB_test = CSV.read("F:\\dataframe_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
 
 # inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
-inputDB = CSV.read("F:\\dataframe_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
 
+inputDB_test[:, end-2:end]
+inputDB[:, end-2:end]
 #Pkg.add("Distributions")
 using Distributions
 tempDfTrain = inputDB[:, end-1]
@@ -346,7 +349,7 @@ histogram!(inputDB[:, end-1], subplot = 3,
         dpi = 300)
 plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
         # Saving
-savefig(outplotTrain, "F:\\CNLRiPrediction_RFTrainWithStratification_v2.png")
+savefig(outplotTrain, "F:\\UvA\\CNLRiPrediction73_RFTrainWithStratification_v2.png")
 
 tempDfTest = inputDB_test[:, end-1]
 layout = @layout [a{0.8w,0.2h}            _
@@ -394,4 +397,4 @@ histogram!(inputDB_test[:, end-1], subplot = 3,
         dpi = 300)
 plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
         # Saving
-savefig(outplotTest, "F:\\CNLRiPrediction_RFTestWithStratification_v2.png")
+savefig(outplotTest, "F:\\UvA\\CNLRiPrediction73_RFTestWithStratification_v2.png")
