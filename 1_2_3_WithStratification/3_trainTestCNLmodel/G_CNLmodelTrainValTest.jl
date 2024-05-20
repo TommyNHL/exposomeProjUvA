@@ -337,12 +337,12 @@ plot!(tempDfTrain -> tempDfTrain, c=:red, subplot = 2,
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
-histogram!(inputDB[:, end-2], subplot = 1, 
+histogram!(inputDB[:, end-2], bins = 165, subplot = 1, 
         xlims = (-150, 1500), 
         orientation = :v, 
         framestyle = :none, 
         dpi = 300)
-histogram!(inputDB[:, end-1], subplot = 3, 
+histogram!(inputDB[:, end-1], bins = 165, subplot = 3, 
         ylims = (-150, 1500), 
         orientation = :h, 
         framestyle = :none, 
@@ -350,6 +350,7 @@ histogram!(inputDB[:, end-1], subplot = 3,
 plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
         # Saving
 savefig(outplotTrain, "F:\\UvA\\CNLRiPrediction73_RFTrainWithStratification_v2.png")
+
 
 tempDfTest = inputDB_test[:, end-1]
 layout = @layout [a{0.8w,0.2h}            _
@@ -385,12 +386,12 @@ plot!(tempDfTest -> tempDfTest, c=:red, subplot = 2,
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
-histogram!(inputDB_test[:, end-2], subplot = 1, 
+histogram!(inputDB_test[:, end-2], bins = 165, subplot = 1, 
         xlims = (-150, 1500), 
         orientation = :v, 
         framestyle = :none, 
         dpi = 300)
-histogram!(inputDB_test[:, end-1], subplot = 3, 
+histogram!(inputDB_test[:, end-1], bins = 165, subplot = 3, 
         ylims = (-150, 1500), 
         orientation = :h, 
         framestyle = :none, 
