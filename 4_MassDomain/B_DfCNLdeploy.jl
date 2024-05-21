@@ -158,7 +158,7 @@ inputTPTNdf
 # storing data in a Matrix
 X = zeros(512981, 15961)
 
-for i in (1+512981*3):(512981*4)
+for i in (1+512981*7):(512981*8)
 #for i in (1+512981+512981+512981+512981+512981+512981+512981):(512981+512981+512981+512981+512981+512981+512981+512981)
     println(i)
     arr = []
@@ -167,10 +167,10 @@ for i in (1+512981*3):(512981*4)
     for col in arr
         mz = findall(x->x==col, candidatesList)
         if (col <= mumIon)
-            X[i-(512981*3), mz] .= 1
+            X[i-(512981*7), mz] .= 1
             #X[i-512981-512981-512981-512981-512981-512981-512981, mz] .= 1
         elseif (col > mumIon)
-            X[i-(512981*3), mz] .= -1
+            X[i-(512981*7), mz] .= -1
             #X[i-512981-512981-512981-512981-512981-512981-512981, mz] .= -1
         end
     end
@@ -178,20 +178,20 @@ end
 
 # 4103848 - 512981
 dfCNLs = DataFrame(X, CNLfeaturesStr)
-insertcols!(dfCNLs, 1, ("ENTRY"=>collect((1+512981*3):(512981*4))))
-insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[(1+512981*3):(512981*4), "INCHIKEY_ID"]))
-insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[(1+512981*3):(512981*4), "INCHIKEY"]))
-insertcols!(dfCNLs, 4, ("INCHIKEYreal"=>inputTPTNdf[(1+512981*3):(512981*4), "INCHIKEYreal"]))
-insertcols!(dfCNLs, 5, ("RefMatchFragRatio"=>inputTPTNdf[(1+512981*3):(512981*4), "RefMatchFragRatio"]))
-insertcols!(dfCNLs, 6, ("UsrMatchFragRatio"=>inputTPTNdf[(1+512981*3):(512981*4), "UsrMatchFragRatio"]))
-insertcols!(dfCNLs, 7, ("MS1Error"=>inputTPTNdf[(1+512981*3):(512981*4), "MS1Error"]))
-insertcols!(dfCNLs, 8, ("MS2Error"=>inputTPTNdf[(1+512981*3):(512981*4), "MS2Error"]))
-insertcols!(dfCNLs, 9, ("MS2ErrorStd"=>inputTPTNdf[(1+512981*3):(512981*4), "MS2ErrorStd"]))
-insertcols!(dfCNLs, 10, ("DirectMatch"=>inputTPTNdf[(1+512981*3):(512981*4), "DirectMatch"]))
-insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[(1+512981*3):(512981*4), "ReversMatch"]))
-insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[(1+512981*3):(512981*4), "FinalScoreRatio"]))
-insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>inputTPTNdf[(1+512981*3):(512981*4), "MS1Mass"] .- 1.007276))
-dfCNLs[!, "FPpredictRi"] = inputTPTNdf[(1+512981*3):(512981*4), "predictRi"]
+insertcols!(dfCNLs, 1, ("ENTRY"=>collect((1+512981*7):(512981*8))))
+insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[(1+512981*7):(512981*8), "INCHIKEY_ID"]))
+insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[(1+512981*7):(512981*8), "INCHIKEY"]))
+insertcols!(dfCNLs, 4, ("INCHIKEYreal"=>inputTPTNdf[(1+512981*7):(512981*8), "INCHIKEYreal"]))
+insertcols!(dfCNLs, 5, ("RefMatchFragRatio"=>inputTPTNdf[(1+512981*7):(512981*8), "RefMatchFragRatio"]))
+insertcols!(dfCNLs, 6, ("UsrMatchFragRatio"=>inputTPTNdf[(1+512981*7):(512981*8), "UsrMatchFragRatio"]))
+insertcols!(dfCNLs, 7, ("MS1Error"=>inputTPTNdf[(1+512981*7):(512981*8), "MS1Error"]))
+insertcols!(dfCNLs, 8, ("MS2Error"=>inputTPTNdf[(1+512981*7):(512981*8), "MS2Error"]))
+insertcols!(dfCNLs, 9, ("MS2ErrorStd"=>inputTPTNdf[(1+512981*7):(512981*8), "MS2ErrorStd"]))
+insertcols!(dfCNLs, 10, ("DirectMatch"=>inputTPTNdf[(1+512981*7):(512981*8), "DirectMatch"]))
+insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[(1+512981*7):(512981*8), "ReversMatch"]))
+insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[(1+512981*7):(512981*8), "FinalScoreRatio"]))
+insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>inputTPTNdf[(1+512981*7):(512981*8), "MS1Mass"] .- 1.007276))
+dfCNLs[!, "FPpredictRi"] = inputTPTNdf[(1+512981*7):(512981*8), "predictRi"]
 size(dfCNLs)  # 512981 x (13+15961+1)
 
 desStat = describe(dfCNLs)  # 15975 x 7
@@ -222,7 +222,7 @@ push!(sumUp, 8888888)
 push!(dfCNLs, sumUp)
 # 512981 -> 512982 rows
 dfCNLsSum = dfCNLs[end:end, :]
-savePath = "F:\\UvA\\dfCNLsSum_4.csv"
+savePath = "F:\\UvA\\dfCNLsSum_8.csv"
 CSV.write(savePath, dfCNLsSum)
 
 using DataSci4Chem
@@ -237,7 +237,7 @@ massesCNLsDistrution = bar(candidatesList, Vector(dfCNLs[end, 14:end-1]),
     ylabel="Count", yguidefontsize=16, 
     dpi = 300)
     # Saving
-    savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution_4.png")
+    savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution_8.png")
 
 dfCNLs = dfCNLs[1:end-1, :]
 #load a model
@@ -248,9 +248,9 @@ size(modelRF_CNL)
 CNLpredictedRi = predict(modelRF_CNL, Matrix(dfCNLs[:, 13:end-1]))
 dfCNLs[!, "CNLpredictRi"] = CNLpredictedRi
 dfCNLs[!, "DeltaRi"] = (CNLpredictedRi - dfCNLs[:, "FPpredictRi"]) / 1000
-dfCNLs[!, "LABEL"] = inputTPTNdf[(1+512981*3):(512981*4), "LABEL"]
+dfCNLs[!, "LABEL"] = inputTPTNdf[(1+512981*7):(512981*8), "LABEL"]
 # save, ouputing testSet df 0.3 x (3+15994+1)
-savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_4withCNLRideltaRi.csv"
+savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv"
 CSV.write(savePath, dfCNLs)
 println("done for saving csv")
 
@@ -259,7 +259,7 @@ println("done for saving csv")
 
 
 outputDf = (dfCNLs[dfCNLs.LABEL .== 1, :])[:, 1:end-3]
-savePath = "F:\\dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi.csv"
+savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi.csv"
 CSV.write(savePath, outputDf)
 println("done for saving csv")
 
@@ -288,21 +288,21 @@ push!(sumUp, 8888888)
 push!(outputDf, sumUp)
 # + 1 rows
 dfCNLsSum = outputDf[end:end, :]
-savePath = "F:\\dfCNLsSum_TP.csv"
+savePath = "F:\\UvA\\dfCNLsSum_TP.csv"
 CSV.write(savePath, dfCNLsSum)
 
 
 
-dfCNLsSum1 = CSV.read("F:\\dfCNLsSum_1.csv", DataFrame)
-dfCNLsSum2 = CSV.read("F:\\dfCNLsSum_2.csv", DataFrame)
-dfCNLsSum3 = CSV.read("F:\\dfCNLsSum_3.csv", DataFrame)
-dfCNLsSum4 = CSV.read("F:\\dfCNLsSum_4.csv", DataFrame)
-dfCNLsSum5 = CSV.read("F:\\dfCNLsSum_5.csv", DataFrame)
-dfCNLsSum6 = CSV.read("F:\\dfCNLsSum_6.csv", DataFrame)
-dfCNLsSum7 = CSV.read("F:\\dfCNLsSum_7.csv", DataFrame)
-dfCNLsSum8 = CSV.read("F:\\dfCNLsSum_8.csv", DataFrame)
+dfCNLsSum1 = CSV.read("F:\\UvA\\dfCNLsSum_1.csv", DataFrame)
+dfCNLsSum2 = CSV.read("F:\\UvA\\dfCNLsSum_2.csv", DataFrame)
+dfCNLsSum3 = CSV.read("F:\\UvA\\dfCNLsSum_3.csv", DataFrame)
+dfCNLsSum4 = CSV.read("F:\\UvA\\dfCNLsSum_4.csv", DataFrame)
+dfCNLsSum5 = CSV.read("F:\\UvA\\dfCNLsSum_5.csv", DataFrame)
+dfCNLsSum6 = CSV.read("F:\\UvA\\dfCNLsSum_6.csv", DataFrame)
+dfCNLsSum7 = CSV.read("F:\\UvA\\dfCNLsSum_7.csv", DataFrame)
+dfCNLsSum8 = CSV.read("F:\\UvA\\dfCNLsSum_8.csv", DataFrame)
 dfCNLsSum = vcat(dfCNLsSum1, dfCNLsSum2, dfCNLsSum3, dfCNLsSum4, dfCNLsSum5, dfCNLsSum6, dfCNLsSum7, dfCNLsSum8)
-dfCNLsSumTP = CSV.read("F:\\dfCNLsSum_TP.csv", DataFrame)
+dfCNLsSumTP = CSV.read("F:\\UvA\\dfCNLsSum_TP.csv", DataFrame)
 
 sumUp = []
 push!(sumUp, 8888888)
@@ -329,27 +329,31 @@ push!(sumUp, 8888888)
 push!(dfCNLsSum, sumUp)
 # 225572 -> 225573 rows
 dfCNLsSum = dfCNLsSum[end:end, :]
-savePath = "F:\\dfCNLsSum.csv"
+savePath = "F:\\UvA\\dfCNLsSum.csv"
 CSV.write(savePath, dfCNLsSum)
 
 using DataSci4Chem
-massesCNLsDistrution = bar(names(dfCNLsSum)[14:end-1], Vector(dfCNLsSum[end, 14:end-1]), 
+massesCNLsDistrution = bar(candidatesList, Vector(dfCNLsSum[end, 14:end-1]), 
     label = "True negative CNLs", 
     fc = "pink", 
     lc = "pink", 
     margin = (5, :mm), 
     size = (1000,800), 
+    xtickfontsize = 12, 
+    ytickfontsize= 12, 
+    xlabel="Feature CNL mass", xguidefontsize=16, 
+    ylabel="Count", yguidefontsize=16, 
     dpi = 300)
-    xlabel!("CNLs features")
-    ylabel!("Summation")
-    bar!(names(dfCNLsSumTP)[14:end-1], Vector(dfCNLsSumTP[end, 14:end-1]), 
+    bar!(candidatesList, Vector(dfCNLsSumTP[end, 14:end-1]), 
         label = "True positive CNLs", 
         fc = "skyblue", 
         lc = "skyblue", 
         margin = (5, :mm), 
         size = (1000,800), 
+        xtickfontsize = 12, 
+        ytickfontsize= 12, 
+        xlabel="Feature CNL mass", xguidefontsize=16, 
+        ylabel="Count", yguidefontsize=16, 
         dpi = 300)
-        xlabel!("CNLs features")
-        ylabel!("Summation")
     # Saving
-    savefig(massesCNLsDistrution, "F:\\TPTNmassesCNLsDistrution.png")
+    savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution.png")
