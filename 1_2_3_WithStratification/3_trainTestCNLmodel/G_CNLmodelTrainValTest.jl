@@ -308,32 +308,32 @@ layout = @layout [a{0.8w,0.2h}            _
                   b{0.8w,0.8h} c{0.2w,0.8h}]
 describe(inputDB[:, "CNLpredictRi"])
 default(fillcolor = :lightgrey, grid = false, legend = false)
-outplotTrain = plot(layout = layout, link = :both, 
+outplotTrain = plot(layout = layout, link = :both, legend = :topleft, 
         size = (600, 600), margin = -2Plots.px, dpi = 300)
 scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
+        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :skyblue, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
-        label = "Non-Cocamides", 
+        label = "Extended", 
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
 scatter!(inputDB[trainCocamide, end-2], inputDB[trainCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
+        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :green, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
-        label = "Cocamides", 
+        label = "Pre-Trained", 
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
 plot!(tempDfTrain -> tempDfTrain, c=:red, subplot = 2, 
-        label = false, 
+        label = "Identity Line", 
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
@@ -357,32 +357,32 @@ layout = @layout [a{0.8w,0.2h}            _
                   b{0.8w,0.8h} c{0.2w,0.8h}]
 describe(inputDB_test[:, "CNLpredictRi"])
 default(fillcolor = :lightgrey, grid = false, legend = false)
-outplotTest = plot(layout = layout, link = :both, 
+outplotTest = plot(layout = layout, link = :both, legend = :topleft, 
         size = (600, 600), margin = -2Plots.px, dpi = 300)
 scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
+        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :skyblue, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
-        label = "Non-Cocamides", 
+        label = "Extended", 
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
 scatter!(inputDB_test[testCocamide, end-2], inputDB_test[testCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived Ri values", ylabel = "CNL-derived Ri values", 
+        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :green, 
         markerstrokewidth = 0, 
         alpha = 0.1, 
-        label = "Cocamides", 
+        label = "Pre-Trained", 
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
 plot!(tempDfTest -> tempDfTest, c=:red, subplot = 2, 
-        label = false, 
+        label = "Identity Line", 
         margin = -2Plots.px, 
         size = (600,600), 
         dpi = 300)
