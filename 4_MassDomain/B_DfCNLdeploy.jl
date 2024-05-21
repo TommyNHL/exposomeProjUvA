@@ -343,6 +343,7 @@ massesCNLsDistrution = bar(candidatesList, Vector(dfCNLsSum[end, 14:end-1]),
     ytickfontsize= 12, 
     xlabel="Feature CNL mass", xguidefontsize=16, 
     ylabel="Count", yguidefontsize=16, 
+    legendfont = font(12), 
     dpi = 300)
     bar!(candidatesList, Vector(dfCNLsSumTP[end, 14:end-1]), 
         label = "True positive CNLs", 
@@ -354,6 +355,7 @@ massesCNLsDistrution = bar(candidatesList, Vector(dfCNLsSum[end, 14:end-1]),
         ytickfontsize= 12, 
         xlabel="Feature CNL mass", xguidefontsize=16, 
         ylabel="Count", yguidefontsize=16, 
+        legendfont = font(12), 
         dpi = 300)
     # Saving
     savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution.png")
