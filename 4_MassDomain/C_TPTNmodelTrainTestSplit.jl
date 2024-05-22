@@ -16,10 +16,12 @@ using ScikitLearn.CrossValidation: train_test_split
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRi.csv", DataFrame)
-dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
+dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv", DataFrame)
 
 dfOutput = dfOutput[:, vcat(collect(1:13), end-3, end-2, end-1, end)]
 savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_pest.csv"
 CSV.write(savePath, dfOutput)
 
 dfOutput1 = CSV.read("F:\\UvA\\dataframeTPTNModeling_1.csv", DataFrame)
