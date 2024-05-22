@@ -9,29 +9,29 @@ using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 
 # 512981 x 15978 df -> 17 df
-#dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_3withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_4withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRi.csv", DataFrame)
-dfOutput = CSV.read("F:\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_3withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_4withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRi.csv", DataFrame)
+dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
 
 dfOutput = dfOutput[:, vcat(collect(1:13), end-3, end-2, end-1, end)]
-savePath = "F:\\dataframeTPTNModeling_8.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
 CSV.write(savePath, dfOutput)
 
-dfOutput1 = CSV.read("F:\\dataframeTPTNModeling_1.csv", DataFrame)
-dfOutput2 = CSV.read("F:\\dataframeTPTNModeling_2.csv", DataFrame)
-dfOutput3 = CSV.read("F:\\dataframeTPTNModeling_3.csv", DataFrame)
-dfOutput4 = CSV.read("F:\\dataframeTPTNModeling_4.csv", DataFrame)
-dfOutput5 = CSV.read("F:\\dataframeTPTNModeling_5.csv", DataFrame)
-dfOutput6 = CSV.read("F:\\dataframeTPTNModeling_6.csv", DataFrame)
-dfOutput7 = CSV.read("F:\\dataframeTPTNModeling_7.csv", DataFrame)
-dfOutput8 = CSV.read("F:\\dataframeTPTNModeling_8.csv", DataFrame)
+dfOutput1 = CSV.read("F:\\UvA\\dataframeTPTNModeling_1.csv", DataFrame)
+dfOutput2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_2.csv", DataFrame)
+dfOutput3 = CSV.read("F:\\UvA\\dataframeTPTNModeling_3.csv", DataFrame)
+dfOutput4 = CSV.read("F:\\UvA\\dataframeTPTNModeling_4.csv", DataFrame)
+dfOutput5 = CSV.read("F:\\UvA\\dataframeTPTNModeling_5.csv", DataFrame)
+dfOutput6 = CSV.read("F:\\UvA\\dataframeTPTNModeling_6.csv", DataFrame)
+dfOutput7 = CSV.read("F:\\UvA\\dataframeTPTNModeling_7.csv", DataFrame)
+dfOutput8 = CSV.read("F:\\UvA\\dataframeTPTNModeling_8.csv", DataFrame)
 dfOutput = vcat(dfOutput1, dfOutput2, dfOutput3, dfOutput4, dfOutput5, dfOutput6, dfOutput7, dfOutput8)
-savePath = "F:\\dataframeTPTNModeling.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling.csv"
 CSV.write(savePath, dfOutput)
 
 X = deepcopy(dfOutput[:, vcat(collect(5:12), end-1)])  # 4103848 x 9 df
@@ -90,28 +90,28 @@ end
 
 # output csv is a 4103848 x 17 + 2 df
 dfOutput
-savePath = "F:\\dataframeTPTNModeling_withLeverage.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_withLeverage.csv"
 CSV.write(savePath, dfOutput)
 
 # 3283078 x 1
 X_trainIdxDf = DataFrame([X_trainIdx], ["INDEX"])
-savePath = "F:\\dataframeTPTNModeling_TrainIndex.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainIndex.csv"
 CSV.write(savePath, X_trainIdxDf)
 
 # 820770 x 1
 X_testIdxDf = DataFrame([X_testIdx], ["INDEX"])
-savePath = "F:\\dataframeTPTNModeling_TestIndex.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestIndex.csv"
 CSV.write(savePath, X_testIdxDf)
 
 # ==============================================================================
 # train 3283078 x 17 + 2 rows
 dfOutputTrain = dfOutput[dfOutput.GROUP .== "train", :]
-savePath = "F:\\dataframeTPTNModeling_TrainDF.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF.csv"
 CSV.write(savePath, dfOutputTrain)
 
 # ==============================================================================
 # test 820770 x 17 + 2 rows
 dfOutputTest = dfOutput[dfOutput.GROUP .== "test", :]
-savePath = "F:\\dataframeTPTNModeling_TestDF.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF.csv"
 CSV.write(savePath, dfOutputTest)
 describe(dfOutputTest)
