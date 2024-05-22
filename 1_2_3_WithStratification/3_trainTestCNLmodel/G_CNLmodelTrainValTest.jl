@@ -390,11 +390,13 @@ plot!(tempDfTest -> tempDfTest, c=:red, subplot = 2,
         dpi = 300)
 histogram!(inputDB_test[:, end-2], bins = 165, subplot = 1, 
         xlims = (-150, 1500), 
+        label = false, 
         orientation = :v, 
         framestyle = :none, 
         dpi = 300)
 histogram!(inputDB_test[:, end-1], bins = 165, subplot = 3, 
         ylims = (-150, 1500), 
+        label = false, 
         orientation = :h, 
         framestyle = :none, 
         dpi = 300)
