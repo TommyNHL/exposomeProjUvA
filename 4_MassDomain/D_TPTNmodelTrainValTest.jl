@@ -1,8 +1,6 @@
 VERSION
 using Pkg
 #Pkg.add("ScikitLearn")
-#Pkg.add("Plots")
-#Pkg.add("ProgressBars")
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
@@ -10,20 +8,11 @@ Pkg.build("PyCall")
 Pkg.status()
 #Pkg.add(PackageSpec(url=""))
 using Random
-#using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-#using ProgressBars
-#using PyPlot
-#Conda.add("pubchempy")
-#Conda.add("padelpy")
-#Conda.add("joblib")
-## import packages ##
-#using PyCall, Conda                 #using python packages
-#pcp = pyimport("pubchempy")
-pd = pyimport("padelpy")            #calculation of FP
+
 jl = pyimport("joblib")             # used for loading models
 f1_score = pyimport("sklearn.metrics").f1_score
 matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
@@ -39,10 +28,10 @@ using ScikitLearn.CrossValidation: train_test_split
 
 # inputing 820770 x 4+8+1+2+1+1+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
-inputDB_test = CSV.read("F:\\dataframeTPTNModeling_TestDF.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 # inputing 3283078 x 4+8+1+2+1+1+2 df
-inputDB = CSV.read("F:\\dataframeTPTNModeling_TrainDF.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 # 4103848 x 19 df
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
