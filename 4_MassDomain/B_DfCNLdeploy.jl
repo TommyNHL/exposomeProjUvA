@@ -28,6 +28,8 @@ using ScikitLearn.CrossValidation: train_test_split
 # inputing 4135721 x 3+8+2+1+1 df
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputTPTNdf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv", DataFrame)
+# inputing 137067 x 3+8+2+1+1 df
+inputTPTNdf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv", DataFrame)
 sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID])
 
 function getVec(matStr)
@@ -68,7 +70,7 @@ function getVec(matStr)
 end
 
 
-# initialization for 1 more column -> 4135721 x 15+1
+# initialization for 1 more column -> 4135721 x 15+1 or 137067 x 15+1
 inputTPTNdf[!, "CNLmasses"] .= [[]]
 size(inputTPTNdf)
 
@@ -137,7 +139,7 @@ retain = []
 for i in 1:size(inputTPTNdf, 1)
     println(i)
     arr = []
-    arr = getMasses(inputTPTNdf, i, arr, "str")
+    arr = getMasses(inputTPTNdf, i, arr, "dig")#"str")
     if (size(arr, 1) >= 2)
         push!(retain, i)
     end
@@ -145,6 +147,7 @@ end
 inputTPTNdf = inputTPTNdf[retain, :]
 
 savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithCNLsList.csv"
+savePath = "F:\\UvA\\Cand_synth_rr10_1-5000_extractedWithCNLsList_pest.csv"
 CSV.write(savePath, inputTPTNdf)
 
 # 4103848 x 16 df
@@ -157,21 +160,20 @@ inputTPTNdf
 
 # storing data in a Matrix
 X = zeros(512981, 15961)
+X = zeros(136678, 15961)
 
 for i in (1+512981*7):(512981*8)
-#for i in (1+512981+512981+512981+512981+512981+512981+512981):(512981+512981+512981+512981+512981+512981+512981+512981)
+for i in 1:136678
     println(i)
     arr = []
-    arr = getMasses(inputTPTNdf, i, arr, "str")
+    arr = getMasses(inputTPTNdf, i, arr, "dig")#"str")
     mumIon = round(inputTPTNdf[i, "MS1Mass"], digits = 2)
     for col in arr
         mz = findall(x->x==col, candidatesList)
         if (col <= mumIon)
-            X[i-(512981*7), mz] .= 1
-            #X[i-512981-512981-512981-512981-512981-512981-512981, mz] .= 1
+            X[i-(512981*0), mz] .= 1
         elseif (col > mumIon)
-            X[i-(512981*7), mz] .= -1
-            #X[i-512981-512981-512981-512981-512981-512981-512981, mz] .= -1
+            X[i-(512981*0), mz] .= -1
         end
     end
 end
@@ -192,6 +194,24 @@ insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[(1+512981*7):(512981*8), "Re
 insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[(1+512981*7):(512981*8), "FinalScoreRatio"]))
 insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>inputTPTNdf[(1+512981*7):(512981*8), "MS1Mass"] .- 1.007276))
 dfCNLs[!, "FPpredictRi"] = inputTPTNdf[(1+512981*7):(512981*8), "predictRi"]
+size(dfCNLs)  # 512981 x (13+15961+1)
+
+# for pesticide dataset, 136678
+dfCNLs = DataFrame(X, CNLfeaturesStr)
+insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:136678)))
+insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[1:136678, "INCHIKEY_ID"]))
+insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[1:136678, "INCHIKEY"]))
+insertcols!(dfCNLs, 4, ("INCHIKEYreal"=>inputTPTNdf[1:136678, "INCHIKEYreal"]))
+insertcols!(dfCNLs, 5, ("RefMatchFragRatio"=>inputTPTNdf[1:136678, "RefMatchFragRatio"]))
+insertcols!(dfCNLs, 6, ("UsrMatchFragRatio"=>inputTPTNdf[1:136678, "UsrMatchFragRatio"]))
+insertcols!(dfCNLs, 7, ("MS1Error"=>inputTPTNdf[1:136678, "MS1Error"]))
+insertcols!(dfCNLs, 8, ("MS2Error"=>inputTPTNdf[1:136678, "MS2Error"]))
+insertcols!(dfCNLs, 9, ("MS2ErrorStd"=>inputTPTNdf[1:136678, "MS2ErrorStd"]))
+insertcols!(dfCNLs, 10, ("DirectMatch"=>inputTPTNdf[1:136678, "DirectMatch"]))
+insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[1:136678, "ReversMatch"]))
+insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[1:136678, "FinalScoreRatio"]))
+insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>inputTPTNdf[1:136678, "MS1Mass"] .- 1.007276))
+dfCNLs[!, "FPpredictRi"] = inputTPTNdf[1:136678, "predictRi"]
 size(dfCNLs)  # 512981 x (13+15961+1)
 
 desStat = describe(dfCNLs)  # 15975 x 7
@@ -223,6 +243,7 @@ push!(dfCNLs, sumUp)
 # 512981 -> 512982 rows
 dfCNLsSum = dfCNLs[end:end, :]
 savePath = "F:\\UvA\\dfCNLsSum_8.csv"
+savePath = "F:\\UvA\\dfCNLsSum_pest.csv"
 CSV.write(savePath, dfCNLsSum)
 
 using DataSci4Chem
@@ -249,8 +270,10 @@ CNLpredictedRi = predict(modelRF_CNL, Matrix(dfCNLs[:, 13:end-1]))
 dfCNLs[!, "CNLpredictRi"] = CNLpredictedRi
 dfCNLs[!, "DeltaRi"] = (CNLpredictedRi - dfCNLs[:, "FPpredictRi"]) / 1000
 dfCNLs[!, "LABEL"] = inputTPTNdf[(1+512981*7):(512981*8), "LABEL"]
+dfCNLs[!, "LABEL"] = inputTPTNdf[1:136678, "LABEL"]
 # save, ouputing testSet df 0.3 x (3+15994+1)
 savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv"
+savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv"
 CSV.write(savePath, dfCNLs)
 println("done for saving csv")
 
@@ -260,6 +283,7 @@ println("done for saving csv")
 
 outputDf = (dfCNLs[dfCNLs.LABEL .== 1, :])[:, 1:end-3]
 savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi.csv"
+savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi_pest.csv"
 CSV.write(savePath, outputDf)
 println("done for saving csv")
 
@@ -289,6 +313,7 @@ push!(outputDf, sumUp)
 # + 1 rows
 dfCNLsSum = outputDf[end:end, :]
 savePath = "F:\\UvA\\dfCNLsSum_TP.csv"
+savePath = "F:\\UvA\\dfCNLsSum_TP_pest.csv"
 CSV.write(savePath, dfCNLsSum)
 
 
@@ -303,6 +328,10 @@ dfCNLsSum7 = CSV.read("F:\\UvA\\dfCNLsSum_7.csv", DataFrame)
 dfCNLsSum8 = CSV.read("F:\\UvA\\dfCNLsSum_8.csv", DataFrame)
 dfCNLsSum = vcat(dfCNLsSum1, dfCNLsSum2, dfCNLsSum3, dfCNLsSum4, dfCNLsSum5, dfCNLsSum6, dfCNLsSum7, dfCNLsSum8)
 dfCNLsSumTP = CSV.read("F:\\UvA\\dfCNLsSum_TP.csv", DataFrame)
+
+# for pesticide dataset only
+dfCNLsSum = CSV.read("F:\\UvA\\dfCNLsSum_pest.csv", DataFrame)
+dfCNLsSumTP = CSV.read("F:\\UvA\\dfCNLsSum_TP_pest.csv", DataFrame)
 
 sumUp = []
 push!(sumUp, 8888888)
@@ -359,3 +388,4 @@ massesCNLsDistrution = bar(candidatesList, Vector(dfCNLsSum[end, 14:end-1]),
         dpi = 300)
     # Saving
     savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution.png")
+    savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution_pest.png")
