@@ -60,27 +60,8 @@ function errorDetermination(arrRi, predictedRi)
     return maxAE, MSE, RMSE
 end
 
-## R-square value
-function rSquareDetermination(arrRi, predictedRi)
-    sumY = 0
-    for i = 1:size(predictedRi, 1)
-        sumY += predictedRi[i]
-    end
-    meanY = sumY / size(predictedRi, 1)
-    sumAE = 0
-    sumRE = 0
-    for i = 1:size(predictedRi, 1)
-        AE = abs(arrRi[i] - predictedRi[i])
-        RE = abs(arrRi[i] - meanY)
-        sumAE += (AE ^ 2)
-        sumRE += (RE ^ 2)
-    end
-    rSquare = 1 - (sumAE / sumRE)
-    return rSquare
-end
-
-## Average accuracy
-function avgAcc(arrAcc, cv)
+## Average score
+function avgScore(arrAcc, cv)
     sumAcc = 0
     for acc in arrAcc
         sumAcc += acc
@@ -89,13 +70,13 @@ function avgAcc(arrAcc, cv)
 end
 
 # modeling, 6 x 11 = 66 times
-function optimRandomForestRegressor(inputDB, inputDB_test)
+function optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
     #leaf_r = [collect(4:2:10);15;20]
     leaf_r = vcat(collect(1:1:6))
     tree_r = vcat(collect(50:50:400),collect(500:100:700))
     #tree_r = collect(50:50:300)
     rs = vcat(1, 42)
-    z = zeros(1,9)
+    z = zeros(1,11)
     itr = 1
     while itr < 67
         l = rand(leaf_r)
@@ -106,10 +87,13 @@ function optimRandomForestRegressor(inputDB, inputDB_test)
             println("## split ##")
             M_train = inputDB
             M_val = inputDB_test
+            M_pest = inputDB_pest
             Xx_train = deepcopy(M_train[:, vcat(collect(5:12), end-3)])
             Yy_train = deepcopy(M_train[:, end-2])
             Xx_val = deepcopy(M_val[:, vcat(collect(5:12), end-3)])
             Yy_val = deepcopy(M_val[:, end-2])
+            Xx_test = deepcopy(M_pest[:, vcat(collect(5:12), end-1)])
+            Yy_test = deepcopy(M_pest[:, end])
             println("## Regression ##")
             reg = RandomForestClassifier(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=s, class_weight=Dict(0=>0.529, 1=>9.097))
             println("## fit ##")
@@ -117,38 +101,43 @@ function optimRandomForestRegressor(inputDB, inputDB_test)
             if itr == 1
                 z[1,1] = l
                 z[1,2] = t
-                z[1,3] = score(reg, Matrix(Xx_train), Vector(Yy_train))
-                z[1,4] = score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]))
+                z[1,3] = f1_score(reg, Matrix(Xx_train), Vector(Yy_train))
+                z[1,4] = matthews_corrcoef(reg, Matrix(Xx_train), Vector(Yy_train))
+                z[1,5] = f1_score(reg, Matrix(Xx_val), Vector(Yy_val))
+                z[1,6] = matthews_corrcoef(reg, Matrix(Xx_val), Vector(Yy_val))
                 println("## CV ##")
-                acc10_train = cross_val_score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]); cv = 10)
-                z[1,5] = avgAcc(acc10_train, 10)
-                z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val))
-                z[1,7] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
-                z[1,8] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
-                z[1,9] = s
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); scoring="f1", cv = 10)
+                z[1,7] = avgScore(f1_10_train, 10)
+                z[1,8] = score(reg, Matrix(Xx_test), Vector(Yy_test))
+                z[1,9] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
+                z[1,10] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
+                z[1,11] = s
                 println(z[end, :])
             else
+                println("## fit ##")
+                itrain = f1_score(reg, Matrix(Xx_train), Vector(Yy_train))
+                jtrain = matthews_corrcoef(reg, Matrix(Xx_train), Vector(Yy_train))
+                ival = f1_score(reg, Matrix(Xx_val), Vector(Yy_val))
+                jval = matthews_corrcoef(reg, Matrix(Xx_val), Vector(Yy_val))
                 println("## CV ##")
-                itrain= score(reg, Matrix(Xx_train), Vector(Yy_train)) 
-                traintrain = score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]))
-                acc10_train = cross_val_score(reg, Matrix(df_train[:, vcat(collect(5:12), end-3)]), Vector(df_train[:, end-2]); cv = 10)
-                traincvtrain = avgAcc(acc10_train, 10) 
-                ival = score(reg, Matrix(Xx_val), Vector(Yy_val))
-                f1s = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
-                mccs = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
-                z = vcat(z, [l t itrain traintrain traincvtrain ival f1s mccs s])
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); scoring="f1", cv = 10)
+                traincvtrain = avgAcc(f1_10_train, 10) 
+                itest = score(reg, Matrix(Xx_test), Vector(Yy_test))
+                f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
+                mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
+                z = vcat(z, [l t itrain jtrain ival jval traincvtrain itest f1s mccs s])
                 println(z[end, :])
             end
             println("End of ", itr, " iterations")
             itr += 1
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], accuracy_10Ftrain = z[:,3], accuracy_train = z[:,4], avgAccuracy10FCV_train = z[:,5], accuracy_val = z[:,6], f1_val = z[:,7], mcc_val = z[:,8], state = z[:,9])
-    z_df_sorted = sort(z_df, [:mcc_val, :f1_val, :accuracy_val, :avgAccuracy10FCV_train, :accuracy_train, :accuracy_10Ftrain], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_10Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11])
+    z_df_sorted = sort(z_df, [:mcc_pest, :f1_pest, :f1_10Ftrain], rev=true)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestRegressor(inputDB, inputDB_test)
+optiSearch_df = optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithDeltaRi.csv"
