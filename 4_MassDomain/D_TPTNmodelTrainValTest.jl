@@ -16,6 +16,8 @@ using Plots
 jl = pyimport("joblib")             # used for loading models
 f1_score = pyimport("sklearn.metrics").f1_score
 matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
+make_scorer = pyimport("sklearn.metrics").make_scorer
+f1 = make_scorer(f1_score, average="weighted")
 
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
@@ -101,12 +103,12 @@ function optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
             if itr == 1
                 z[1,1] = l
                 z[1,2] = t
-                z[1,3] = f1_score(reg, Matrix(Xx_train), Vector(Yy_train))
-                z[1,4] = matthews_corrcoef(reg, Matrix(Xx_train), Vector(Yy_train))
-                z[1,5] = f1_score(reg, Matrix(Xx_val), Vector(Yy_val))
-                z[1,6] = matthews_corrcoef(reg, Matrix(Xx_val), Vector(Yy_val))
+                z[1,3] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)))
+                z[1,4] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)))
+                z[1,5] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+                z[1,6] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); scoring="f1", cv = 10)
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 10, scoring=f1)
                 z[1,7] = avgScore(f1_10_train, 10)
                 z[1,8] = score(reg, Matrix(Xx_test), Vector(Yy_test))
                 z[1,9] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
@@ -114,14 +116,13 @@ function optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
                 z[1,11] = s
                 println(z[end, :])
             else
-                println("## fit ##")
-                itrain = f1_score(reg, Matrix(Xx_train), Vector(Yy_train))
-                jtrain = matthews_corrcoef(reg, Matrix(Xx_train), Vector(Yy_train))
-                ival = f1_score(reg, Matrix(Xx_val), Vector(Yy_val))
-                jval = matthews_corrcoef(reg, Matrix(Xx_val), Vector(Yy_val))
+                itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)))
+                jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)))
+                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
+                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); scoring="f1", cv = 10)
-                traincvtrain = avgAcc(f1_10_train, 10) 
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 10, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 10) 
                 itest = score(reg, Matrix(Xx_test), Vector(Yy_test))
                 f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
                 mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
