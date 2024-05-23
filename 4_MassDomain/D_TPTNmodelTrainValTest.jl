@@ -17,7 +17,7 @@ jl = pyimport("joblib")             # used for loading models
 f1_score = pyimport("sklearn.metrics").f1_score
 matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
 make_scorer = pyimport("sklearn.metrics").make_scorer
-f1 = make_scorer(f1_score, average="weighted")
+f1 = make_scorer(f1_score, pos_label=1, average="binary")
 
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
@@ -71,22 +71,22 @@ function avgScore(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 7 x 12 = 84 times
-function optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
-    #leaf_r = [collect(4:2:10);15;20]
-    leaf_r = vcat(collect(3:1:9))
-    tree_r = vcat(collect(50:50:400), collect(500:100:800))
-    #tree_r = collect(50:50:300)
+# modeling, 6 x 10 = 60 times
+function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
+    #leaf_r = vcat(collect(6:2:10), collect(12:4:20))
+    leaf_r = vcat(collect(10:1:15))
+    #tree_r = vcat(collect(50:50:400), collect(500:100:800))
+    tree_r = vcat(collect(50:50:500))
     rs = vcat(1, 42)
     z = zeros(1,11)
     itr = 1
-    while itr < 9
+    while itr < 13
         l = rand(leaf_r)
         t = rand(tree_r)
         for s in rs
             println("itr=", itr, ", leaf=", l, ", tree=", t)
             MaxFeat = Int64(9)
-            println("## split ##")
+            println("## loading in data ##")
             M_train = inputDB
             M_val = inputDB_test
             M_pest = inputDB_pest
@@ -96,7 +96,7 @@ function optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
             Yy_val = deepcopy(M_val[:, end-2])
             Xx_test = deepcopy(M_pest[:, vcat(collect(5:12), end-1)])
             Yy_test = deepcopy(M_pest[:, end])
-            println("## Regression ##")
+            println("## Classification ##")
             reg = RandomForestClassifier(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=s, class_weight=Dict(0=>0.529, 1=>9.097))
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
@@ -138,7 +138,7 @@ function optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestRegressor(inputDB, inputDB_test, inputDB_pest)
+optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithDeltaRi3F.csv"
@@ -159,9 +159,9 @@ gridsearch = GridSearchCV(model, param_dist)
 println("Best parameters: $(gridsearch.best_params_)") =#
 
 model = RandomForestClassifier(
-      n_estimators = 700, 
+      n_estimators = 400, 
       #max_depth = 10, 
-      min_samples_leaf = 2, 
+      min_samples_leaf = 9, 
       max_features = Int64(9), 
       n_jobs = -1, 
       oob_score = true, 
