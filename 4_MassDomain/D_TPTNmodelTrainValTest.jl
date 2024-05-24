@@ -28,7 +28,7 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-describe((inputDB_pest))[5:12, :]
+describe((inputDB))[12:end, :]
 # inputing 820770 x 4+8+1+2+1+1+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
 inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF.csv", DataFrame)
@@ -110,18 +110,24 @@ end
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     #leaf_r = vcat(collect(6:2:10), collect(12:4:20))
     #leaf_r = vcat(collect(10:1:15))
-    leaf_r = vcat(collect(14:1:16))
+    #leaf_r = vcat(collect(14:1:16))
+    leaf_r = vcat(1, 2, 4, collect(8:4:20))
     #tree_r = vcat(collect(50:50:400), collect(500:100:800))
-    tree_r = vcat(collect(50:50:500))
-    rs = vcat(1, 42)
-    z = zeros(1,11)
+    tree_r = vcat(collect(50:50:200), collect(400:200:2000))
+    depth_r = vcat(collect(10:10:100), nothing)
+    split_r = vcat(2, 5, 10)
+    #rs = vcat(1, 42)
+    rs = vcat(42)
+    z = zeros(1,13)
     itr = 1
     while itr < 13
         l = rand(leaf_r)
         t = rand(tree_r)
+        d = rand(depth_r)
+        r = rand(split_r)
         for s in rs
-            println("itr=", itr, ", leaf=", l, ", tree=", t)
-            MaxFeat = Int64(9)
+            println("itr=", itr, ", leaf=", l, ", tree=", t, ", depth=", d, ", minSsplit=", r)
+            #MaxFeat = Int64(9)
             println("## loading in data ##")
             M_train = inputDB
             M_val = inputDB_test
@@ -133,7 +139,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
             Xx_test = deepcopy(M_pest[:, vcat(collect(5:12), end-1)])
             Yy_test = deepcopy(M_pest[:, end])
             println("## Classification ##")
-            reg = RandomForestClassifier(n_estimators=t, min_samples_leaf=l, max_features=MaxFeat, n_jobs=-1, oob_score =true, random_state=s, class_weight=Dict(0=>0.529, 1=>9.097))
+            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=s, class_weight=Dict(0=>0.529, 1=>9.097))
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
@@ -144,12 +150,14 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
                 z[1,5] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 z[1,6] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 5, scoring=f1)
-                z[1,7] = avgScore(f1_10_train, 5)
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                z[1,7] = avgScore(f1_10_train, 3)
                 z[1,8] = score(reg, Matrix(Xx_test), Vector(Yy_test))
                 z[1,9] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
                 z[1,10] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
                 z[1,11] = s
+                z[1,12] = d
+                z[1,13] = r
                 println(z[end, :])
             else
                 itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)))
@@ -157,27 +165,27 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
                 ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 5, scoring=f1)
-                traincvtrain = avgScore(f1_10_train, 5) 
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 3) 
                 itest = score(reg, Matrix(Xx_test), Vector(Yy_test))
                 f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
                 mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
-                z = vcat(z, [l t itrain jtrain ival jval traincvtrain itest f1s mccs s])
+                z = vcat(z, [l t itrain jtrain ival jval traincvtrain itest f1s mccs s d r])
                 println(z[end, :])
             end
             println("End of ", itr, " iterations")
             itr += 1
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_5Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11])
-    z_df_sorted = sort(z_df, [:mcc_pest, :f1_pest, :f1_5Ftrain], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_3Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11])
+    z_df_sorted = sort(z_df, [:mcc_pest, :f1_pest, :f1_3Ftrain], rev=true)
     return z_df_sorted
 end
 
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithDeltaRi5F.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
@@ -198,7 +206,7 @@ model = RandomForestClassifier(
       n_estimators = 450, 
       #max_depth = 10, 
       min_samples_leaf = 15, 
-      max_features = Int64(9), 
+      #max_features = Int64(9), 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
