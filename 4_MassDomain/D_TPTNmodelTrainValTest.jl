@@ -112,18 +112,21 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     #leaf_r = vcat(collect(10:1:15))
     #leaf_r = vcat(collect(14:1:16))
     #leaf_r = vcat(1, collect(2:2:8))
-    leaf_r = vcat(collect(4:1:8))
+    #leaf_r = vcat(collect(6:1:8))
+    leaf_r = vcat(collect(6:1:7))
     #tree_r = vcat(collect(50:50:400), collect(500:100:800))
     #tree_r = vcat(collect(200:200:2000))
-    tree_r = vcat(collect(300:150:750))
+    tree_r = vcat(collect(50:25:500))
     #depth_r = vcat(collect(5:5:30), collect(40:10:70))
-    depth_r = vcat(collect(50:5:70))
-    split_r = vcat(collect(2:1:6), 8, 10, 15, 30)
+    #depth_r = vcat(collect(55:5:75))
+    depth_r = vcat(60)
+    #split_r = vcat(collect(4:1:6))
+    split_r = vcat(4)
     #rs = vcat(1, 42)
     rs = vcat(42)
     z = zeros(1,13)
     itr = 1
-    while itr < 17
+    while itr < 9
         l = rand(leaf_r)
         t = rand(tree_r)
         d = rand(depth_r)
@@ -188,7 +191,7 @@ end
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi10F.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi10F5.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= model = RandomForestRegressor()
