@@ -41,9 +41,8 @@ for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
     inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
 end
-#inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
 # save, ouputing 409126 x 19 df, 0:373107; 1:36019 = 10.3586:1
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
@@ -58,9 +57,8 @@ for i = 1:size(inputDB, 1)
     inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
     inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
 end
-#inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
 # save, ouputing 1637238 x 19 df, 0:1492750; 1:144488 = 10.3313:1
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
@@ -81,9 +79,8 @@ for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "FinalScoreRatio"] = log10(inputDB_pest[i, "FinalScoreRatio"])
     inputDB_pest[i, "MatchRatio"] = inputDB_pest[i, "DirectMatch"] - inputDB_pest[i, "ReversMatch"]
 end
-#inputDB_pest = inputDB_pest[inputDB_pest.FinalScoreRatio .>= float(0.5), :]
 # save, ouputing 62008 x 17 df, 0:53162; 1:8846 = 6.0097:1
-savePath = "F:\\UvA\\dataframeTPTNModeling_pestDF0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_pestDF0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB_pest)
 inputDB_pest[inputDB_pest.LABEL .== 1, :]
 
