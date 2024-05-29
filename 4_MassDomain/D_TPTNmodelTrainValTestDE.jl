@@ -40,8 +40,6 @@ for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
     inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
     inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
-    #inputDB_test[i, "MS1Error"] = abs(inputDB_test[i, "MS1Error"])
-    #inputDB_test[i, "DeltaRi"] = abs(inputDB_test[i, "DeltaRi"])
 end
 #inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
 # save, ouputing 409126 x 19 df, 0:373107; 1:36019 = 10.3586:1
@@ -59,8 +57,6 @@ for i = 1:size(inputDB, 1)
     inputDB[i, "UsrMatchFragRatio"] = log10(inputDB[i, "UsrMatchFragRatio"])
     inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
     inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
-    #inputDB[i, "MS1Error"] = abs(inputDB[i, "MS1Error"])
-    #inputDB[i, "DeltaRi"] = abs(inputDB[i, "DeltaRi"])
 end
 #inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
 # save, ouputing 1637238 x 19 df, 0:1492750; 1:144488 = 10.3313:1
@@ -84,8 +80,6 @@ for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "UsrMatchFragRatio"] = log10(inputDB_pest[i, "UsrMatchFragRatio"])
     inputDB_pest[i, "FinalScoreRatio"] = log10(inputDB_pest[i, "FinalScoreRatio"])
     inputDB_pest[i, "MatchRatio"] = inputDB_pest[i, "DirectMatch"] - inputDB_pest[i, "ReversMatch"]
-    #inputDB_pest[i, "MS1Error"] = abs(inputDB_pest[i, "MS1Error"])
-    #inputDB_pest[i, "DeltaRi"] = abs(inputDB_pest[i, "DeltaRi"])
 end
 #inputDB_pest = inputDB_pest[inputDB_pest.FinalScoreRatio .>= float(0.5), :]
 # save, ouputing 62008 x 17 df, 0:53162; 1:8846 = 6.0097:1
@@ -228,18 +222,6 @@ savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRati
 CSV.write(savePath, optiSearch_df)
 
 model = RandomForestClassifier(
-      n_estimators = 600, 
-      max_depth = 60, 
-      min_samples_leaf = 26, 
-      #max_features = Int64(9), 
-      min_samples_split = 6, 
-      n_jobs = -1, 
-      oob_score = true, 
-      random_state = 42, 
-      class_weight= Dict(0=>0.625, 1=>2.501)
-      )
-
-model = RandomForestClassifier(
       n_estimators = 425, 
       max_depth = 100, 
       min_samples_leaf = 28, 
@@ -329,12 +311,7 @@ inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withA
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withDeltaRiTPTN[:, end-3], inputDB_withDeltaRiTPTN[:, end])
 # -0.12879993787163913
 rSquare_train = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-3], inputDB_withDeltaRiTPTN[:, end])
-#= ## accuracy, 0.9977639885497694
-acc1_train = score(model, Matrix(inputDB_withDeltaRiTPTN[:, vcat(collect(5:12), end-4)]), Vector(inputDB_withDeltaRiTPTN[:, end-3]))
-# 0.938269856354399, 0.9336424942432107, 0.9370105577882192
-acc5_train = cross_val_score(model, Matrix(inputDB_withDeltaRiTPTN[:, vcat(collect(5:12), end-4)]), Vector(inputDB_withDeltaRiTPTN[:, end-3]); cv = 3)
-# 0.9363076361286096
-avgAcc_train = avgAcc(acc5_train, 3) =#
+
 # 3283078 × 2 Matrix
 #pTP_train = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, vcat(collect(5:12), end-4)]))
 pTP_train = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, vcat(collect(5:10), 13, end-4)]))
