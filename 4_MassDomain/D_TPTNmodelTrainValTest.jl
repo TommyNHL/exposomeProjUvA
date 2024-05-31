@@ -411,10 +411,10 @@ CSV.write(savePath, optiSearch_df)
       class_weight= Dict(0=>0.625, 1=>2.501)
       ) =#
 model = RandomForestClassifier(
-      n_estimators = 200, 
+      n_estimators = 100, 
       max_depth = 40, 
-      min_samples_leaf = 14, 
-      min_samples_split = 8, 
+      min_samples_leaf = 12, 
+      min_samples_split = 9, 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
@@ -429,178 +429,186 @@ model = RandomForestClassifier(
       min_samples_split = 20, 
       random_state = 42
       ) =#
+model = GradientBoostingClassifier(
+      learning_rate = 0.30, 
+      n_estimators = 16, 
+      max_depth = 18, 
+      min_samples_leaf = 35, 
+      min_samples_split = 12, 
+      random_state = 42
+      )
 
-fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]))
-#fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]), sample_weight=sampleW)
+#fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]))
+fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]), sample_weight=sampleW)
 # --------------------------------------------------------------------------------------------------
-fit!(model, Matrix(inputDB[:, 5:12]), Vector(inputDB[:, end-2]))
-#fit!(model, Matrix(inputDB[:, 5:12]), Vector(inputDB[:, end-2]), sample_weight=sampleW)
+#fit!(model, Matrix(inputDB[:, 5:12]), Vector(inputDB[:, end-2]))
+fit!(model, Matrix(inputDB[:, 5:12]), Vector(inputDB[:, end-2]), sample_weight=sampleW)
 # --------------------------------------------------------------------------------------------------
-fit!(model, Matrix(inputDBInputDB_test[:, vcat(collect(5:12), end-3)]), Vector(inputDBInputDB_test[:, end-2]))
-#fit!(model, Matrix(inputDBInputDB_test[:, vcat(collect(5:12), end-3)]), Vector(inputDBInputDB_test[:, end-2]), sample_weight=sampleTW)
+#fit!(model, Matrix(inputDBInputDB_test[:, vcat(collect(5:12), end-3)]), Vector(inputDBInputDB_test[:, end-2]))
+fit!(model, Matrix(inputDBInputDB_test[:, vcat(collect(5:12), end-3)]), Vector(inputDBInputDB_test[:, end-2]), sample_weight=sampleTW)
 # --------------------------------------------------------------------------------------------------
-fit!(model, Matrix(inputDBInputDB_test[:, 5:12]), Vector(inputDBInputDB_test[:, end-2]))
-#fit!(model, Matrix(inputDBInputDB_test[:, 5:12]), Vector(inputDBInputDB_test[:, end-2]), sample_weight=sampleTW)
+#fit!(model, Matrix(inputDBInputDB_test[:, 5:12]), Vector(inputDBInputDB_test[:, end-2]))
+fit!(model, Matrix(inputDBInputDB_test[:, 5:12]), Vector(inputDBInputDB_test[:, end-2]), sample_weight=sampleTW)
 
 # saving model
-modelSavePath = "F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib"
-#modelSavePath = "F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
+#modelSavePath = "F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib"
+modelSavePath = "F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 # --------------------------------------------------------------------------------------------------
-modelSavePath = "F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib"
-#modelSavePath = "F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
+#modelSavePath = "F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib"
+modelSavePath = "F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 # --------------------------------------------------------------------------------------------------
-modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio.joblib"
-#modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
+#modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio.joblib"
+modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 # --------------------------------------------------------------------------------------------------
-modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio.joblib"
-#modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
+#modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio.joblib"
+modelSavePath = "F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
 describe((inputDB_pest))[vcat(collect(5:12), end-1), :]
 
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#model = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#model = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib")
+model = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(model)
 # training performace, withDeltaRi vs. withoutDeltaRi
 predictedTPTN_train = predict(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]))
 inputDB[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 1637238 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#model = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#model = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
+model = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(model)
 predictedTPTN_train = predict(model, Matrix(inputDB[:, 5:12]))
 inputDB[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 1637238 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio.joblib")
+model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(model)
 predictedTPTN_train = predict(model, Matrix(inputDBInputDB_test[:, vcat(collect(5:12), end-3)]))
 inputDBInputDB_test[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 2046364 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDBInputDB_test)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
+model = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(model)
 predictedTPTN_train = predict(model, Matrix(inputDBInputDB_test[:, 5:12]))
 inputDBInputDB_test[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 2046364 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDBInputDB_test)
 
 # ==================================================================================================
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
-# RF: 1, 0.05838857881383159, 0.24163728771411003; GBMs: 1, 0.04895684072810428, 0.22126192787758195
+#inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+# RF: 1, 0.05284326408255855, 0.2298766279606488; GBMs: 1, 0.060732159893674593, 0.2464389577434432
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withDeltaRiTPTN[:, end-3], inputDB_withDeltaRiTPTN[:, end])
-# RF: 0.2984740229435662; GBMs: 0.40690215449347245
+# RF: 0.3612168205537992; GBMs: 0.27249409205022423
 rSquare_train = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-3], inputDB_withDeltaRiTPTN[:, end])
 
 # 1637238 × 2 Matrix
 pTP_train = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, vcat(collect(5:12), end-4)]))
-# RF: 0.7451548062722266; GBMs: 0.7795980993862601
+# RF: 0.7641592498194061; GBMs: 0.7375794060283921
 f1_train = f1_score(inputDB_withDeltaRiTPTN[:, end-3], inputDB_withDeltaRiTPTN[:, end])
-# RF: 0.7390729006988429; GBMs: 0.7740855761780748
+# RF: 0.7576191480268382; GBMs: 0.7318665706007587
 mcc_train = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-3], inputDB_withDeltaRiTPTN[:, end])
 
 inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
 inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
 # save, ouputing trainSet df 1637238 x (19+1+2)
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 describe((inputDB_withDeltaRiTPTN))[end-5:end, :]
 # --------------------------------------------------------------------------------------------------
-inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
-# RF: 1, 0.09328576541712323, 0.3054271851311262; GBMs: 1, 0.09494221365494815, 0.30812694405869173
+#inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+# RF: 1, 0.08733550039762088, 0.29552580326871775; GBMs: 1, 0.1025153337511101, 0.3201801582720424
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withoutDeltaRiTPTN[:, end-3], inputDB_withoutDeltaRiTPTN[:, end])
-# RF: -0.06910359620030437; GBMs: -0.08129805555154213
+# RF: -0.011666264385671088; GBMs: -0.15528507232134503
 rSquare_train = rSquareDetermination(inputDB_withoutDeltaRiTPTN[:, end-3], inputDB_withoutDeltaRiTPTN[:, end])
 
 # 1637238 × 2 Matrix
 pTP_train = predict_proba(model, Matrix(inputDB_withoutDeltaRiTPTN[:, 5:12]))
-# RF: 0.6397165496238669; GBMs: 0.6378772524490105
+# RF: 0.6549218446449645; GBMs: 0.6167063261885296
 f1_train = f1_score(inputDB_withoutDeltaRiTPTN[:, end-3], inputDB_withoutDeltaRiTPTN[:, end])
-# RF: 0.6349074407348939; GBMs: 0.6349481861922986
+# RF: 0.649228445686795; GBMs: 0.6127028967509178
 mcc_train = matthews_corrcoef(inputDB_withoutDeltaRiTPTN[:, end-3], inputDB_withoutDeltaRiTPTN[:, end])
 
 inputDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
 inputDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
 # save, ouputing trainSet df 1637238 x (19+1+2)
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB_withoutDeltaRiTPTN)
 
 describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
 
 # --------------------------------------------------------------------------------------------------
-inputWholeDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputWholeDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
-# RF: 1, 0.055710030082624595, 0.2360297228796081; GBMs: 1, 0.04582127128897889, 0.21405903692434686
+#inputWholeDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputWholeDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+# RF: 1, 0.05051740550556988, 0.22476077394770175; GBMs: 1, 0.05592651160790554, 0.23648786778163808
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputWholeDB_withDeltaRiTPTN[:, end-3], inputWholeDB_withDeltaRiTPTN[:, end])
-# RF: 0.32844716737928203; GBMs: 0.44302236480475476
+# RF: 0.3875838557828927; GBMs: 0.32616910197262994
 rSquare_train = rSquareDetermination(inputWholeDB_withDeltaRiTPTN[:, end-3], inputWholeDB_withDeltaRiTPTN[:, end])
 
 # 2046364 × 2 Matrix
 pTP_train = predict_proba(model, Matrix(inputWholeDB_withDeltaRiTPTN[:, vcat(collect(5:12), end-4)]))
-# RF: 0.7542652184503166; GBMs: 0.7910666259645401
+# RF: 0.772252710333083; GBMs: 0.7537492953261294
 f1_train = f1_score(inputWholeDB_withDeltaRiTPTN[:, end-3], inputWholeDB_withDeltaRiTPTN[:, end])
-# RF: 0.7480715333887892; GBMs: 0.7854378388943672
+# RF: 0.7655156847434202; GBMs: 0.7477509246549277
 mcc_train = matthews_corrcoef(inputWholeDB_withDeltaRiTPTN[:, end-3], inputWholeDB_withDeltaRiTPTN[:, end])
 
 inputWholeDB_withDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
 inputWholeDB_withDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
 # save, ouputing trainSet df 2046364 x (19+1+2)
-savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputWholeDB_withDeltaRiTPTN)
 
 describe((inputWholeDB_withDeltaRiTPTN))[end-5:end, :]
 
 # --------------------------------------------------------------------------------------------------
-inputWholeDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputWholeDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
-# RF: 1, 0.09212535013321188, 0.3035215810007781; GBMs: 1, 0.09599025393331782, 0.30982293964991975
+#inputWholeDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputWholeDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+# RF: 1, 0.08626226810088528, 0.2937043889710967; GBMs: 1, 0.10391357549292306, 0.3223562865726727
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputWholeDB_withoutDeltaRiTPTN[:, end-3], inputWholeDB_withoutDeltaRiTPTN[:, end])
-# RF: -0.05860120942757252; GBMs: -0.09163974851790391
+# RF: -0.0016453208001689923; GBMs: -0.16914026392609482
 rSquare_train = rSquareDetermination(inputWholeDB_withoutDeltaRiTPTN[:, end-3], inputWholeDB_withoutDeltaRiTPTN[:, end])
 
 # 2046364 × 2 Matrix
 pTP_train = predict_proba(model, Matrix(inputWholeDB_withoutDeltaRiTPTN[:, 5:12]))
-# RF: 0.6424306567127943; GBMs: 0.6350799297769769
+# RF: 0.65750894430087; GBMs: 0.6127749926705041
 f1_train = f1_score(inputWholeDB_withoutDeltaRiTPTN[:, end-3], inputWholeDB_withoutDeltaRiTPTN[:, end])
-# RF: 0.6374175726794766; GBMs: 0.6322531345256402
+# RF: 0.6515954481290722; GBMs: 0.6085923974087313
 mcc_train = matthews_corrcoef(inputWholeDB_withoutDeltaRiTPTN[:, end-3], inputWholeDB_withoutDeltaRiTPTN[:, end])
 
 inputWholeDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
 inputWholeDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
 # save, ouputing trainSet df 2046364 x (19+1+2)
-savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_WholeDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputWholeDB_withoutDeltaRiTPTN)
 
 describe((inputWholeDB_withoutDeltaRiTPTN))[end-5:end, :]
@@ -611,12 +619,12 @@ describe((inputWholeDB_withoutDeltaRiTPTN))[end-5:end, :]
 # model validation
 # load a model
 # requires python 3.11 or 3.12
-modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib")
+modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(modelRF_TPTN)
 # --------------------------------------------------------------------------------------------------
-modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
+modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(modelRF_TPTN)
 # --------------------------------------------------------------------------------------------------
 #modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
@@ -632,63 +640,63 @@ describe((inputDB_test))[end-5:end, :]
 predictedTPTN_test = predict(modelRF_TPTN, Matrix(inputDB_test[:, vcat(collect(5:12), end-3)]))
 inputDB_test[!, "withDeltaRipredictTPTN"] = predictedTPTN_test
 # save, ouputing testSet df 409126 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB_test)
 # --------------------------------------------------------------------------------------------------
 predictedTPTN_test = predict(modelRF_TPTN, Matrix(inputDB_test[:, 5:12]))
 inputDB_test[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_test
 # save, ouputing testSet df 409126 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB_test)
 # ==================================================================================================
-inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+#inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
 describe((inputTestDB_withDeltaRiTPTN))[end-5:end, :]
 
-# RF: 1, 0.08035177427002928, 0.2834638853011601; GBMs: 
+# RF: 1, 0.07676852607754091, 0.2770713375243656; GBMs: 1, 0.07172606971935296, 0.26781723193131723
 maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withDeltaRiTPTN[:, end-3], inputTestDB_withDeltaRiTPTN[:, end])
-# RF: 0.03440676677259136; GBMs: 
+# RF: 0.07142478238515282; GBMs: 0.1416408699178705
 rSquare_val = rSquareDetermination(inputTestDB_withDeltaRiTPTN[:, end-3], inputTestDB_withDeltaRiTPTN[:, end])
 
 # 409126 × 2 Matrix
 pTP_test = predict_proba(modelRF_TPTN, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(collect(5:12), end-4)]))
-# RF: 0.6509153463874612; GBMs: 
+# RF: 0.6586828950228212; GBMs: 0.6925518874349116
 f1_test = f1_score(inputTestDB_withDeltaRiTPTN[:, end-3], inputTestDB_withDeltaRiTPTN[:, end])
-# RF: 0.6306524814306599; GBMs: 
+# RF: 0.6368410426078788; GBMs: 0.6810426714836091
 mcc_test = matthews_corrcoef(inputTestDB_withDeltaRiTPTN[:, end-3], inputTestDB_withDeltaRiTPTN[:, end])
 
 inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
 inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
 # save, ouputing trainSet df 62008 x (19+1+2)
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
 
 describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
 # --------------------------------------------------------------------------------------------------
-inputTestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputTestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+#inputTestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputTestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
 describe((inputTestDB_withoutDeltaRiTPTN))[end-5:end, :]
 
-# RF: 1, 0.11572474005563078, 0.34018339179864554; GBMs: 
+# RF: 1, 0.11229547865449764, 0.3351051755113574; GBMs: 1, 0.1204934421180761, 0.3471216531967951
 maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withoutDeltaRiTPTN[:, end-3], inputTestDB_withoutDeltaRiTPTN[:, end])
-# RF: -0.3260527576523158; GBMs: 
+# RF: -0.30095529518099173; GBMs: -0.3575215098183282
 rSquare_val = rSquareDetermination(inputTestDB_withoutDeltaRiTPTN[:, end-3], inputTestDB_withoutDeltaRiTPTN[:, end])
 
 # 409126 × 2 Matrix
 pTP_test = predict_proba(modelRF_TPTN, Matrix(inputTestDB_withoutDeltaRiTPTN[:, 5:12]))
-# RF: 0.554281518300949; GBMs: 
+# RF: 0.5574190565183466; GBMs: 0.5505993892155522
 f1_test = f1_score(inputTestDB_withoutDeltaRiTPTN[:, end-3], inputTestDB_withoutDeltaRiTPTN[:, end])
-# RF: 0.5321302483305548; GBMs: 
+# RF: 0.532787139631841; GBMs: 0.5323259842809919
 mcc_test = matthews_corrcoef(inputTestDB_withoutDeltaRiTPTN[:, end-3], inputTestDB_withoutDeltaRiTPTN[:, end])
 
 inputTestDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
 inputTestDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
 # save, ouputing trainSet df 409126 x 19+2 df 
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputTestDB_withoutDeltaRiTPTN)
 
 describe((inputTestDB_withoutDeltaRiTPTN))[end-4:end, :]
@@ -698,12 +706,12 @@ describe((inputTestDB_withoutDeltaRiTPTN))[end-4:end, :]
 # model validation
 # load a model
 # requires python 3.11 or 3.12
-modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio.joblib")
+modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(modelRF_TPTN)
 # --------------------------------------------------------------------------------------------------
-modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
-#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
+#modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio.joblib")
+modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
 size(modelRF_TPTN)
 # --------------------------------------------------------------------------------------------------
 #modelRF_TPTN = jl.load("F:\\UvA\\modelTPTNModeling_WholeWithAbsDeltaRi_0d5FinalScoreRatio_GBMs.joblib")
@@ -719,63 +727,63 @@ describe((inputDB_pest))[end-5:end, :]
 predictedTPTN_pest = predict(modelRF_TPTN, Matrix(inputDB_pest[:, vcat(collect(5:12), end-1)]))
 inputDB_pest[!, "withDeltaRipredictTPTN"] = predictedTPTN_pest
 # save, ouputing testSet df 62008 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB_pest)
 # --------------------------------------------------------------------------------------------------
 predictedTPTN_pest = predict(modelRF_TPTN, Matrix(inputDB_pest[:, 5:12]))
 inputDB_pest[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_pest
 # save, ouputing testSet df 62008 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputDB_pest)
 # ==================================================================================================
-inputPestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputPestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+#inputPestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputPestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
 describe((inputPestDB_withDeltaRiTPTN))[end-5:end, :]
 
-# RF: 1, 0.06626564314282028, 0.2574211396579937; GBMs: 1, 0.08063475680557347, 0.28396259754688374
+# RF: 1, 0.06713649851632048, 0.25910711784186957; GBMs: 1, 0.07737711263062831, 0.2781674183484261
 maxAE_val, MSE_val, RMSE_val = errorDetermination(inputPestDB_withDeltaRiTPTN[:, end-1], inputPestDB_withDeltaRiTPTN[:, end])
-# RF: 0.45832738288804586; GBMs: 0.3410354620690087
+# RF: 0.4511046480696742; GBMs: 0.36747982307162175
 rSquare_val = rSquareDetermination(inputPestDB_withDeltaRiTPTN[:, end-1], inputPestDB_withDeltaRiTPTN[:, end])
 
 # 62008 × 2 Matrix
 pTP_test = predict_proba(modelRF_TPTN, Matrix(inputPestDB_withDeltaRiTPTN[:, vcat(collect(5:12), end-2)]))
-# RF: 0.771962928020423; GBMs: 0.7096062260425136
+# RF: 0.7664516129032258; GBMs: 0.7240625718886587
 f1_test = f1_score(inputPestDB_withDeltaRiTPTN[:, end-1], inputPestDB_withDeltaRiTPTN[:, end])
-# RF: 0.7333779265807219; GBMs: 0.6631689257226046
+# RF: 0.7272788279812913; GBMs: 0.6792214314485406
 mcc_test = matthews_corrcoef(inputPestDB_withDeltaRiTPTN[:, end-1], inputPestDB_withDeltaRiTPTN[:, end])
 
 inputPestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
 inputPestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
 # save, ouputing trainSet df 62008 x (19+1+2)
-savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputPestDB_withDeltaRiTPTN)
 
 describe((inputPestDB_withDeltaRiTPTN))[end-4:end, :]
 # --------------------------------------------------------------------------------------------------
-inputPestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
-#inputPestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
+#inputPestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio.csv", DataFrame)
+inputPestDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatio_GBMs.csv", DataFrame)
 describe((inputPestDB_withoutDeltaRiTPTN))[end-5:end, :]
 
-# RF: 1, 0.06444329763901432, 0.2538568447747949; GBMs: 1, 0.08144110437362921, 0.285378878639659
+# RF: 1, 0.06426590117404206, 0.2535072014244212; GBMs: 1, 0.07707070055476713, 0.2776161028376544
 maxAE_val, MSE_val, RMSE_val = errorDetermination(inputPestDB_withoutDeltaRiTPTN[:, end-1], inputPestDB_withoutDeltaRiTPTN[:, end])
-# RF: 0.47495036752142916; GBMs: 0.33520768549030233
+# RF: 0.47668278565308986; GBMs: 0.3698955149345251
 rSquare_val = rSquareDetermination(inputPestDB_withoutDeltaRiTPTN[:, end-1], inputPestDB_withoutDeltaRiTPTN[:, end])
 
 # 62008 × 2 Matrix
 pTP_test = predict_proba(modelRF_TPTN, Matrix(inputPestDB_withoutDeltaRiTPTN[:, 5:12]))
-# RF: 0.7894404046791021; GBMs: 0.6997264835295517
+# RF: 0.7910878112712975; GBMs: 0.7323138968240631
 f1_test = f1_score(inputPestDB_withoutDeltaRiTPTN[:, end-1], inputPestDB_withoutDeltaRiTPTN[:, end])
-# RF: 0.7540161750911537; GBMs: 0.6539464542444986
+# RF: 0.75612508340891; GBMs: 0.6873406299193503
 mcc_test = matthews_corrcoef(inputPestDB_withoutDeltaRiTPTN[:, end-1], inputPestDB_withoutDeltaRiTPTN[:, end])
 
 inputPestDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
 inputPestDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
 # save, ouputing trainSet df 62008 x 19+2 df 
-savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_0d5FinalScoreRatio_GBMs.csv"
 CSV.write(savePath, inputPestDB_withoutDeltaRiTPTN)
 
 describe((inputPestDB_withoutDeltaRiTPTN))[end-4:end, :]
