@@ -10,15 +10,17 @@ using ScikitLearn.CrossValidation: train_test_split
 
 # CNL model 95% leverage cut-off = 0.14604417882015916
 # 512981 x 15978 df -> 17 df
-dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_3withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_4withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
-dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv", DataFrame)
+dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_1withCNLRideltaRiLev.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRiLev.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_3withCNLRideltaRiLev.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_4withCNLRideltaRiLev.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRiLev.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRiLev.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRiLev.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRiLev.csv", DataFrame)
+dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRiLev.csv", DataFrame)
+
+
 
 dfOutput = dfOutput[:, vcat(collect(1:13), end-3, end-2, end-1, end)]
 savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
