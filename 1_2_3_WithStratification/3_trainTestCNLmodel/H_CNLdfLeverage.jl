@@ -46,7 +46,7 @@ CSV.write(savePath, dfOutputCNL)
 
 sortHt = ht
 sort!(sortHt)
-# 0.14604417882015916
+# CNL model 95% leverage cut-off = 0.14604417882015916
 sortHt[end-24279]
 
 finalDistinctLeverage = Set()
