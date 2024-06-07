@@ -52,7 +52,7 @@ dfOutput[!, "Leverage"] .= ht
 
 dfOutput = dfOutput[:, vcat(collect(1:13), end-4, end-3, end-2, end-1, end)]
 
-# 346842-2 x 1
+# 512981 * 18 df / 136678
 #savePath = "F:\\UvA\\dataframeTPTNModeling_1.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_2.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_3.csv"
