@@ -9,24 +9,7 @@ using ScikitLearn
 using ScikitLearn.CrossValidation: train_test_split
 
 # CNL model 95% leverage cut-off = 0.14604417882015916
-# 512981 x 15978 df -> 17 df
-dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_1withCNLRideltaRiLev.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRiLev.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_3withCNLRideltaRiLev.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_4withCNLRideltaRiLev.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRiLev.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRiLev.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRiLev.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRiLev.csv", DataFrame)
-dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRiLev.csv", DataFrame)
-
-
-
-dfOutput = dfOutput[:, vcat(collect(1:13), end-3, end-2, end-1, end)]
-savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
-savePath = "F:\\UvA\\dataframeTPTNModeling_pest.csv"
-CSV.write(savePath, dfOutput)
-
+# 512981 x 18 df
 dfOutput1 = CSV.read("F:\\UvA\\dataframeTPTNModeling_1.csv", DataFrame)
 dfOutput2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_2.csv", DataFrame)
 dfOutput3 = CSV.read("F:\\UvA\\dataframeTPTNModeling_3.csv", DataFrame)
@@ -37,31 +20,11 @@ dfOutput7 = CSV.read("F:\\UvA\\dataframeTPTNModeling_7.csv", DataFrame)
 dfOutput8 = CSV.read("F:\\UvA\\dataframeTPTNModeling_8.csv", DataFrame)
 dfOutput = vcat(dfOutput1, dfOutput2, dfOutput3, dfOutput4, dfOutput5, dfOutput6, dfOutput7, dfOutput8)
 savePath = "F:\\UvA\\dataframeTPTNModeling.csv"
-CSV.write(savePath, dfOutput)
+CSV.write(savePath, dfOutput)  # 4103848 x 18
 
-X = deepcopy(dfOutput[:, vcat(collect(5:12), end-1)])  # 4103848 x 9 df
-size(X)
-Y = deepcopy(dfOutput[:, end])  # 4103848,
-size(Y)
-Xmat = Matrix(X)
+describe(dfOutput)[end-2:end, :]
 
-# 9 x 9
-hipinv = zeros(9, 9)
-hipinv[:,:] .= pinv(Xmat'*Xmat)
-
-function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zeros(4103848,1)
-    for i in ProgressBar(1: size(X,1)) #check dimensions
-        x = X[i,:]
-        #hi = x'*pinv(X'*X)*x
-        hi = x'* hipinv *x
-        #push!(h,hi)
-        h[i,1] = hi
-    end
-    return h
-end
-
-h = leverage_dist(Matrix(X))
+h = deepcopy(dfOutput[:, end])
 ht = Vector(transpose(h)[1,:])
 
 function strat_split(leverage=ht; limits = limits)
@@ -77,46 +40,86 @@ end
 X_trainIdx, X_testIdx, train_lev, test_lev = strat_split(ht, limits = collect(0.0:0.2:1))
 
 dfOutput[!, "GROUP"] .= ""
-dfOutput[!, "Leverage"] .= float(0)
+dfOutput[!, "LeverageOfLeverage"] .= float(0)
 dfOutput[X_trainIdx, "GROUP"] .= "train"  # 4103848 x 0.8 > 3283078
 dfOutput[X_testIdx, "GROUP"] .= "test"  # 4103848 x 0.2 > 820770
+dfOutput[!, "IncludeDeltaRI"] .= ""
 
 count = 1
+X_trainIdxYes = []
+X_trainIdxNo = []
 for i in X_trainIdx
-    dfOutput[i, "Leverage"] = train_lev[count]
+    dfOutput[i, "LeverageOfLeverage"] = train_lev[count]
+    if dfOutput[i, "Leverage"] > 0.14604417882015916
+        dfOutput[i, "IncludeDeltaRI"] = "no"
+        push!(X_trainIdxNo, i)
+    elseif dfOutput[i, "Leverage"] <= 0.14604417882015916
+        dfOutput[i, "IncludeDeltaRI"] = "yes"
+        push!(X_trainIdxYes, i)
+    end
     count += 1
 end
 
 count = 1
+X_testIdxYes = []
+X_testIdxNo = []
 for i in X_testIdx
-    dfOutput[i, "Leverage"] = test_lev[count]
+    dfOutput[i, "LeverageOfLeverage"] = test_lev[count]
+    if dfOutput[i, "Leverage"] > 0.14604417882015916
+        dfOutput[i, "IncludeDeltaRI"] = "no"
+        push!(X_testIdxNo, i)
+    elseif dfOutput[i, "Leverage"] <= 0.14604417882015916
+        dfOutput[i, "IncludeDeltaRI"] = "yes"
+        push!(X_testIdxYes, i)
+    end
     count += 1
 end
 
-# output csv is a 4103848 x 17 + 2 df
+# output csv is a 4103848 x 18 + 3 df
 dfOutput
 savePath = "F:\\UvA\\dataframeTPTNModeling_withLeverage.csv"
 CSV.write(savePath, dfOutput)
 
+# ==============================================================================
 # 3283078 x 1
 X_trainIdxDf = DataFrame([X_trainIdx], ["INDEX"])
 savePath = "F:\\UvA\\dataframeTPTNModeling_TrainIndex.csv"
 CSV.write(savePath, X_trainIdxDf)
 
+# train 3283078 x 18 + 3 rows
+dfOutputTrain = dfOutput[dfOutput.GROUP .== "train", :]
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl.csv"
+CSV.write(savePath, dfOutputTrain)
+
+# 3282229 x 1
+X_trainIdxDf_YesDeltaRI = DataFrame([X_trainIdxYes], ["INDEX"])
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainYesIndex.csv"
+CSV.write(savePath, X_trainIdxDf_YesDeltaRI)
+
+# train 3282229 x 18 + 3 rows
+dfOutputTrainYes = dfOutputTrain[dfOutputTrain.IncludeDeltaRI .== "yes", :]
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl.csv"
+CSV.write(savePath, dfOutputTrainYes)
+
+# ==============================================================================
 # 820770 x 1
 X_testIdxDf = DataFrame([X_testIdx], ["INDEX"])
 savePath = "F:\\UvA\\dataframeTPTNModeling_TestIndex.csv"
 CSV.write(savePath, X_testIdxDf)
 
-# ==============================================================================
-# train 3283078 x 17 + 2 rows
-dfOutputTrain = dfOutput[dfOutput.GROUP .== "train", :]
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF.csv"
-CSV.write(savePath, dfOutputTrain)
-
-# ==============================================================================
-# test 820770 x 17 + 2 rows
+# train 820770 x 18 + 3 rows
 dfOutputTest = dfOutput[dfOutput.GROUP .== "test", :]
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl.csv"
 CSV.write(savePath, dfOutputTest)
+
+# 820536 x 1
+X_testIdxDf_YesDeltaRI = DataFrame([X_testIdxYes], ["INDEX"])
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestYesIndex.csv"
+CSV.write(savePath, X_testIdxDf_YesDeltaRI)
+
+# train 820536 x 18 + 3 rows
+dfOutputTestYes = dfOutputTest[dfOutputTest.IncludeDeltaRI .== "yes", :]
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv"
+CSV.write(savePath, dfOutputTestYes)
+
 describe(dfOutputTest)
