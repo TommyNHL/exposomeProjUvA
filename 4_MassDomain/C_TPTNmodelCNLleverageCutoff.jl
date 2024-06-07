@@ -17,14 +17,14 @@ using ScikitLearn.CrossValidation: train_test_split
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRi.csv", DataFrame)
-dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
+dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv", DataFrame)
 
 describe(dfOutput)[end-2:end-1, :]
 
-X = deepcopy(dfOutput[:, 13:end-4])  # 512981 x 15962 df
+X = deepcopy(dfOutput[:, 13:end-4])  # 512981 x 15962 df / 136678 x 15962 df
 size(X)
-Y = deepcopy(dfOutput[:, end-2])  #512981,
+Y = deepcopy(dfOutput[:, end-2])  #512981, 136678
 size(Y)
 Xmat = Matrix(X)
 
@@ -33,7 +33,8 @@ hipinv = zeros(15962, 15962)
 hipinv[:,:] .= pinv(Xmat'*Xmat)
 
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zeros(512981,1)
+    #h = zeros(512981,1)
+    h = zeros(136678,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:]
         #hi = x'*pinv(X'*X)*x
@@ -59,5 +60,6 @@ dfOutput = dfOutput[:, vcat(collect(1:13), end-4, end-3, end-2, end-1, end)]
 #savePath = "F:\\UvA\\dataframeTPTNModeling_5.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_6.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_7.csv"
-savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_pest.csv"
 CSV.write(savePath, dfOutput)
