@@ -33,33 +33,33 @@ using ScikitLearn.CrossValidation: train_test_split
 describe((inputDB_test))[12:14, :]
 # inputing 820770 x 4+8+1+2+1+1+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
-inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
 for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "MS1Error"] = abs(inputDB_test[i, "MS1Error"])
     inputDB_test[i, "DeltaRi"] = abs(inputDB_test[i, "DeltaRi"])
 end
-# save, ouputing 409126 x 19 df, 0:373107; 1:36019 = 10.3586:1
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF0d5FinalScoreRatio.csv"
+# save, ouputing 409139 x 21 df, 0:373024; 1:36115 = 0.5484; 5.6644
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio.csv"
 CSV.write(savePath, inputDB_test)
-inputDB_test[inputDB_test.LABEL .== 1, :]
+inputDB_test[inputDB_test.LABEL .== 0, :]
 
 # inputing 3283078 x 4+8+1+2+1+1+2 df
-inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
 for i = 1:size(inputDB, 1)
     inputDB[i, "MS1Error"] = abs(inputDB[i, "MS1Error"])
     inputDB[i, "DeltaRi"] = abs(inputDB[i, "DeltaRi"])
 end
-# save, ouputing 1637238 x 19 df, 0:1492750; 1:144488 = 10.3313:1
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF0d5FinalScoreRatio.csv"
+# save, ouputing 1637238 x 19 df, 0:1492833; 1:144392 = 0.5484; 5.6694
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio.csv"
 CSV.write(savePath, inputDB)
-inputDB[inputDB.LABEL .== 1, :]
+inputDB[inputDB.LABEL .== 0, :]
 
 # 4103848 x 19 df; 
-# 409126+1637238= 2046364, 0:1865857; 1:180507 = 10.3368:1
+# 409126+1637238= 2046364, 0:1865857; 1:180507 = 0.5484; 5.6684
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
 inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
@@ -67,12 +67,13 @@ inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
 # 136678 x 17 df
 inputDB_pest = CSV.read("F:\\UvA\\dataframeTPTNModeling_pest.csv", DataFrame)
 sort!(inputDB_pest, [:ENTRY])
-insertcols!(inputDB_pest, 10, ("MatchRatio"=>float(0)))
+
 inputDB_pest = inputDB_pest[inputDB_pest.FinalScoreRatio .>= float(0.5), :]
 for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "MS1Error"] = abs(inputDB_pest[i, "MS1Error"])
     inputDB_pest[i, "DeltaRi"] = abs(inputDB_pest[i, "DeltaRi"])
 end
+
 # save, ouputing 62008 x 17 df, 0:53162; 1:8846 = 6.0097:1
 savePath = "F:\\UvA\\dataframeTPTNModeling_pestDF0d5FinalScoreRatio.csv"
 CSV.write(savePath, inputDB_pest)
