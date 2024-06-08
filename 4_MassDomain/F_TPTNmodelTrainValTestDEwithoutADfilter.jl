@@ -64,7 +64,7 @@ savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
-# 4103848 x 19 df; 
+# 2046364 x 19 df; 
 # 409126+1637238= 2046364, 0:1865857; 1:180507 = 0.5484; 5.6684
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])

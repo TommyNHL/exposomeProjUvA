@@ -19,6 +19,7 @@ matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
 make_scorer = pyimport("sklearn.metrics").make_scorer
 f1 = make_scorer(f1_score, pos_label=1, average="binary")
 
+
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: GradientBoostingClassifier
@@ -33,7 +34,7 @@ using ScikitLearn.CrossValidation: train_test_split
 describe((inputDB_test))[12:14, :]
 # inputing 820770 x 4+8+1+2+1+1+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
-inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 insertcols!(inputDB_test, 10, ("MatchRatio"=>float(0)))
 inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
@@ -43,13 +44,13 @@ for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
     inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
 end
-# save, ouputing 409126 x 19 df, 0:373107; 1:36019 = 10.3586:1
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDF0d5FinalScoreRatioDE.csv"
+# save, ouputing 409139 x 22 df, 0:373024; 1:36115 = 0.5484; 5.6644
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
 # inputing 3283078 x 4+8+1+2+1+1+2 df
-inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 insertcols!(inputDB, 10, ("MatchRatio"=>float(0)))
 inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
@@ -59,10 +60,10 @@ for i = 1:size(inputDB, 1)
     inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
     inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
 end
-# save, ouputing 1637238 x 19 df, 0:1492750; 1:144488 = 10.3313:1
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF0d5FinalScoreRatioDE.csv"
+# save, ouputing 1637225 x 22 df, 0:1492750; 1:144488 = 10.3313:1
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB)
-inputDB[inputDB.LABEL .== 1, :]
+inputDB[inputDB.LABEL .== 0, :]
 
 # 4103848 x 19 df; 
 # 409126+1637238= 2046364, 0:1865857; 1:180507 = 10.3368:1
