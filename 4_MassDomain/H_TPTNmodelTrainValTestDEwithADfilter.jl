@@ -32,7 +32,7 @@ using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
 describe((inputDB_test))[12:14, :]
-# inputing 820770 x 4+8+1+2+1+1+2 df
+# inputing 820536 x 4+8+1+2+1+1+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
 inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
@@ -44,12 +44,12 @@ for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
     inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
 end
-# save, ouputing 409139 x 22 df, 0:373024; 1:36115 = 0.5484; 5.6644
+# save, ouputing 409002 x 22 df, 0:372896; 1:36106 = 0.5484; 5.6639
 savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
-# inputing 3283078 x 4+8+1+2+1+1+2+2 df
+# inputing 3282229 x 4+8+1+2+1+1+2+2 df
 inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 insertcols!(inputDB, 10, ("MatchRatio"=>float(0)))
@@ -60,13 +60,13 @@ for i = 1:size(inputDB, 1)
     inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
     inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
 end
-# save, ouputing 1637225 x 22 df, 0:1492833; 1:144392 = 0.5484; 5.6656
+# save, ouputing 1636788 x 22 df, 0:1492439; 1:144349 = 0.5484; 5.6696
 savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatioDE.csv"
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
-# 2046364 x 21 df; 
-# 409139+1637225= 2046364, 0:1865857; 1:180507 = 0.5484; 5.6684
+# 2045790 x 21 df; 
+# 409002+1636788= 2045790, 0:1865335; 1:180455 = 0.5484; 5.6684
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
 inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
