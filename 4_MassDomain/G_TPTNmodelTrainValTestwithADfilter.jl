@@ -31,7 +31,7 @@ using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
 describe((inputDB_test))[12:14, :]
-# inputing 820770 x 4+8+1+2+1+1+2 df
+# inputing 820536 x 4+8+1+2+1+1+2+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
 inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
@@ -45,7 +45,7 @@ savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
-# inputing 3283078 x 4+8+1+2+1+1+2 df
+# inputing 3282229 x 4+8+1+2+1+1+2 df
 inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
