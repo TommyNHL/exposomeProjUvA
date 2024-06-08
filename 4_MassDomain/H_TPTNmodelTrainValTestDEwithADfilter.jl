@@ -32,7 +32,7 @@ using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
 describe((inputDB_test))[12:14, :]
-# inputing 820536 x 4+8+1+2+1+1+2 df
+# inputing 820536 x 4+8+1+2+1+1+2+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
 inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
@@ -65,13 +65,13 @@ savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatioDE.csv
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
-# 2045790 x 21 df; 
+# 2045790 x 22 df; 
 # 409002+1636788= 2045790, 0:1865335; 1:180455 = 0.5484; 5.6684
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
 inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
 
-# 136678 x 17 df
+# 136678 x 18 df
 inputDB_pest = CSV.read("F:\\UvA\\dataframeTPTNModeling_pest.csv", DataFrame)
 sort!(inputDB_pest, [:ENTRY])
 insertcols!(inputDB_pest, 10, ("MatchRatio"=>float(0)))
@@ -135,7 +135,7 @@ function avgScore(arrAcc, cv)
 end
 
 # modeling, 5 x 4 x 5 x 9 = 225 times
-describe((inputDB_pest))[vcat(collect(5:10), 13, end-2), :]
+describe((inputDB_test))[vcat(collect(5:10), 13, end-5), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     leaf_r = vcat(collect(2:2:16))
@@ -162,12 +162,12 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
                 Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13)])
                 Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13)])
             elseif mod == 9
-                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13, end-3)])
-                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13, end-3)])
+                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13, end-5)])
                 Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13, end-2)])
             end
-            Yy_train = deepcopy(M_train[:, end-2])
-            Yy_val = deepcopy(M_val[:, end-2])
+            Yy_train = deepcopy(M_train[:, end-4])
+            Yy_val = deepcopy(M_val[:, end-4])
             Yy_test = deepcopy(M_pest[:, end-1])
             println("## Classification ##")
             reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.5484, 1=>5.6684))
