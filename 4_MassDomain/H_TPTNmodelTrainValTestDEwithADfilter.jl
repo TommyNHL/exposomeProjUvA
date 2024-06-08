@@ -34,7 +34,7 @@ using ScikitLearn.CrossValidation: train_test_split
 describe((inputDB_test))[12:14, :]
 # inputing 820770 x 4+8+1+2+1+1+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
-inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 insertcols!(inputDB_test, 10, ("MatchRatio"=>float(0)))
 inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
@@ -50,7 +50,7 @@ CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
 # inputing 3283078 x 4+8+1+2+1+1+2+2 df
-inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 insertcols!(inputDB, 10, ("MatchRatio"=>float(0)))
 inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
