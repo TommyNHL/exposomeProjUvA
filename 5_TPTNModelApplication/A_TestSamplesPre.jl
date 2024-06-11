@@ -1,35 +1,4 @@
-VERSION
-using Pkg
-import Conda
-Conda.PYTHONDIR
-ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
-Pkg.build("PyCall")
-Pkg.status()
-
-using Random
-using BSON
-using CSV, DataFrames, Conda, LinearAlgebra, Statistics
-using PyCall
-using StatsPlots
-using Plots
-using ProgressBars
-#using PyPlot
-#Conda.add("pubchempy")
-#Conda.add("padelpy")
-#Conda.add("joblib")
-## import packages ##
-#using PyCall, Conda                 #using python packages
-#pcp = pyimport("pubchempy")
-pd = pyimport("padelpy")            #calculation of FP
-jl = pyimport("joblib")             # used for loading models
-
-using ScikitLearn  #: @sk_import, fit!, predict
-@sk_import ensemble: RandomForestRegressor
-@sk_import ensemble: RandomForestClassifier
-#using ScikitLearn.GridSearch: RandomizedSearchCV
-using ScikitLearn.CrossValidation: cross_val_score
-using ScikitLearn.CrossValidation: train_test_split
-#using ScikitLearn.GridSearch: GridSearchCV
+using CSV, DataFrames
 
 #input csv of Ref, 15 columns df, including
     # Name, Formula, Mass, CAS, ChemSpider, IUPAC, 
@@ -85,7 +54,7 @@ using ScikitLearn.CrossValidation: train_test_split
     inputRef[:, "INCHIKEY"]
 
 #save csv
-    savePath = "F:\\CNL_Ref_PestMix_1-8.csv"
+    savePath = "F:\\UvA\\CNL_Ref_PestMix_1-8.csv"
     CSV.write(savePath, inputRef)
 
 #gather distinct INCHIKEY IDs
@@ -122,39 +91,39 @@ using ScikitLearn.CrossValidation: train_test_split
     distinctKeys7 = setDistinct(inputRef7)
     distinctKeys8 = setDistinct(inputRef8)
 
-#export distinct INCHIKEYs
+#export distinct INCHIKEYs # 25+32+43+50+32+21+33+19=255
     outputDf = DataFrame([distinctKeys1to8], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv"
     CSV.write(savePath, outputDf)
 
     outputDf1 = DataFrame([distinctKeys1], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_1.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_1.csv"
     CSV.write(savePath, outputDf1)
 
     outputDf2 = DataFrame([distinctKeys2], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_2.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_2.csv"
     CSV.write(savePath, outputDf2)
 
     outputDf3 = DataFrame([distinctKeys3], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_3.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_3.csv"
     CSV.write(savePath, outputDf3)
 
     outputDf4 = DataFrame([distinctKeys4], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_4.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_4.csv"
     CSV.write(savePath, outputDf4)
 
     outputDf5 = DataFrame([distinctKeys5], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_5.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_5.csv"
     CSV.write(savePath, outputDf5)
 
     outputDf6 = DataFrame([distinctKeys6], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_6.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_6.csv"
     CSV.write(savePath, outputDf6)
 
     outputDf7 = DataFrame([distinctKeys7], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_7.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_7.csv"
     CSV.write(savePath, outputDf7)
 
     outputDf8 = DataFrame([distinctKeys8], ["PesticideMixINCHIKEYs"])
-    savePath = "F:\\INCHIKEYs_CNL_Ref_PestMix_8.csv"
+    savePath = "F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_8.csv"
     CSV.write(savePath, outputDf8)
