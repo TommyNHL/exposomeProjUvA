@@ -299,7 +299,7 @@
         insertcols!(dfCNLs, 10, ("DirectMatch"=>inputTPTNdf[:, "DirectMatch"]))
         insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[:, "ReversMatch"]))
         insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[:, "FinalScoreRatio"]))
-        insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>inputTPTNdf[:, "MS1Mass"] .- 1.007276))
+        insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>((inputTPTNdf[:, "MS1Mass"] .- 1.007276)/1000)))
     dfCNLs[!, "FPpredictRi"] = inputTPTNdf[:,"FPpredictRi"]
     size(dfCNLs)  # __ x (13+15961+1)
 
