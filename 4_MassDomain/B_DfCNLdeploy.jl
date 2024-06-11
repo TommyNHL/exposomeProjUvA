@@ -192,7 +192,7 @@ insertcols!(dfCNLs, 9, ("MS2ErrorStd"=>inputTPTNdf[(1+512981*7):(512981*8), "MS2
 insertcols!(dfCNLs, 10, ("DirectMatch"=>inputTPTNdf[(1+512981*7):(512981*8), "DirectMatch"]))
 insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[(1+512981*7):(512981*8), "ReversMatch"]))
 insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[(1+512981*7):(512981*8), "FinalScoreRatio"]))
-insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>inputTPTNdf[(1+512981*7):(512981*8), "MS1Mass"] .- 1.007276))
+insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>((inputTPTNdf[(1+512981*7):(512981*8), "MS1Mass"] .- 1.007276)/1000)))
 dfCNLs[!, "FPpredictRi"] = inputTPTNdf[(1+512981*7):(512981*8), "predictRi"]
 size(dfCNLs)  # 512981 x (13+15961+1)
 
@@ -210,7 +210,7 @@ insertcols!(dfCNLs, 9, ("MS2ErrorStd"=>inputTPTNdf[1:136678, "MS2ErrorStd"]))
 insertcols!(dfCNLs, 10, ("DirectMatch"=>inputTPTNdf[1:136678, "DirectMatch"]))
 insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[1:136678, "ReversMatch"]))
 insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[1:136678, "FinalScoreRatio"]))
-insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>inputTPTNdf[1:136678, "MS1Mass"] .- 1.007276))
+insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>((inputTPTNdf[1:136678, "MS1Mass"] .- 1.007276)/1000)))
 dfCNLs[!, "FPpredictRi"] = inputTPTNdf[1:136678, "predictRi"]
 size(dfCNLs)  # 512981 x (13+15961+1)
 
