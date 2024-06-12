@@ -160,10 +160,10 @@ inputTPTNdf
 
 # storing data in a Matrix
 X = zeros(512981, 15961)
-X = zeros(136678, 15961)
+#X = zeros(136678, 15961)
 
-for i in (1+512981*7):(512981*8)
-for i in 1:136678
+for i in (1+512981*0):(512981*1)
+#for i in 1:136678
     println(i)
     arr = []
     arr = getMasses(inputTPTNdf, i, arr, "dig")#"str")
@@ -180,9 +180,9 @@ end
 
 # 4103848 - 512981
 dfCNLs = DataFrame(X, CNLfeaturesStr)
-insertcols!(dfCNLs, 1, ("ENTRY"=>collect((1+512981*7):(512981*8))))
-insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[(1+512981*7):(512981*8), "INCHIKEY_ID"]))
-insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[(1+512981*7):(512981*8), "INCHIKEY"]))
+insertcols!(dfCNLs, 1, ("ENTRY"=>collect((1+512981*0):(512981*1))))
+insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[(1+512981*0):(512981*1), "INCHIKEY_ID"]))
+insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[(1+512981*0):(512981*8), "INCHIKEY"]))
 insertcols!(dfCNLs, 4, ("INCHIKEYreal"=>inputTPTNdf[(1+512981*7):(512981*8), "INCHIKEYreal"]))
 insertcols!(dfCNLs, 5, ("RefMatchFragRatio"=>inputTPTNdf[(1+512981*7):(512981*8), "RefMatchFragRatio"]))
 insertcols!(dfCNLs, 6, ("UsrMatchFragRatio"=>inputTPTNdf[(1+512981*7):(512981*8), "UsrMatchFragRatio"]))
@@ -213,6 +213,12 @@ insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[1:136678, "FinalScoreRat
 insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>((inputTPTNdf[1:136678, "MS1Mass"] .- 1.007276)/1000)))
 dfCNLs[!, "FPpredictRi"] = inputTPTNdf[1:136678, "predictRi"]
 size(dfCNLs)  # 512981 x (13+15961+1)
+
+#################################################################################
+dfCNLs = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv", DataFrame)
+dfCNLs[:, 13]
+dfCNLs[:, "MONOISOTOPICMASS"] = dfCNLs[:, "MONOISOTOPICMASS"] ./ 1000
+#################################################################################
 
 desStat = describe(dfCNLs)  # 15975 x 7
 desStat[14,:]
@@ -278,7 +284,21 @@ CSV.write(savePath, dfCNLs)
 println("done for saving csv")
 
 
+#################################################################################
+describe(dfCNLs[:, end-4:end])
 
+modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+size(modelRF_CNL)
+
+CNLpredictedRi = predict(modelRF_CNL, Matrix(dfCNLs[:, 13:end-4]))
+dfCNLs[:, "CNLpredictRi"] = CNLpredictedRi
+dfCNLs[:, "DeltaRi"] = (CNLpredictedRi - dfCNLs[:, "FPpredictRi"]) / 1000
+describe(dfCNLs[:, end-4:end])
+# save, ouputing testSet df 0.3 x (3+15994+1)
+savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv"
+CSV.write(savePath, dfCNLs)
+println("done for saving csv")
+#################################################################################
 
 
 outputDf = (dfCNLs[dfCNLs.LABEL .== 1, :])[:, 1:end-3]
