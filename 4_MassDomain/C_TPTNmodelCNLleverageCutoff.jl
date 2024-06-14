@@ -11,13 +11,13 @@ using ScikitLearn.CrossValidation: train_test_split
 # CNL model 95% leverage cut-off = 0.14604417882015916
 # 512981 x 15978 df -> 17 df
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv", DataFrame)
-dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRi.csv", DataFrame)
+#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_2withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_3withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_4withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_5withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_6withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_7withCNLRideltaRi.csv", DataFrame)
-#dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
+dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv", DataFrame)
 #dfOutput = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv", DataFrame)
 
 describe(dfOutput)[end-4:end, :]
@@ -54,12 +54,12 @@ dfOutput = dfOutput[:, vcat(collect(1:13), end-4, end-3, end-2, end-1, end)]
 
 # 512981 * 18 df / 136678
 #savePath = "F:\\UvA\\dataframeTPTNModeling_1.csv"
-savePath = "F:\\UvA\\dataframeTPTNModeling_2.csv"
+#savePath = "F:\\UvA\\dataframeTPTNModeling_2.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_3.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_4.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_5.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_6.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_7.csv"
-#savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_8.csv"
 #savePath = "F:\\UvA\\dataframeTPTNModeling_pest.csv"
 CSV.write(savePath, dfOutput)
