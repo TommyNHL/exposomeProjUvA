@@ -33,8 +33,8 @@ hipinv = zeros(15962, 15962)
 hipinv[:,:] .= pinv(Xmat'*Xmat)
 
 function leverage_dist(X)   # Set x1 and x2 to your FPs variables
-    h = zeros(512981,1)
-    #h = zeros(136678,1)
+    #h = zeros(512981,1)
+    h = zeros(136678,1)
     for i in ProgressBar(1: size(X,1)) #check dimensions
         x = X[i,:]
         #hi = x'*pinv(X'*X)*x
