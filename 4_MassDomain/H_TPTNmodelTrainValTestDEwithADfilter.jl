@@ -170,7 +170,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
             Yy_val = deepcopy(M_val[:, end-4])
             Yy_test = deepcopy(M_pest[:, end-1])
             println("## Classification ##")
-            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.5484, 1=>5.6684))
+            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.5484, 1=>5.6665))
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
@@ -226,7 +226,7 @@ for w in Vector(Yy_train)
     if w == 0
         push!(sampleW, 0.5484)
     elseif w == 1
-        push!(sampleW, 5.6684)
+        push!(sampleW, 5.6665)
     end
 end 
 
@@ -236,7 +236,7 @@ for w in Vector(Yy_trainWhole)
     if w == 0
         push!(sampleTW, 0.5484)
     elseif w == 1
-        push!(sampleTW, 5.6684)
+        push!(sampleTW, 5.6665)
     end
 end 
 
@@ -336,7 +336,7 @@ model = RandomForestClassifier(
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
-      class_weight= Dict(0=>0.625, 1=>2.501)
+      class_weight= Dict(0=>0.5484, 1=>5.6665)
       )
 
 model = GradientBoostingClassifier(

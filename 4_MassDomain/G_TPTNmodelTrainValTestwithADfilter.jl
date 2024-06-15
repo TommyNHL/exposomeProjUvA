@@ -31,7 +31,7 @@ using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
 describe((inputDB_test))[12:14, :]
-# inputing 820536 x 4+8+1+2+1+1+2+2 df
+# inputing 820519 x 4+8+1+2+1+1+2+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
 inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
@@ -40,12 +40,12 @@ for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "MS1Error"] = abs(inputDB_test[i, "MS1Error"])
     inputDB_test[i, "DeltaRi"] = abs(inputDB_test[i, "DeltaRi"])
 end
-# save, ouputing 409002 x 21 df, 0:372896; 1:36106 = 0.5484; 5.6639
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio.csv"
+# save, ouputing 408929 x 21 df, 0:372927; 1:36002 = 0.5483; 5.6793
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
-# inputing 3282229 x 4+8+1+2+1+1+2 df
+# inputing 3282022 x 4+8+1+2+1+1+2+2 df
 inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
@@ -53,13 +53,13 @@ for i = 1:size(inputDB, 1)
     inputDB[i, "MS1Error"] = abs(inputDB[i, "MS1Error"])
     inputDB[i, "DeltaRi"] = abs(inputDB[i, "DeltaRi"])
 end
-# save, ouputing 1636788 x 21 df, 0:1492439; 1:144349 = 0.5484; 5.6696
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio.csv"
+# save, ouputing 1636783 x 21 df, 0:1492356; 1:144427 = 0.5484; 5.6665
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2.csv"
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
-# 2045790 x 21 df; 
-# 409002+1636788= 2045790, 0:1865335; 1:180455 = 0.5484; 5.6684
+# 2045712 x 21 df
+# 408929+1636783= 2045712, 0:1865283; 1:180429 = 0.5484; 5.6690
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
 inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
@@ -73,8 +73,8 @@ for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "MS1Error"] = abs(inputDB_pest[i, "MS1Error"])
     inputDB_pest[i, "DeltaRi"] = abs(inputDB_pest[i, "DeltaRi"])
 end
-# save, ouputing 61988 x 19 df, 0:53142; 1:8846 = 
-savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatio.csv"
+# save, ouputing 61988 x 18 df, 0:53142; 1:8846 = 0.5832; 3.504
+savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatio2.csv"
 CSV.write(savePath, inputDB_pest)
 inputDB_pest[inputDB_pest.LABEL .== 1, :]
 
@@ -126,7 +126,9 @@ function avgScore(arrAcc, cv)
 end
 
 # modeling, 5 x 4 x 5 x 9 = 225 times
+describe((inputDB))[vcat(collect(5:12), end-5), :]
 describe((inputDB_test))[vcat(collect(5:12), end-5), :]
+describe((inputDB_pest))[vcat(collect(5:12), end-2), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     leaf_r = vcat(collect(2:2:16))
@@ -137,7 +139,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     rs = 42
     z = zeros(1,14)
     itr = 1
-    while itr < 17
+    while itr < 65
         l = rand(leaf_r)
         t = rand(tree_r)
         d = rand(depth_r)
@@ -161,7 +163,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
             Yy_val = deepcopy(M_val[:, end-4])
             Yy_test = deepcopy(M_pest[:, end-1])
             println("## Classification ##")
-            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.5484, 1=>5.6684))
+            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.5484, 1=>5.6665))
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
@@ -172,8 +174,8 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
                 z[1,5] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 z[1,6] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 100, scoring=f1)
-                z[1,7] = avgScore(f1_10_train, 100)
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                z[1,7] = avgScore(f1_10_train, 3)
                 z[1,8] = score(reg, Matrix(Xx_test), Vector(Yy_test))
                 z[1,9] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
                 z[1,10] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
@@ -188,8 +190,8 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
                 ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)))
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 100, scoring=f1)
-                traincvtrain = avgScore(f1_10_train, 100) 
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 3) 
                 itest = score(reg, Matrix(Xx_test), Vector(Yy_test))
                 f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
                 mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)))
@@ -200,15 +202,15 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
             itr += 1
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_100Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11], depth = z[:,12], minSampleSplit = z[:,13], model = z[:,14])
-    z_df_sorted = sort(z_df, [:f1_100Ftrain, :f1_pest], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_3Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11], depth = z[:,12], minSampleSplit = z[:,13], model = z[:,14])
+    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
     return z_df_sorted
 end
 
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi100F_0d5FinalScoreRatio_RFwithhlnewCompare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatio_RFwithhlnew2Compare2.csv"
 CSV.write(savePath, optiSearch_df)
 
 #= function optimLR(inputDB, inputDB_test, inputDB_pest)
@@ -247,7 +249,7 @@ CSV.write(savePath, optiSearch_df)
             Xx_test = deepcopy(M_pest[:, vcat(collect(5:12), end-2)])
             Yy_test = deepcopy(M_pest[:, end-1])
             println("## Classification ##")
-            reg = LogisticRegression(penalty=p, C=c, solver=solver_rs[s], n_jobs=-1, max_iter=1000, random_state=r, class_weight=Dict(0=>0.5484, 1=>5.6684))
+            reg = LogisticRegression(penalty=p, C=c, solver=solver_rs[s], n_jobs=-1, max_iter=1000, random_state=r, class_weight=Dict(0=>0.5484, 1=>5.6665))
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
@@ -295,15 +297,15 @@ optiSearch_df = optimLR(inputDB, inputDB_test, inputDB_pest)
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatio_LRnew1.csv"
 CSV.write(savePath, optiSearch_df) =#
 
-Yy_train = deepcopy(inputDB[:, end-2])
+#= Yy_train = deepcopy(inputDB[:, end-2])
 sampleW = []
 for w in Vector(Yy_train)
     if w == 0
         push!(sampleW, 0.5484)
     elseif w == 1
-        push!(sampleW, 5.6684)
+        push!(sampleW, 5.6665)
     end
-end 
+end  =#
 
 #= Yy_trainWhole = deepcopy(inputDBInputDB_test[:, end-2])
 sampleTW = []
@@ -311,11 +313,11 @@ for w in Vector(Yy_trainWhole)
     if w == 0
         push!(sampleTW, 0.5484)
     elseif w == 1
-        push!(sampleTW, 5.6684)
+        push!(sampleTW, 5.6665)
     end
 end  =#
 
-function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
+#= function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
     lr_r = vcat(collect(0.1:0.1:0.5))
     leaf_r = vcat(collect(16:2:32))
     tree_r = vcat(8, 16, 24, 32)
@@ -392,7 +394,7 @@ optiSearch_df = optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatio6_GBMsnew1.csv"
-CSV.write(savePath, optiSearch_df)
+CSV.write(savePath, optiSearch_df) =#
 
 
 model = RandomForestClassifier(
@@ -403,25 +405,17 @@ model = RandomForestClassifier(
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
-      class_weight= Dict(0=>0.625, 1=>2.501)
+      class_weight= Dict(0=>0.5484, 1=>5.6665)
       )
 
 #= model = GradientBoostingClassifier(
-      learning_rate = 0.20, 
-      n_estimators = 32, 
-      max_depth = 18, 
-      min_samples_leaf = 30, 
-      min_samples_split = 20, 
-      random_state = 42
-      ) =#
-model = GradientBoostingClassifier(
       learning_rate = 0.30, 
       n_estimators = 16, 
       max_depth = 17, 
       min_samples_leaf = 31, 
       min_samples_split = 16, 
       random_state = 42
-      )
+      ) =#
 
 #fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]))
 fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]), sample_weight=sampleW)
