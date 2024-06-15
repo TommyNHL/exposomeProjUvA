@@ -64,7 +64,7 @@ inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
 inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
 
-# 136678 x 19 df
+# 136678 x 18 df
 inputDB_pest = CSV.read("F:\\UvA\\dataframeTPTNModeling_pest.csv", DataFrame)
 sort!(inputDB_pest, [:ENTRY])
 inputDB_pest = inputDB_pest[inputDB_pest.FinalScoreRatio .>= float(0.5), :]
