@@ -19,7 +19,6 @@ matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
 make_scorer = pyimport("sklearn.metrics").make_scorer
 f1 = make_scorer(f1_score, pos_label=1, average="binary")
 
-
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: GradientBoostingClassifier
@@ -32,7 +31,7 @@ using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
 describe((inputDB_test))[12:14, :]
-# inputing 820536 x 4+8+1+2+1+1+2+2 df
+# inputing 820519 x 4+8+1+2+1+1+2+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
 inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
@@ -44,12 +43,12 @@ for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
     inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
 end
-# save, ouputing 409002 x 22 df, 0:372896; 1:36106 = 0.5484; 5.6639
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatioDE.csv"
+# save, ouputing 408929 x 21+1 df, 0:372927; 1:36002 = 0.5483; 5.6793
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
-# inputing 3282229 x 4+8+1+2+1+1+2+2 df
+# inputing 3282022 x 4+8+1+2+1+1+2+2 df
 inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 insertcols!(inputDB, 10, ("MatchRatio"=>float(0)))
@@ -60,13 +59,13 @@ for i = 1:size(inputDB, 1)
     inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
     inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
 end
-# save, ouputing 1636788 x 22 df, 0:1492439; 1:144349 = 0.5484; 5.6696
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatioDE.csv"
+# save, ouputing 1636783 x 21+1 df, 0:1492356; 1:144427 = 0.5484; 5.6665
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE.csv"
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
-# 2045790 x 22 df; 
-# 409002+1636788= 2045790, 0:1865335; 1:180455 = 0.5484; 5.6684
+# 2045712 x 22 df; 
+# 408929+1636783= 2045712, 0:1865283; 1:180429 = 0.5484; 5.6690
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
 inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
@@ -82,8 +81,8 @@ for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "FinalScoreRatio"] = log10(inputDB_pest[i, "FinalScoreRatio"])
     inputDB_pest[i, "MatchRatio"] = inputDB_pest[i, "DirectMatch"] - inputDB_pest[i, "ReversMatch"]
 end
-# save, ouputing 62008 x 17 df, 0:53162; 1:8846 = 
-savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDE.csv"
+# save, ouputing 61988 x 18+1 df, 0:53142; 1:8846 = 0.5832; 3.504
+savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE.csv"
 CSV.write(savePath, inputDB_pest)
 inputDB_pest[inputDB_pest.LABEL .== 1, :]
 
@@ -135,7 +134,9 @@ function avgScore(arrAcc, cv)
 end
 
 # modeling, 5 x 4 x 5 x 9 = 225 times
+describe((inputDB))[vcat(collect(5:10), 13, end-5), :]
 describe((inputDB_test))[vcat(collect(5:10), 13, end-5), :]
+describe((inputDB_pest))[vcat(collect(5:10), 13, end-2), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     leaf_r = vcat(collect(2:2:16))
@@ -217,7 +218,7 @@ end
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE_RFwithhlnewCompare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE_RFwithhlnew2Compare2.csv"
 CSV.write(savePath, optiSearch_df)
 
 Yy_train = deepcopy(inputDB[:, end-2])
