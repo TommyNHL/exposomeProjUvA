@@ -75,6 +75,7 @@ inputDB_pest = CSV.read("F:\\UvA\\dataframeTPTNModeling_pest.csv", DataFrame)
 sort!(inputDB_pest, [:ENTRY])
 insertcols!(inputDB_pest, 10, ("MatchRatio"=>float(0)))
 inputDB_pest = inputDB_pest[inputDB_pest.FinalScoreRatio .>= float(0.5), :]
+inputDB_pest = inputDB_pest[inputDB_pest.Leverage .<= 0.14604417882015916, :]
 for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "RefMatchFragRatio"] = log10(inputDB_pest[i, "RefMatchFragRatio"])
     inputDB_pest[i, "UsrMatchFragRatio"] = log10(inputDB_pest[i, "UsrMatchFragRatio"])

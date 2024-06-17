@@ -81,6 +81,7 @@ inputDB_pest = CSV.read("F:\\UvA\\dataframeTPTNModeling_pest.csv", DataFrame)
 sort!(inputDB_pest, [:ENTRY])
 insertcols!(inputDB_pest, 10, ("MatchRatio"=>float(0)))
 inputDB_pest = inputDB_pest[inputDB_pest.FinalScoreRatio .>= float(0.5), :]
+inputDB_pest = inputDB_pest[inputDB_pest.Leverage .<= 0.14604417882015916, :]
 describe(inputDB_pest[inputDB_pest.LABEL .== 1, :])
 inputDB_pest = inputDB_pest[inputDB_pest.MS1Error .>= float(-0.001), :]
 inputDB_pest = inputDB_pest[inputDB_pest.MS1Error .<= float(0.001), :]
@@ -90,7 +91,7 @@ for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "FinalScoreRatio"] = log10(inputDB_pest[i, "FinalScoreRatio"])
     inputDB_pest[i, "MatchRatio"] = inputDB_pest[i, "DirectMatch"] - inputDB_pest[i, "ReversMatch"]
 end
-# save, ouputing 13296 x 18+1 df, 0:4450; 1:8846 = 1.4939; 0.7515
+# save, ouputing 13278 x 18+1 df, 0:4432; 1:8846 = 1.4980; 0.7505
 savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE2.csv"
 CSV.write(savePath, inputDB_pest)
 inputDB_pest[inputDB_pest.LABEL .== 1, :]
@@ -318,7 +319,7 @@ end
 optiSearch_df = optimLR(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare2.csv"
 CSV.write(savePath, optiSearch_df)
 
 
