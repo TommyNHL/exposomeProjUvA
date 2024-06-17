@@ -30,21 +30,24 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-describe((inputDB_test))[12:14, :]
+describe((inputDB_test))[1:14, :]
 # inputing 820519 x 4+8+1+2+1+1+2+2 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage
 inputDB_test = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 insertcols!(inputDB_test, 10, ("MatchRatio"=>float(0)))
 inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
+describe(inputDB_test[inputDB_test.LABEL .== 1, :])
+inputDB_test = inputDB_test[inputDB_test.MS1Error .>= float(-0.001), :]
+inputDB_test = inputDB_test[inputDB_test.MS1Error .<= float(0.001), :]
 for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "RefMatchFragRatio"] = log10(inputDB_test[i, "RefMatchFragRatio"])
     inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
     inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
     inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
 end
-# save, ouputing 408929 x 21+1 df, 0:372927; 1:36002 = 0.5483; 5.6793
-savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE.csv"
+# save, ouputing 119054 x 21+1 df, 0:83052; 1:36002 = 0.7167; 1.6534
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE2.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
@@ -53,19 +56,22 @@ inputDB = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl.csv", DataFr
 sort!(inputDB, [:ENTRY])
 insertcols!(inputDB, 10, ("MatchRatio"=>float(0)))
 inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
+describe(inputDB[inputDB.LABEL .== 1, :])
+inputDB = inputDB[inputDB.MS1Error .>= float(-0.001), :]
+inputDB = inputDB[inputDB.MS1Error .<= float(0.001), :]
 for i = 1:size(inputDB, 1)
     inputDB[i, "RefMatchFragRatio"] = log10(inputDB[i, "RefMatchFragRatio"])
     inputDB[i, "UsrMatchFragRatio"] = log10(inputDB[i, "UsrMatchFragRatio"])
     inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
     inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
 end
-# save, ouputing 1636783 x 21+1 df, 0:1492356; 1:144427 = 0.5484; 5.6665
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE.csv"
+# save, ouputing 475245 x 21+1 df, 0:330818; 1:144427 = 0.7183; 1.6453
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE2.csv"
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
-# 2045712 x 22 df; 
-# 408929+1636783= 2045712, 0:1865283; 1:180429 = 0.5484; 5.6690
+# 594299 x 22 df; 
+# 119054+475245= 594299, 0:413870; 1:180429 = 0.7180; 1.6469
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
 inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
@@ -75,14 +81,17 @@ inputDB_pest = CSV.read("F:\\UvA\\dataframeTPTNModeling_pest.csv", DataFrame)
 sort!(inputDB_pest, [:ENTRY])
 insertcols!(inputDB_pest, 10, ("MatchRatio"=>float(0)))
 inputDB_pest = inputDB_pest[inputDB_pest.FinalScoreRatio .>= float(0.5), :]
+describe(inputDB_pest[inputDB_pest.LABEL .== 1, :])
+inputDB_pest = inputDB_pest[inputDB_pest.MS1Error .>= float(-0.001), :]
+inputDB_pest = inputDB_pest[inputDB_pest.MS1Error .<= float(0.001), :]
 for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "RefMatchFragRatio"] = log10(inputDB_pest[i, "RefMatchFragRatio"])
     inputDB_pest[i, "UsrMatchFragRatio"] = log10(inputDB_pest[i, "UsrMatchFragRatio"])
     inputDB_pest[i, "FinalScoreRatio"] = log10(inputDB_pest[i, "FinalScoreRatio"])
     inputDB_pest[i, "MatchRatio"] = inputDB_pest[i, "DirectMatch"] - inputDB_pest[i, "ReversMatch"]
 end
-# save, ouputing 61988 x 18+1 df, 0:53142; 1:8846 = 0.5832; 3.504
-savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE.csv"
+# save, ouputing 13296 x 18+1 df, 0:4450; 1:8846 = 1.4939; 0.7515
+savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE2.csv"
 CSV.write(savePath, inputDB_pest)
 inputDB_pest[inputDB_pest.LABEL .== 1, :]
 
@@ -171,7 +180,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
             Yy_val = deepcopy(M_val[:, end-4])
             Yy_test = deepcopy(M_pest[:, end-1])
             println("## Classification ##")
-            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.5484, 1=>5.6665))
+            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.7183, 1=>1.6453))  #0.7183; 1.6453
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
@@ -263,7 +272,7 @@ function optimLR(inputDB, inputDB_test, inputDB_pest)
             Yy_val = deepcopy(M_val[:, end-4])
             Yy_test = deepcopy(M_pest[:, end-1])
             println("## Classification ##")
-            reg = LogisticRegression(penalty=p, C=c, solver=solver_rs[s], max_iter=5000, random_state=rs, class_weight=Dict(0=>0.5484, 1=>5.6665))
+            reg = LogisticRegression(penalty=p, C=c, solver=solver_rs[s], max_iter=5000, random_state=rs, class_weight=Dict(0=>0.7183, 1=>1.6453))  # 0.7183; 1.6453
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
@@ -313,13 +322,13 @@ savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRati
 CSV.write(savePath, optiSearch_df)
 
 
-Yy_train = deepcopy(inputDB[:, end-5])
+Yy_train = deepcopy(inputDB[:, end-5])  # 0.7183; 1.6453
 sampleW = []
 for w in Vector(Yy_train)
     if w == 0
-        push!(sampleW, 0.5484)
+        push!(sampleW, 0.7183)
     elseif w == 1
-        push!(sampleW, 5.6665)
+        push!(sampleW, 1.6453)
     end
 end 
 
@@ -426,7 +435,7 @@ model = RandomForestClassifier(
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
-      class_weight= Dict(0=>0.5484, 1=>5.6665)
+      class_weight= Dict(0=>0.7183, 1=>1.6453)  # 0.7183; 1.6453
       )
 
 model = GradientBoostingClassifier(
