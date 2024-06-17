@@ -227,7 +227,7 @@ end
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE_RFwithhlnew2Compare2.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE2_RFwithhlnew2Compare1.csv"
 CSV.write(savePath, optiSearch_df)
 
 function optimLR(inputDB, inputDB_test, inputDB_pest)

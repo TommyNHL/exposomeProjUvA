@@ -8,12 +8,15 @@ using Plots
 # 4103848 x 4 + 8 + 1 + 2 + 1 + 1
 trainDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2.csv", DataFrame)
 trainDEDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE.csv", DataFrame)
+trainDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE2.csv", DataFrame)
 
 testDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2.csv", DataFrame)
 testDEDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE.csv", DataFrame)
+testDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE2.csv", DataFrame)
 
 pestDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatio2.csv", DataFrame)
 pestDEDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE.csv", DataFrame)
+pestDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE2.csv", DataFrame)
 
 describe(trainDf)[1:end, :]
 describe(testDf)[1:end, :]
@@ -33,24 +36,31 @@ testDf_DE0 = testDEDf[testDEDf.LABEL .== 0, :]
 testDf_DE1 = testDEDf[testDEDf.LABEL .== 1, :]
 pestDf_DE0 = pestDEDf[pestDEDf.LABEL .== 0, :]
 pestDf_DE1 = pestDEDf[pestDEDf.LABEL .== 1, :]
+
+trainDf2_DE0 = trainDEDf2[trainDEDf2.LABEL .== 0, :]
+trainDf2_DE1 = trainDEDf2[trainDEDf2.LABEL .== 1, :]
+testDf2_DE0 = testDEDf2[testDEDf2.LABEL .== 0, :]
+testDf2_DE1 = testDEDf2[testDEDf2.LABEL .== 1, :]
+pestDf2_DE0 = pestDEDf2[pestDEDf2.LABEL .== 0, :]
+pestDf2_DE1 = pestDEDf2[pestDEDf2.LABEL .== 1, :]
 # ==================================================================================================
 
 using DataSci4Chem
 
-layout = @layout [a{0.50w,0.33h} b{0.50w,0.33h}
-                  c{0.50w,0.33h} d{0.50w,0.33h}
-                  e{0.50w,0.33h} f{0.50w,0.33h}]
+layout = @layout [a{0.33w,0.33h} b{0.33w,0.33h} c{0.33w,0.33h}
+                  d{0.33w,0.33h} e{0.33w,0.33h} f{0.33w,0.33h}
+                  g{0.33w,0.33h} h{0.33w,0.33h} i{0.33w,0.33h}]
 default(grid = false, legend = false)
 gr()
 
 outplotTPTNdetaRiDistrution = plot(layout = layout, link = :both, 
-        size = (1200, 1200), margin = (8, :mm), dpi = 300)
+        size = (1800, 1200), margin = (8, :mm), dpi = 300)
 
-histogram!(trainDf_0[:, "FinalScoreRatio"], 
+histogram!(trainDf_0[:, "UsrMatchFragRatio"], 
     subplot = 1, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "FinalScoreRatio", xguidefontsize=10, 
+    xlabel = "UsrMatchFragRatio", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -64,11 +74,11 @@ histogram!(trainDf_0[:, "FinalScoreRatio"],
     title = "Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(trainDf_1[:, "FinalScoreRatio"], 
+histogram!(trainDf_1[:, "UsrMatchFragRatio"], 
     subplot = 1, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "FinalScoreRatio", xguidefontsize=10, 
+    xlabel = "UsrMatchFragRatio", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -83,11 +93,11 @@ histogram!(trainDf_1[:, "FinalScoreRatio"],
     titlefont = font(12), 
     dpi = 300)
 
-histogram!(trainDf_DE0[:, "FinalScoreRatio"], 
+histogram!(trainDf_DE0[:, "UsrMatchFragRatio"], 
     subplot = 2, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "log(FinalScoreRatio)", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -101,11 +111,11 @@ histogram!(trainDf_DE0[:, "FinalScoreRatio"],
     title = "Preprocessed Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(trainDf_DE1[:, "FinalScoreRatio"], 
+histogram!(trainDf_DE1[:, "UsrMatchFragRatio"], 
     subplot = 2, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "log(FinalScoreRatio)", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -120,12 +130,49 @@ histogram!(trainDf_DE1[:, "FinalScoreRatio"],
     titlefont = font(12), 
     dpi = 300)
 
-
-histogram!(testDf_0[:, "FinalScoreRatio"], 
+histogram!(trainDf2_DE0[:, "UsrMatchFragRatio"], 
     subplot = 3, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "FinalScoreRatio", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 0", 
+    fc = "pink", 
+    lc = "pink", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topleft, 
+    legendfont = font(8), 
+    title = "Filtered Training Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+histogram!(trainDf2_DE1[:, "UsrMatchFragRatio"], 
+    subplot = 3, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topleft, 
+    legendfont = font(8), 
+    title = "Filtered Training Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+
+
+histogram!(testDf_0[:, "UsrMatchFragRatio"], 
+    subplot = 4, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "UsrMatchFragRatio", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -139,11 +186,11 @@ histogram!(testDf_0[:, "FinalScoreRatio"],
     title = "Testing Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(testDf_1[:, "FinalScoreRatio"], 
-    subplot = 3, 
+histogram!(testDf_1[:, "UsrMatchFragRatio"], 
+    subplot = 4, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "FinalScoreRatio", xguidefontsize=10, 
+    xlabel = "UsrMatchFragRatio", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -158,11 +205,11 @@ histogram!(testDf_1[:, "FinalScoreRatio"],
     titlefont = font(12), 
     dpi = 300)
 
-histogram!(testDf_DE0[:, "FinalScoreRatio"], 
-    subplot = 4, 
+histogram!(testDf_DE0[:, "UsrMatchFragRatio"], 
+    subplot = 5, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "log(FinalScoreRatio)", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -176,11 +223,11 @@ histogram!(testDf_DE0[:, "FinalScoreRatio"],
     title = "Preprocessed Testing Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(testDf_DE1[:, "FinalScoreRatio"], 
-    subplot = 4, 
+histogram!(testDf_DE1[:, "UsrMatchFragRatio"], 
+    subplot = 5, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "log(FinalScoreRatio)", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -195,12 +242,48 @@ histogram!(testDf_DE1[:, "FinalScoreRatio"],
     titlefont = font(12), 
     dpi = 300)
 
-
-histogram!(pestDf_0[:, "FinalScoreRatio"], 
-    subplot = 5, 
+histogram!(testDf2_DE0[:, "UsrMatchFragRatio"], 
+    subplot = 6, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "FinalScoreRatio", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 0", 
+    fc = "pink", 
+    lc = "pink", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topleft, 
+    legendfont = font(8), 
+    title = "Filtered Testing Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+histogram!(testDf2_DE1[:, "UsrMatchFragRatio"], 
+    subplot = 6, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topleft, 
+    legendfont = font(8), 
+    title = "Filtered Testing Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+
+histogram!(pestDf_0[:, "UsrMatchFragRatio"], 
+    subplot = 7, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "UsrMatchFragRatio", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -214,11 +297,11 @@ histogram!(pestDf_0[:, "FinalScoreRatio"],
     title = "External Independent Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(pestDf_1[:, "FinalScoreRatio"], 
-    subplot = 5, 
+histogram!(pestDf_1[:, "UsrMatchFragRatio"], 
+    subplot = 7, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "FinalScoreRatio", xguidefontsize=10, 
+    xlabel = "UsrMatchFragRatio", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -233,11 +316,11 @@ histogram!(pestDf_1[:, "FinalScoreRatio"],
     titlefont = font(12), 
     dpi = 300)
 
-histogram!(pestDf_DE0[:, "FinalScoreRatio"], 
-    subplot = 6, 
+histogram!(pestDf_DE0[:, "UsrMatchFragRatio"], 
+    subplot = 8, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "log(FinalScoreRatio)", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -251,11 +334,11 @@ histogram!(pestDf_DE0[:, "FinalScoreRatio"],
     title = "Preprocessed External Independent Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(pestDf_DE1[:, "FinalScoreRatio"], 
-    subplot = 6, 
+histogram!(pestDf_DE1[:, "UsrMatchFragRatio"], 
+    subplot = 8, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "log(FinalScoreRatio)", xguidefontsize=10, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -267,28 +350,65 @@ histogram!(pestDf_DE1[:, "FinalScoreRatio"],
     legend = :topleft, 
     legendfont = font(8), 
     title = "Preprocessed External Independent Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+
+histogram!(pestDf2_DE0[:, "UsrMatchFragRatio"], 
+    subplot = 9, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 0", 
+    fc = "pink", 
+    lc = "pink", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topleft, 
+    legendfont = font(8), 
+    title = "Filtered External Independent Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+histogram!(pestDf2_DE1[:, "UsrMatchFragRatio"], 
+    subplot = 9, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "log(UsrMatchFragRatio)", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topleft, 
+    legendfont = font(8), 
+    title = "Filtered External Independent Dataset", 
     titlefont = font(12), 
     dpi = 300)
 
 # Saving
-savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\outplot_TPTNDistrution_FinalScoreRatio.png")
+savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\outplot_TPTNDistrution_UsrMatchFragRatio2.png")
 
 # ==================================================================================================
 
-layout = @layout [a{0.50w,0.33h} b{0.50w,0.33h}
-                  c{0.50w,0.33h} d{0.50w,0.33h}
-                  e{0.50w,0.33h} f{0.50w,0.33h}]
+layout = @layout [a{0.33w,0.33h} b{0.33w,0.33h} c{0.33w,0.33h}
+                  d{0.33w,0.33h} e{0.33w,0.33h} f{0.33w,0.33h}
+                  g{0.33w,0.33h} h{0.33w,0.33h} i{0.33w,0.33h}]
 default(grid = false, legend = false)
 gr()
 
 outplotTPTNdetaRiDistrution = plot(layout = layout, link = :both, 
-        size = (1200, 1200), margin = (8, :mm), dpi = 300)
+        size = (1800, 1200), margin = (8, :mm), dpi = 300)
 
-histogram!(trainDf_0[:, "DeltaRi"], 
+histogram!(trainDf_0[:, "MS1Error"], 
     subplot = 1, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "1-Way DeltaRI", xguidefontsize=10, 
+    xlabel = "1-Way MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -302,11 +422,11 @@ histogram!(trainDf_0[:, "DeltaRi"],
     title = "Preprocessed Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(trainDf_1[:, "DeltaRi"], 
+histogram!(trainDf_1[:, "MS1Error"], 
     subplot = 1, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "1-Way DeltaRI", xguidefontsize=10, 
+    xlabel = "1-Way MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -321,11 +441,11 @@ histogram!(trainDf_1[:, "DeltaRi"],
     titlefont = font(12), 
     dpi = 300)
 
-histogram!(trainDf_DE0[:, "DeltaRi"], 
+histogram!(trainDf_DE0[:, "MS1Error"], 
     subplot = 2, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "2-Way DeltaRI", xguidefontsize=10, 
+    xlabel = "2-Way MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -339,11 +459,11 @@ histogram!(trainDf_DE0[:, "DeltaRi"],
     title = "Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(trainDf_DE1[:, "DeltaRi"], 
+histogram!(trainDf_DE1[:, "MS1Error"], 
     subplot = 2, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "2-Way DeltaRI", xguidefontsize=10, 
+    xlabel = "2-Way MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -358,12 +478,11 @@ histogram!(trainDf_DE1[:, "DeltaRi"],
     titlefont = font(12), 
     dpi = 300)
 
-
-histogram!(testDf_0[:, "DeltaRi"], 
+histogram!(trainDf2_DE0[:, "MS1Error"], 
     subplot = 3, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "1-Way DeltaRI", xguidefontsize=10, 
+    xlabel = "2-Way MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -372,16 +491,16 @@ histogram!(testDf_0[:, "DeltaRi"],
     margin = (5, :mm), 
     xtickfontsize = 8, 
     ytickfontsize= 8, 
-    legend = :topright, 
+    legend = :topleft, 
     legendfont = font(8), 
-    title = "Preprocessed Testing Dataset", 
+    title = "Filtered Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(testDf_1[:, "DeltaRi"], 
+histogram!(trainDf2_DE1[:, "MS1Error"], 
     subplot = 3, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "1-Way DeltaRI", xguidefontsize=10, 
+    xlabel = "2-Way MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -390,17 +509,55 @@ histogram!(testDf_1[:, "DeltaRi"],
     margin = (5, :mm), 
     xtickfontsize = 8, 
     ytickfontsize= 8, 
-    legend = :topright, 
+    legend = :topleft, 
     legendfont = font(8), 
-    title = "Preprocessed Testing Dataset", 
+    title = "Filtered Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
 
-histogram!(testDf_DE0[:, "DeltaRi"], 
+
+histogram!(testDf_0[:, "MS1Error"], 
     subplot = 4, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "2-Way DeltaRI", xguidefontsize=10, 
+    xlabel = "1-Way MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 0", 
+    fc = "pink", 
+    lc = "pink", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Preprocessed Testing Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+histogram!(testDf_1[:, "MS1Error"], 
+    subplot = 4, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "1-Way MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Preprocessed Testing Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+
+histogram!(testDf_DE0[:, "MS1Error"], 
+    subplot = 5, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "2-Way MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
