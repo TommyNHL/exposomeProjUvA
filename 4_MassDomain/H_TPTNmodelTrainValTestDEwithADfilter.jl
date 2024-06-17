@@ -313,7 +313,7 @@ savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRati
 CSV.write(savePath, optiSearch_df)
 
 
-Yy_train = deepcopy(inputDB[:, end-2])
+Yy_train = deepcopy(inputDB[:, end-5])
 sampleW = []
 for w in Vector(Yy_train)
     if w == 0
@@ -414,6 +414,8 @@ optiSearch_df = optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
 # save, ouputing 180 x 8 df
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE_GBMswithhlnew2Compare1.csv"
 CSV.write(savePath, optiSearch_df)
+
+#===============================================================================#
 
 model = RandomForestClassifier(
       n_estimators = 425, 
