@@ -398,10 +398,10 @@ CSV.write(savePath, optiSearch_df) =#
 
 
 model = RandomForestClassifier(
-      n_estimators = 100, 
+      n_estimators = 300, 
       max_depth = 40, 
-      min_samples_leaf = 12, 
-      min_samples_split = 9, 
+      min_samples_leaf = 6, 
+      min_samples_split = 2, 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
