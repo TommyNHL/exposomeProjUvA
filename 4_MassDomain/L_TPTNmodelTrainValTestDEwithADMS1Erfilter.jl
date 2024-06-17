@@ -143,9 +143,9 @@ function avgScore(arrAcc, cv)
 end
 
 # modeling, 5 x 4 x 5 x 9 = 225 times
-describe((inputDB))[vcat(collect(5:10), 13, end-5), :]
-describe((inputDB_test))[vcat(collect(5:10), 13, end-5), :]
-describe((inputDB_pest))[vcat(collect(5:10), 13, end-2), :]
+describe((inputDB))[vcat(5,6,8,9,10, 13, end-5), :]
+describe((inputDB_test))[vcat(5,6,8,9,10, 13, end-5), :]
+describe((inputDB_pest))[vcat(5,6,8,9,10, 13, end-2), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     leaf_r = vcat(collect(2:2:16))
@@ -168,13 +168,13 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
             M_val = inputDB_test
             M_pest = inputDB_pest
             if mod == 8
-                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13)])
-                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13)])
-                Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13)])
             elseif mod == 9
-                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13, end-5)])
-                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13, end-5)])
-                Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13, end-2)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13, end-2)])
             end
             Yy_train = deepcopy(M_train[:, end-4])
             Yy_val = deepcopy(M_val[:, end-4])
@@ -227,7 +227,7 @@ end
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE2_RFwithhlnew2Compare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare1.csv"
 CSV.write(savePath, optiSearch_df)
 
 function optimLR(inputDB, inputDB_test, inputDB_pest)
@@ -260,13 +260,13 @@ function optimLR(inputDB, inputDB_test, inputDB_pest)
             M_val = inputDB_test
             M_pest = inputDB_pest
             if mod == 8
-                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13)])
-                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13)])
-                Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13)])
             elseif mod == 9
-                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13, end-5)])
-                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13, end-5)])
-                Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13, end-2)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13, end-2)])
             end
             Yy_train = deepcopy(M_train[:, end-4])
             Yy_val = deepcopy(M_val[:, end-4])
@@ -318,7 +318,7 @@ end
 optiSearch_df = optimLR(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE_LRwithhlnew2Compare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare1.csv"
 CSV.write(savePath, optiSearch_df)
 
 
