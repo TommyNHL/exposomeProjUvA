@@ -418,25 +418,25 @@ CSV.write(savePath, optiSearch_df)
 #===============================================================================#
 
 model = RandomForestClassifier(
-      n_estimators = 425, 
-      max_depth = 100, 
-      min_samples_leaf = 28, 
+      n_estimators = 300, 
+      max_depth = 40, 
+      min_samples_leaf = 4, 
       #max_features = Int64(9), 
-      min_samples_split = 12, 
+      min_samples_split = 5, 
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
       class_weight= Dict(0=>0.5484, 1=>5.6665)
       )
 
-model = GradientBoostingClassifier(
+#= model = GradientBoostingClassifier(
       learning_rate = 0.25, 
       n_estimators = 8, 
       max_depth = 18, 
       min_samples_leaf = 18, 
       min_samples_split = 18, 
       random_state = 42
-      )
+      ) =#
 
 #fit!(model, Matrix(inputDB[:, vcat(collect(5:12), end-3)]), Vector(inputDB[:, end-2]))
 fit!(model, Matrix(inputDB[:, vcat(collect(5:10), 13, end-3)]), Vector(inputDB[:, end-2]), sample_weight=sampleW)
