@@ -91,7 +91,7 @@ for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "FinalScoreRatio"] = log10(inputDB_pest[i, "FinalScoreRatio"])
     inputDB_pest[i, "MatchRatio"] = inputDB_pest[i, "DirectMatch"] - inputDB_pest[i, "ReversMatch"]
 end
-# save, ouputing 13278 x 18+1 df, 0:4432; 1:8846 = 1.4980; 0.7505
+# save, ouputing 13296 x 18+1 df, 0:4432; 1:8846 = 1.4980; 0.7505
 savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE2.csv"
 CSV.write(savePath, inputDB_pest)
 inputDB_pest[inputDB_pest.LABEL .== 1, :]
@@ -157,7 +157,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     rs = 42
     z = zeros(1,14)
     itr = 1
-    while itr < 65
+    while itr < 129
         l = rand(leaf_r)
         t = rand(tree_r)
         d = rand(depth_r)
@@ -228,7 +228,7 @@ end
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare23.csv"
 CSV.write(savePath, optiSearch_df)
 
 function optimLR(inputDB, inputDB_test, inputDB_pest)
@@ -319,7 +319,7 @@ end
 optiSearch_df = optimLR(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare2.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare3.csv"
 CSV.write(savePath, optiSearch_df)
 
 

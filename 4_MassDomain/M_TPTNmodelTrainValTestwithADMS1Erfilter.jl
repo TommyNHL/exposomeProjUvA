@@ -134,10 +134,11 @@ function avgScore(arrAcc, cv)
     return sumAcc / cv
 end
 
+
 # modeling, 5 x 4 x 5 x 9 = 225 times
-describe((inputDB))[vcat(collect(5:12), end-5), :]
-describe((inputDB_test))[vcat(collect(5:12), end-5), :]
-describe((inputDB_pest))[vcat(collect(5:12), end-2), :]
+describe((inputDB))[vcat(5,6,8,9,10, 13, end-5), :]
+describe((inputDB_test))[vcat(5,6,8,9,10, 13, end-5), :]
+describe((inputDB_pest))[vcat(5,6,8,9,10, 13, end-2), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest)
     leaf_r = vcat(collect(2:2:16))
