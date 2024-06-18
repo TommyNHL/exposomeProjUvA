@@ -91,7 +91,7 @@ for i = 1:size(inputDB_pest, 1)
     inputDB_pest[i, "FinalScoreRatio"] = log10(inputDB_pest[i, "FinalScoreRatio"])
     inputDB_pest[i, "MatchRatio"] = inputDB_pest[i, "DirectMatch"] - inputDB_pest[i, "ReversMatch"]
 end
-# save, ouputing 13296 x 18+1 df, 0:4432; 1:8846 = 1.4980; 0.7505
+# save, ouputing 13278 x 18+1 df, 0:4432; 1:8846 = 1.4980; 0.7505
 savePath = "F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE2Filter.csv"
 CSV.write(savePath, inputDB_pest)
 inputDB_pest[inputDB_pest.LABEL .== 1, :]
