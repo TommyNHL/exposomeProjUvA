@@ -362,13 +362,13 @@ function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
             M_val = inputDB_test
             M_pest = inputDB_pest
             if mod == 8
-                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13)])
-                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13)])
-                Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13)])
             elseif mod == 9
-                Xx_train = deepcopy(M_train[:, vcat(collect(5:10), 13, end-5)])
-                Xx_val = deepcopy(M_val[:, vcat(collect(5:10), 13, end-5)])
-                Xx_test = deepcopy(M_pest[:, vcat(collect(5:10), 13, end-2)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13, end-2)])
             end
             Yy_train = deepcopy(M_train[:, end-4])
             Yy_val = deepcopy(M_val[:, end-4])
@@ -422,7 +422,7 @@ end
 optiSearch_df = optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE_GBMswithhlnew2Compare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_GBMwithhlnew2Compare1.csv"
 CSV.write(savePath, optiSearch_df)
 
 #===============================================================================#
