@@ -7,16 +7,19 @@ using Plots
 
 # 4103848 x 4 + 8 + 1 + 2 + 1 + 1
 trainDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2.csv", DataFrame)
+trainDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2Filter.csv", DataFrame)
 trainDEDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE.csv", DataFrame)
-trainDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE2.csv", DataFrame)
+trainDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
 
 testDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2.csv", DataFrame)
+testDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2Filter.csv", DataFrame)
 testDEDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE.csv", DataFrame)
-testDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE2.csv", DataFrame)
+testDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
 
 pestDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatio2.csv", DataFrame)
+pestDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatio2Filter.csv", DataFrame)
 pestDEDf = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE.csv", DataFrame)
-pestDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE2.csv", DataFrame)
+pestDEDf2 = CSV.read("F:\\UvA\\dataframeTPTNModeling_pestDFwithhl0d5FinalScore2RatioDE2Filter.csv", DataFrame)
 
 describe(trainDf)[1:end, :]
 describe(testDf)[1:end, :]
