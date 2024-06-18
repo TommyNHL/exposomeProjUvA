@@ -29,13 +29,13 @@ using ScikitLearn.CrossValidation: train_test_split
 
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage, withDeltaRipredictTPTN, p0, p1
 # --------------------------------------------------------------------------------------------------
-# inputing 1636788 x 24 df; 409002 x 24 df; 61988 x 21 df
-inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTNandpTP_new0d5FinalScoreRatio.csv", DataFrame)
-inputDB_TrainWithoutDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTNandpTP_new0d5FinalScoreRatio.csv", DataFrame)
-inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withAbsDeltaRiandPredictedTPTNandpTP_new0d5FinalScoreRatio.csv", DataFrame)
-inputDB_TestWithoutDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_new0d5FinalScoreRatio.csv", DataFrame)
-inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withAbsDeltaRiandPredictedTPTNandpTP_new0d5FinalScoreRatio.csv", DataFrame)
-inputDB_PestWithoutDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withoutAbsDeltaRiandPredictedTPTNandpTP_new0d5FinalScoreRatio.csv", DataFrame)
+# inputing 475245 x 25 df; 119054 x 25 df; 13278 x 22 df
+inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withDeltaRiandPredictedTPTNandpTP_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
+inputDB_TrainWithoutDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutDeltaRiandPredictedTPTNandpTP_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
+inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withDeltaRiandPredictedTPTNandpTP_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
+inputDB_TestWithoutDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_TestDF_withoutDeltaRiandPredictedTPTNandpTP_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
+inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withDeltaRiandPredictedTPTNandpTP_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
+inputDB_PestWithoutDeltaRi = CSV.read("F:\\UvA\\dataframeTPTNModeling_PestDF_withoutDeltaRiandPredictedTPTNandpTP_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
 
 # ==================================================================================================
 # prepare plotting confusion matrix
@@ -46,16 +46,16 @@ inputDB_TrainWithDeltaRi_FP = 0
 inputDB_TrainWithDeltaRi_TN = 0
 inputDB_TrainWithDeltaRi_FN = 0
 for i in 1:size(inputDB_TrainWithDeltaRi , 1)
-    if (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+    if (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 1)
         inputDB_TrainWithDeltaRi[i, "CM"] = "TP"
         inputDB_TrainWithDeltaRi_TP += 1
-    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 1)
         inputDB_TrainWithDeltaRi[i, "CM"] = "FP"
         inputDB_TrainWithDeltaRi_FP += 1
-    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 0)
         inputDB_TrainWithDeltaRi[i, "CM"] = "TN"
         inputDB_TrainWithDeltaRi_TN += 1
-    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 0)
         inputDB_TrainWithDeltaRi[i, "CM"] = "FN"
         inputDB_TrainWithDeltaRi_FN += 1
     end
@@ -68,8 +68,8 @@ CM_TrainWith[2, 2] = inputDB_TrainWithDeltaRi_FP
 CM_TrainWith[1, 2] = inputDB_TrainWithDeltaRi_TN
 CM_TrainWith[1, 1] = inputDB_TrainWithDeltaRi_FN
 
-# save, ouputing df 1636788 x 24+1 df 
-savePath = "F:\\UvA\\dataframePostPredict_TrainWithDeltaRi_new0d5FinalScoreRatio.csv"
+# save, ouputing df 475245 x 25+1 df 
+savePath = "F:\\UvA\\dataframePostPredict_TrainWithDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_TrainWithDeltaRi)
 
 # --------------------------------------------------------------------------------------------------
@@ -79,16 +79,16 @@ inputDB_TrainWithoutDeltaRi_FP = 0
 inputDB_TrainWithoutDeltaRi_TN = 0
 inputDB_TrainWithoutDeltaRi_FN = 0
 for i in 1:size(inputDB_TrainWithoutDeltaRi , 1)
-    if (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 1)
+    if (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 1)
         inputDB_TrainWithoutDeltaRi[i, "CM"] = "TP"
         inputDB_TrainWithoutDeltaRi_TP += 1
-    elseif (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 1)
+    elseif (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 1)
         inputDB_TrainWithoutDeltaRi[i, "CM"] = "FP"
         inputDB_TrainWithoutDeltaRi_FP += 1
-    elseif (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 0)
         inputDB_TrainWithoutDeltaRi[i, "CM"] = "TN"
         inputDB_TrainWithoutDeltaRi_TN += 1
-    elseif (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TrainWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 0)
         inputDB_TrainWithoutDeltaRi[i, "CM"] = "FN"
         inputDB_TrainWithoutDeltaRi_FN += 1
     end
@@ -101,8 +101,8 @@ CM_TrainWithout[2, 2] = inputDB_TrainWithoutDeltaRi_FP
 CM_TrainWithout[1, 2] = inputDB_TrainWithoutDeltaRi_TN
 CM_TrainWithout[1, 1] = inputDB_TrainWithoutDeltaRi_FN
 
-# save, ouputing df 1636788 x 24+1 df 
-savePath = "F:\\UvA\\dataframePostPredict_TrainWithoutDeltaRi_new0d5FinalScoreRatio.csv"
+# save, ouputing df 475245 x 25+1 df 
+savePath = "F:\\UvA\\dataframePostPredict_TrainWithoutDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_TrainWithoutDeltaRi)
 
 # --------------------------------------------------------------------------------------------------
@@ -113,16 +113,16 @@ inputDB_TestWithDeltaRi_FP = 0
 inputDB_TestWithDeltaRi_TN = 0
 inputDB_TestWithDeltaRi_FN = 0
 for i in 1:size(inputDB_TestWithDeltaRi , 1)
-    if (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+    if (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 1)
         inputDB_TestWithDeltaRi[i, "CM"] = "TP"
         inputDB_TestWithDeltaRi_TP += 1
-    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 1)
         inputDB_TestWithDeltaRi[i, "CM"] = "FP"
         inputDB_TestWithDeltaRi_FP += 1
-    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 0)
         inputDB_TestWithDeltaRi[i, "CM"] = "TN"
         inputDB_TestWithDeltaRi_TN += 1
-    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 0)
         inputDB_TestWithDeltaRi[i, "CM"] = "FN"
         inputDB_TestWithDeltaRi_FN += 1
     end
@@ -135,8 +135,8 @@ CM_TestWith[2, 2] = inputDB_TestWithDeltaRi_FP
 CM_TestWith[1, 2] = inputDB_TestWithDeltaRi_TN
 CM_TestWith[1, 1] = inputDB_TestWithDeltaRi_FN
 
-# save, ouputing df 409002 x 24+1 df 
-savePath = "F:\\UvA\\dataframePostPredict_TestWithDeltaRi_new0d5FinalScoreRatio.csv"
+# save, ouputing df 119054 x 25+1 df 
+savePath = "F:\\UvA\\dataframePostPredict_TestWithDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_TestWithDeltaRi)
 
 # --------------------------------------------------------------------------------------------------
@@ -146,16 +146,16 @@ inputDB_TestWithoutDeltaRi_FP = 0
 inputDB_TestWithoutDeltaRi_TN = 0
 inputDB_TestWithoutDeltaRi_FN = 0
 for i in 1:size(inputDB_TestWithoutDeltaRi , 1)
-    if (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 1)
+    if (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 1)
         inputDB_TestWithoutDeltaRi[i, "CM"] = "TP"
         inputDB_TestWithoutDeltaRi_TP += 1
-    elseif (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 1)
+    elseif (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 1)
         inputDB_TestWithoutDeltaRi[i, "CM"] = "FP"
         inputDB_TestWithoutDeltaRi_FP += 1
-    elseif (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 0)
         inputDB_TestWithoutDeltaRi[i, "CM"] = "TN"
         inputDB_TestWithoutDeltaRi_TN += 1
-    elseif (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_TestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 0)
         inputDB_TestWithoutDeltaRi[i, "CM"] = "FN"
         inputDB_TestWithoutDeltaRi_FN += 1
     end
@@ -168,8 +168,8 @@ CM_TestWithout[2, 2] = inputDB_TestWithoutDeltaRi_FP
 CM_TestWithout[1, 2] = inputDB_TestWithoutDeltaRi_TN
 CM_TestWithout[1, 1] = inputDB_TestWithoutDeltaRi_FN
 
-# save, ouputing df 409002 x 24+1 df 
-savePath = "F:\\UvA\\dataframePostPredict_TestWithoutDeltaRi_new0d5FinalScoreRatio.csv"
+# save, ouputing df 119054 x 25+1 df 
+savePath = "F:\\UvA\\dataframePostPredict_TestWithoutDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_TestWithoutDeltaRi)
 
 # --------------------------------------------------------------------------------------------------
@@ -180,16 +180,16 @@ inputDB_PestWithDeltaRi_FP = 0
 inputDB_PestWithDeltaRi_TN = 0
 inputDB_PestWithDeltaRi_FN = 0
 for i in 1:size(inputDB_PestWithDeltaRi , 1)
-    if (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+    if (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 1)
         inputDB_PestWithDeltaRi[i, "CM"] = "TP"
         inputDB_PestWithDeltaRi_TP += 1
-    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 1)
         inputDB_PestWithDeltaRi[i, "CM"] = "FP"
         inputDB_PestWithDeltaRi_FP += 1
-    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 0)
         inputDB_PestWithDeltaRi[i, "CM"] = "TN"
         inputDB_PestWithDeltaRi_TN += 1
-    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRIpredictTPTN"] == 0)
         inputDB_PestWithDeltaRi[i, "CM"] = "FN"
         inputDB_PestWithDeltaRi_FN += 1
     end
@@ -202,8 +202,8 @@ CM_PestWith[2, 2] = inputDB_PestWithDeltaRi_FP
 CM_PestWith[1, 2] = inputDB_PestWithDeltaRi_TN
 CM_PestWith[1, 1] = inputDB_PestWithDeltaRi_FN
 
-# save, ouputing df 61988 x 21+1 df 
-savePath = "F:\\UvA\\dataframePostPredict_PestWithDeltaRi_new0d5FinalScoreRatio.csv"
+# save, ouputing df 13278 x 22+1 df 
+savePath = "F:\\UvA\\dataframePostPredict_PestWithDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_PestWithDeltaRi)
 
 # --------------------------------------------------------------------------------------------------
@@ -213,16 +213,16 @@ inputDB_PestWithoutDeltaRi_FP = 0
 inputDB_PestWithoutDeltaRi_TN = 0
 inputDB_PestWithoutDeltaRi_FN = 0
 for i in 1:size(inputDB_PestWithoutDeltaRi , 1)
-    if (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 1)
+    if (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 1)
         inputDB_PestWithoutDeltaRi[i, "CM"] = "TP"
         inputDB_PestWithoutDeltaRi_TP += 1
-    elseif (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 1)
+    elseif (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 1)
         inputDB_PestWithoutDeltaRi[i, "CM"] = "FP"
         inputDB_PestWithoutDeltaRi_FP += 1
-    elseif (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 0)
         inputDB_PestWithoutDeltaRi[i, "CM"] = "TN"
         inputDB_PestWithoutDeltaRi_TN += 1
-    elseif (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRipredictTPTN"] == 0)
+    elseif (inputDB_PestWithoutDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithoutDeltaRi[i, "withoutDeltaRIpredictTPTN"] == 0)
         inputDB_PestWithoutDeltaRi[i, "CM"] = "FN"
         inputDB_PestWithoutDeltaRi_FN += 1
     end
@@ -235,8 +235,8 @@ CM_PestWithout[2, 2] = inputDB_PestWithoutDeltaRi_FP
 CM_PestWithout[1, 2] = inputDB_PestWithoutDeltaRi_TN
 CM_PestWithout[1, 1] = inputDB_PestWithoutDeltaRi_FN
 
-# save, ouputing df 61988 x 21+1 df 
-savePath = "F:\\UvA\\dataframePostPredict_PestWithoutDeltaRi_new0d5FinalScoreRatio.csv"
+# save, ouputing df 13278 x 22+1 df 
+savePath = "F:\\UvA\\dataframePostPredict_PestWithoutDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_PestWithoutDeltaRi)
 
 # ==================================================================================================
@@ -248,34 +248,38 @@ gr()
 TrainOutplotCM = plot(layout = layout, link = :both, 
         size = (1400, 600), margin = (10, :mm), dpi = 300)
 heatmap!(["1", "0"], ["0", "1"], CM_TrainWith, cmap = :viridis, cbar = :true, 
-        clims = (5000, 200000), 
+        clims = (25000, 250000), 
         subplot = 2, 
         framestyle = :box, 
         xlabel = "Expected", xguidefontsize=16, 
         ylabel = "Predicted", yguidefontsize=16, 
         xtickfontsize = 12, 
         ytickfontsize= 12, 
+        title = "DeltaRI Inclusive", 
+        titlefont = font(16), 
         size = (1400,600), 
         dpi = 300)
-        annotate!(["1"], ["1"], ["TP\n144,300"], subplot = 2)
-        annotate!(["0"], ["1"], ["FP\n105,825"], subplot = 2)
-        annotate!(["1"], ["0"], ["FN\n49"], subplot = 2, font(color="white"))
-        annotate!(["0"], ["0"], ["TN\n1,386,614"], subplot = 2)
+        annotate!(["1"], ["1"], ["TP\n110,279"], subplot = 2)
+        annotate!(["0"], ["1"], ["FP\n49,177"], subplot = 2, font(color="white"))
+        annotate!(["1"], ["0"], ["FN\n34,148"], subplot = 2, font(color="white"))
+        annotate!(["0"], ["0"], ["TN\n281,641"], subplot = 2)
 heatmap!(["1", "0"], ["0", "1"], CM_TrainWithout, cmap = :viridis, cbar = :none, 
-        clims = (5000, 200000), 
+        clims = (25000, 250000), 
         subplot = 1, 
         framestyle = :box, 
         xlabel = "Expected", xguidefontsize=16, 
         ylabel = "Predicted", yguidefontsize=16, 
         xtickfontsize = 12, 
         ytickfontsize= 12, 
+        title = "DeltaRI Exclusive", 
+        titlefont = font(16), 
         size = (1400,600), 
         dpi = 300)
-        annotate!(["1"], ["1"], ["TP\n144,260"], subplot = 1)
-        annotate!(["0"], ["1"], ["FP\n204,310"], subplot = 1)
-        annotate!(["1"], ["0"], ["FN\n89"], subplot = 1, font(color="white"))
-        annotate!(["0"], ["0"], ["TN\n1,288,129"], subplot = 1)
-savefig(TrainOutplotCM, "F:\\UvA\\TPTNPrediction_RFtrainCM_new0d5FinalScoreRatio.png")
+        annotate!(["1"], ["1"], ["TP\n106,610"], subplot = 1)
+        annotate!(["0"], ["1"], ["FP\n46,243"], subplot = 1, font(color="white"))
+        annotate!(["1"], ["0"], ["FN\n37,817"], subplot = 1, font(color="white"))
+        annotate!(["0"], ["0"], ["TN\n284,575"], subplot = 1)
+savefig(TrainOutplotCM, "F:\\UvA\\TPTNPrediction_RFtrainCM_withhl0d5FinalScoreRatio2DE2Filter.png")
 
 # --------------------------------------------------------------------------------------------------
 layout = @layout [a{0.45w,1.0h} b{0.55w,1.0h}]
@@ -284,34 +288,38 @@ gr()
 TestOutplotCM = plot(layout = layout, link = :both, 
         size = (1400, 600), margin = (10, :mm), dpi = 300)
 heatmap!(["1", "0"], ["0", "1"], CM_TestWith, cmap = :viridis, cbar = :true, 
-        clims = (1200, 50000), 
+        clims = (10000, 50000), 
         subplot = 2, 
         framestyle = :box, 
         xlabel = "Expected", xguidefontsize=16, 
         ylabel = "Predicted", yguidefontsize=16, 
         xtickfontsize = 12, 
         ytickfontsize= 12, 
+        title = "DeltaRI Inclusive", 
+        titlefont = font(16), 
         size = (1400,600), 
         dpi = 300)
-        annotate!(["1"], ["1"], ["TP\n33,420"], subplot = 2)
-        annotate!(["0"], ["1"], ["FP\n34,733"], subplot = 2)
-        annotate!(["1"], ["0"], ["FN\n2,686"], subplot = 2, font(color="white"))
-        annotate!(["0"], ["0"], ["TN\n338,163"], subplot = 2)
+        annotate!(["1"], ["1"], ["TP\n22,800"], subplot = 2)
+        annotate!(["0"], ["1"], ["FP\n15,509"], subplot = 2, font(color="white"))
+        annotate!(["1"], ["0"], ["FN\n13,202"], subplot = 2, font(color="white"))
+        annotate!(["0"], ["0"], ["TN\n67,543"], subplot = 2)
 heatmap!(["1", "0"], ["0", "1"], CM_TestWithout, cmap = :viridis, cbar = :none, 
-        clims = (1200, 50000), 
+        clims = (10000, 50000), 
         subplot = 1, 
         framestyle = :box, 
         xlabel = "Expected", xguidefontsize=16, 
         ylabel = "Predicted", yguidefontsize=16, 
         xtickfontsize = 12, 
         ytickfontsize= 12, 
+        title = "DeltaRI Exclusive", 
+        titlefont = font(16), 
         size = (1400,600), 
         dpi = 300)
-        annotate!(["1"], ["1"], ["TP\n33,743"], subplot = 1)
-        annotate!(["0"], ["1"], ["FP\n57,424"], subplot = 1)
-        annotate!(["1"], ["0"], ["FN\n2,363"], subplot = 1, font(color="white"))
-        annotate!(["0"], ["0"], ["TN\n315,472"], subplot = 1)
-savefig(TestOutplotCM, "F:\\UvA\\TPTNPrediction_RFtestCM_new0d5FinalScoreRatio.png")
+        annotate!(["1"], ["1"], ["TP\n19,483"], subplot = 1, font(color="white"))
+        annotate!(["0"], ["1"], ["FP\n16,544"], subplot = 1, font(color="white"))
+        annotate!(["1"], ["0"], ["FN\n16,519"], subplot = 1, font(color="white"))
+        annotate!(["0"], ["0"], ["TN\n66,508"], subplot = 1)
+savefig(TestOutplotCM, "F:\\UvA\\TPTNPrediction_RFtestCM_withhl0d5FinalScoreRatio2DE2Filter.png")
 
 # --------------------------------------------------------------------------------------------------
 layout = @layout [a{0.45w,1.0h} b{0.55w,1.0h}]
@@ -320,54 +328,58 @@ gr()
 PestOutplotCM = plot(layout = layout, link = :both, 
         size = (1400, 600), margin = (10, :mm), dpi = 300)
 heatmap!(["1", "0"], ["0", "1"], CM_PestWith, cmap = :viridis, cbar = :true, 
-        clims = (250, 10000), 
+        clims = (1000, 5000), 
         subplot = 2, 
         framestyle = :box, 
         xlabel = "Expected", xguidefontsize=16, 
         ylabel = "Predicted", yguidefontsize=16, 
         xtickfontsize = 12, 
         ytickfontsize= 12, 
+        title = "DeltaRI Inclusive", 
+        titlefont = font(16), 
         size = (1400,600), 
         dpi = 300)
-        annotate!(["1"], ["1"], ["TP\n6,882"], subplot = 2)
-        annotate!(["0"], ["1"], ["FP\n2,005"], subplot = 2, font(color="white"))
-        annotate!(["1"], ["0"], ["FN\n1,964"], subplot = 2, font(color="white"))
-        annotate!(["0"], ["0"], ["TN\n51,137"], subplot = 2)
+        annotate!(["1"], ["1"], ["TP\n4,802"], subplot = 2)
+        annotate!(["0"], ["1"], ["FP\n1,001"], subplot = 2, font(color="white"))
+        annotate!(["1"], ["0"], ["FN\n4,044"], subplot = 2)
+        annotate!(["0"], ["0"], ["TN\n3,431"], subplot = 2)
 heatmap!(["1", "0"], ["0", "1"], CM_PestWithout, cmap = :viridis, cbar = :none, 
-        clims = (250, 10000), 
+        clims = (1000, 5000), 
         subplot = 1, 
         framestyle = :box, 
         xlabel = "Expected", xguidefontsize=16, 
         ylabel = "Predicted", yguidefontsize=16, 
         xtickfontsize = 12, 
         ytickfontsize= 12, 
+        title = "DeltaRI Exclusive", 
+        titlefont = font(16), 
         size = (1400,600), 
         dpi = 300)
-        annotate!(["1"], ["1"], ["TP\n7,730"], subplot = 1)
-        annotate!(["0"], ["1"], ["FP\n2,813"], subplot = 1, font(color="white"))
-        annotate!(["1"], ["0"], ["FN\n1,116"], subplot = 1, font(color="white"))
-        annotate!(["0"], ["0"], ["TN\n50,329"], subplot = 1)
-savefig(PestOutplotCM, "F:\\UvA\\TPTNPrediction_RFpestCM_new0d5FinalScoreRatio.png")
+        annotate!(["1"], ["1"], ["TP\n45,33"], subplot = 1)
+        annotate!(["0"], ["1"], ["FP\n791"], subplot = 1, font(color="white"))
+        annotate!(["1"], ["0"], ["FN\n4,313"], subplot = 1)
+        annotate!(["0"], ["0"], ["TN\n36,41"], subplot = 1)
+savefig(PestOutplotCM, "F:\\UvA\\TPTNPrediction_RFpestCM_withhl0d5FinalScoreRatio2DE2Filter.png")
 
 # ==================================================================================================
 
 # prepare plotting P(TP)threshold-to-TPR curve
-# 1636788 x 24+1 df
-inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\dataframePostPredict_TrainWithDeltaRi_new0d5FinalScoreRatio.csv", DataFrame)
+# 475245 x 25+1 df
+inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\dataframePostPredict_TrainWithDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
 sort!(inputDB_TrainWithDeltaRi, [:"p(1)"], rev = true)
 for i in 1:size(inputDB_TrainWithDeltaRi, 1)
     inputDB_TrainWithDeltaRi[i, "p(1)"] = round(float(inputDB_TrainWithDeltaRi[i, "p(1)"]), digits = 2)
 end
 
-# 409002 x 24+1 df
-inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\dataframePostPredict_TestWithDeltaRi_new0d5FinalScoreRatio.csv", DataFrame)
+# 119054 x 25+1 df
+inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\dataframePostPredict_TestWithDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
 sort!(inputDB_TestWithDeltaRi, [:"p(1)"], rev = true)
 for i in 1:size(inputDB_TestWithDeltaRi, 1)
     inputDB_TestWithDeltaRi[i, "p(1)"] = round(float(inputDB_TestWithDeltaRi[i, "p(1)"]), digits = 2)
 end
 
-# 61988 x 21+1 df
-inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\dataframePostPredict_PestWithDeltaRi_new0d5FinalScoreRatio.csv", DataFrame)
+# 13278 x 22+1 df
+inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\dataframePostPredict_PestWithDeltaRi_withhl0d5FinalScoreRatio2DE2Filter.csv", DataFrame)
 sort!(inputDB_PestWithDeltaRi, [:"p(1)"], rev = true)
 for i in 1:size(inputDB_PestWithDeltaRi, 1)
     inputDB_PestWithDeltaRi[i, "p(1)"] = round(float(inputDB_PestWithDeltaRi[i, "p(1)"]), digits = 2)
@@ -419,8 +431,8 @@ inputDB_TrainWithDeltaRi[!, "TPR"] = TrainWithDeltaRi_TPR
 inputDB_TrainWithDeltaRi[!, "FNR"] = TrainWithDeltaRi_FNR
 inputDB_TrainWithDeltaRi[!, "FDR"] = TrainWithDeltaRi_FDR
 
-# save, ouputing df 1636788 x 24+1+3 df 
-savePath = "F:\\UvA\\dataframePostPredict_TPRFNRFDR_newTrain0d5FinalScoreRatio.csv"
+# save, ouputing df 475245 x 25+1+3 df 
+savePath = "F:\\UvA\\dataframePostPredict_TPRFNRFDR_newTrain_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_TrainWithDeltaRi)
 
 # --------------------------------------------------------------------------------------------------
@@ -450,8 +462,8 @@ inputDB_TestWithDeltaRi[!, "TPR"] = TestWithDeltaRi_TPR
 inputDB_TestWithDeltaRi[!, "FNR"] = TestWithDeltaRi_FNR
 inputDB_TestWithDeltaRi[!, "FDR"] = TestWithDeltaRi_FDR
 
-# save, ouputing df 409002 x 24+1+3 df 
-savePath = "F:\\UvA\\dataframePostPredict_TPRFNRFDR_newTest0d5FinalScoreRatio.csv"
+# save, ouputing df 119054 x 25+1+3 df 
+savePath = "F:\\UvA\\dataframePostPredict_TPRFNRFDR_newTest_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_TestWithDeltaRi)
 
 # --------------------------------------------------------------------------------------------------
@@ -481,8 +493,8 @@ inputDB_PestWithDeltaRi[!, "TPR"] = PestWithDeltaRi_TPR
 inputDB_PestWithDeltaRi[!, "FNR"] = PestWithDeltaRi_FNR
 inputDB_PestWithDeltaRi[!, "FDR"] = PestWithDeltaRi_FDR
 
-# save, ouputing df 61988 x 21+1+3 df 
-savePath = "F:\\UvA\\dataframePostPredict_TPRFNRFDR_newPest0d5FinalScoreRatio.csv"
+# save, ouputing df 13278 x 22+1+3 df 
+savePath = "F:\\UvA\\dataframePostPredict_TPRFNRFDR_newPest_withhl0d5FinalScoreRatio2DE2Filter.csv"
 CSV.write(savePath, inputDB_PestWithDeltaRi)
 
 # ==================================================================================================
@@ -502,12 +514,12 @@ plot!(inputDB_TrainWithDeltaRi[:, end-4], [inputDB_TrainWithDeltaRi[:, end-2] in
         label = ["True positive rate" "False negative rate"], 
         xtickfontsize = 10, 
         ytickfontsize= 10, 
-        legend = :left, 
+        legend = :bottomleft, 
         legendfont = font(10), 
         size = (1200,600), 
         dpi = 300)
-        new_xticks = ([0.865], ["\$\\bar"])
-        vline!(new_xticks[1], label = "5% FDR cutoff at P(1) = 0.865", legendfont = font(10), lc = "red", subplot = 1)
+        new_xticks = ([0.835], ["\$\\bar"])
+        vline!(new_xticks[1], label = "5% FDR cutoff at P(1) = 0.835", legendfont = font(10), lc = "red", subplot = 1)
 
 plot!(inputDB_TrainWithDeltaRi[:, end], inputDB_TrainWithDeltaRi[:, end-2], 
         subplot = 2, framestyle = :box, 
@@ -522,7 +534,7 @@ plot!(inputDB_TrainWithDeltaRi[:, end], inputDB_TrainWithDeltaRi[:, end-2],
         dpi = 300)
         new_xticks = ([0.05], ["\$\\bar"])
         vline!(new_xticks[1], label = "5% FDR", lc = "red", subplot = 2)
-savefig(TrainOutplotP1toRate, "F:\\UvA\\TPTNPrediction_P1threshold2TPRFNRFDR_newTrain0d5FinalScoreRatio.png")
+savefig(TrainOutplotP1toRate, "F:\\UvA\\TPTNPrediction_P1threshold2TPRFNRFDR_newTrain_withhl0d5FinalScoreRatio2DE2Filter.png")
 
 # --------------------------------------------------------------------------------------------------
 # plot P(1)threshold-to-TPR & P(1)threshold-to-TNR
@@ -541,12 +553,12 @@ plot!(inputDB_TestWithDeltaRi[:, end-4], [inputDB_TestWithDeltaRi[:, end-2] inpu
         label = ["True positive rate" "False negative rate"], 
         xtickfontsize = 10, 
         ytickfontsize= 10, 
-        legend = :left, 
+        legend = :bottomleft, 
         legendfont = font(10), 
         size = (1200,600), 
         dpi = 300)
-        new_xticks = ([0.965], ["\$\\bar"])
-        vline!(new_xticks[1], label = "5% FDR cutoff at P(1) = 0.965", legendfont = font(10), lc = "red", subplot = 1)
+        new_xticks = ([0.915], ["\$\\bar"])
+        vline!(new_xticks[1], label = "5% FDR cutoff at P(1) = 0.915", legendfont = font(10), lc = "red", subplot = 1)
 
 plot!(inputDB_TestWithDeltaRi[:, end], inputDB_TestWithDeltaRi[:, end-2], 
         subplot = 2, framestyle = :box, 
@@ -561,7 +573,7 @@ plot!(inputDB_TestWithDeltaRi[:, end], inputDB_TestWithDeltaRi[:, end-2],
         dpi = 300)
         new_xticks = ([0.05], ["\$\\bar"])
         vline!(new_xticks[1], label = "5% FDR", lc = "red", subplot = 2)
-savefig(TestOutplotP1toRate, "F:\\UvA\\TPTNPrediction_P1threshold2TPRFNRFDR_newTest0d5FinalScoreRatio.png")
+savefig(TestOutplotP1toRate, "F:\\UvA\\TPTNPrediction_P1threshold2TPRFNRFDR_newTest_withhl0d5FinalScoreRatio2DE2Filter.png")
 
 # --------------------------------------------------------------------------------------------------
 # plot P(1)threshold-to-TPR & P(1)threshold-to-TNR
@@ -580,12 +592,12 @@ plot!(inputDB_PestWithDeltaRi[:, end-4], [inputDB_PestWithDeltaRi[:, end-2] inpu
         label = ["True positive rate" "False negative rate"], 
         xtickfontsize = 10, 
         ytickfontsize= 10, 
-        legend = :left, 
+        legend = :bottomleft, 
         legendfont = font(10), 
         size = (1200,600), 
         dpi = 300)
-        new_xticks = ([0.935], ["\$\\bar"])
-        vline!(new_xticks[1], label = "5% FDR cutoff at P(1) = 0.935", legendfont = font(10), lc = "red", subplot = 1)
+        new_xticks = ([0.785], ["\$\\bar"])
+        vline!(new_xticks[1], label = "5% FDR cutoff at P(1) = 0.785", legendfont = font(10), lc = "red", subplot = 1)
 
 plot!(inputDB_PestWithDeltaRi[:, end], inputDB_PestWithDeltaRi[:, end-2], 
         subplot = 2, framestyle = :box, 
@@ -600,4 +612,4 @@ plot!(inputDB_PestWithDeltaRi[:, end], inputDB_PestWithDeltaRi[:, end-2],
         dpi = 300)
         new_xticks = ([0.05], ["\$\\bar"])
         vline!(new_xticks[1], label = "5% FDR", lc = "red", subplot = 2)
-savefig(PestOutplotP1toRate, "F:\\UvA\\TPTNPrediction_P1threshold2TPRFNRFDR_newPest0d5FinalScoreRatio.png")
+savefig(PestOutplotP1toRate, "F:\\UvA\\TPTNPrediction_P1threshold2TPRFNRFDR_newPest_withhl0d5FinalScoreRatio2DE2Filter.png")
