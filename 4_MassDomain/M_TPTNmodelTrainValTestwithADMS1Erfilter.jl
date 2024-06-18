@@ -259,7 +259,7 @@ CSV.write(savePath, optiSearch_df)
             Xx_test = deepcopy(M_pest[:, vcat(collect(5:12), end-2)])
             Yy_test = deepcopy(M_pest[:, end-1])
             println("## Classification ##")
-            reg = LogisticRegression(penalty=p, C=c, solver=solver_rs[s], n_jobs=-1, max_iter=1000, random_state=r, class_weight=Dict(0=>0.5484, 1=>5.6665))
+            reg = LogisticRegression(penalty=p, C=c, solver=solver_rs[s], n_jobs=-1, max_iter=1000, random_state=r, class_weight=Dict(0=>0.7183, 1=>1.6453))  #0.7183; 1.6453
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
@@ -311,9 +311,9 @@ CSV.write(savePath, optiSearch_df) =#
 sampleW = []
 for w in Vector(Yy_train)
     if w == 0
-        push!(sampleW, 0.5484)
+        push!(sampleW, 0.7183)
     elseif w == 1
-        push!(sampleW, 5.6665)
+        push!(sampleW, 1.6453)
     end
 end  =#
 
@@ -321,9 +321,9 @@ end  =#
 sampleTW = []
 for w in Vector(Yy_trainWhole)
     if w == 0
-        push!(sampleTW, 0.5484)
+        push!(sampleTW, 0.7183)
     elseif w == 1
-        push!(sampleTW, 5.6665)
+        push!(sampleTW, 1.6453)
     end
 end  =#
 
@@ -415,7 +415,7 @@ model = RandomForestClassifier(
       n_jobs = -1, 
       oob_score = true, 
       random_state = 42, 
-      class_weight= Dict(0=>0.5484, 1=>5.6665)
+      class_weight= Dict(0=>0.7183, 1=>1.6453)  #0.7183; 1.6453
       )
 
 #= model = GradientBoostingClassifier(
