@@ -93,33 +93,33 @@ dfOutputTrain = dfOutput[dfOutput.GROUP .== "train", :]
 savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl_all.csv"
 CSV.write(savePath, dfOutputTrain)
 
-# 3282022 x 1
+# 3391333 x 1
 X_trainIdxDf_YesDeltaRI = DataFrame([X_trainIdxYes], ["INDEX"])
 savePath = "F:\\UvA\\dataframeTPTNModeling_TrainYesIndex_all.csv"
 CSV.write(savePath, X_trainIdxDf_YesDeltaRI)
 
-# train 3282022 x 18 + 3 rows
+# train 3391333 x 18 + 3 rows
 dfOutputTrainYes = dfOutputTrain[dfOutputTrain.IncludeDeltaRI .== "yes", :]
 savePath = "F:\\UvA\\dataframeTPTNModeling_TrainYesDFwithhl_all.csv"
 CSV.write(savePath, dfOutputTrainYes)
 
 # ==============================================================================
-# 820770 x 1
+# 848106 x 1
 X_testIdxDf = DataFrame([X_testIdx], ["INDEX"])
 savePath = "F:\\UvA\\dataframeTPTNModeling_TestIndex_all.csv"
 CSV.write(savePath, X_testIdxDf)
 
-# train 820770 x 18 + 3 rows
+# train 848106 x 18 + 3 rows
 dfOutputTest = dfOutput[dfOutput.GROUP .== "test", :]
 savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl_all.csv"
 CSV.write(savePath, dfOutputTest)
 
-# 820519 x 1
+# 847838 x 1
 X_testIdxDf_YesDeltaRI = DataFrame([X_testIdxYes], ["INDEX"])
 savePath = "F:\\UvA\\dataframeTPTNModeling_TestYesIndex_all.csv"
 CSV.write(savePath, X_testIdxDf_YesDeltaRI)
 
-# train 820519 x 18 + 3 rows
+# train 847838 x 18 + 3 rows
 dfOutputTestYes = dfOutputTest[dfOutputTest.IncludeDeltaRI .== "yes", :]
 savePath = "F:\\UvA\\dataframeTPTNModeling_TestYesDFwithhl_all.csv"
 CSV.write(savePath, dfOutputTestYes)
