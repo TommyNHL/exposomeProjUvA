@@ -58,11 +58,11 @@ savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE2Fil
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
-# 594299 x 22 df; 
-# 119054+475245= 594299, 0:413870; 1:180429 = 0.7180; 1.6469
+# 607577 x 22 df; 
+# 485631+121946= 607577, 0:418302; 1:189275 = 
 inputDBInputDB_test = vcat(inputDB, inputDB_test)
 sort!(inputDBInputDB_test, [:ENTRY])
-inputDBInputDB_test[inputDBInputDB_test.LABEL .== 0, :]
+inputDBInputDB_test[inputDBInputDB_test.LABEL .== 1, :]
 
 
 #TP/TN prediction
@@ -183,7 +183,7 @@ describe((inputDB_test))[vcat(5,6,8,9,10, 13, end-5), :]
 describe((inputDB_pest2))[vcat(5,6,8,9,10, 13, end-2), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
-    leaf_r = vcat(collect(2:2:30))
+    leaf_r = vcat(collect(2:2:40))
     tree_r = vcat(collect(50:50:400))
     depth_r = vcat(collect(30:10:100))
     split_r = vcat(collect(2:1:10))
@@ -246,7 +246,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
                 traincvtrain = avgScore(f1_10_train, 3) 
                 itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
                 f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
                 z = vcat(z, [l t itrain jtrain ival jval traincvtrain itest f1s mccs rs d r mod])
                 println(z[end, :])
             end
@@ -265,14 +265,14 @@ optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare45_all.csv"
 CSV.write(savePath, optiSearch_df)
 
-function optimLR(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
+function optimLR(inputDB, inputDB_test, inputDB_pest2)
     penalty_r = vcat("l1", "l2")
     solver_rs = ["newton-cg", "lbfgs", "liblinear", "sag", "saga"]
     solver_r = vcat(collect(1:1:5))
     c_values_r = vcat(1000, 500, 100, 50, 10, 1.0)
     model_r = vcat(9, 8)
     rs = 42
-    z = zeros(1,16)
+    z = zeros(1,13)
     itr = 1
     pn = float(0)
     while itr < 65
@@ -293,22 +293,18 @@ function optimLR(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
             println("## loading in data ##")
             M_train = inputDB
             M_val = inputDB_test
-            M_pest = inputDB_pest
             M_pest2 = inputDB_pest2
             if mod == 8
                 Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
                 Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
-                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13)])
                 Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
             elseif mod == 9
                 Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
                 Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13, end-2)])
                 Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
             end
             Yy_train = deepcopy(M_train[:, end-4])
             Yy_val = deepcopy(M_val[:, end-4])
-            Yy_test = deepcopy(M_pest[:, end-1])
             Yy_test2 = deepcopy(M_pest2[:, end-1])
             println("## Classification ##")
             reg = LogisticRegression(penalty=p, C=c, solver=solver_rs[s], max_iter=5000, random_state=rs, class_weight=Dict(0=>0.7263, 1=>1.6048))  # 0.7263; 1.6048
@@ -324,15 +320,12 @@ function optimLR(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
                 println("## CV ##")
                 f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
                 z[1,7] = avgScore(f1_10_train, 3)
-                z[1,8] = score(reg, Matrix(Xx_test), Vector(Yy_test))
-                z[1,9] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepest2W)
-                z[1,10] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepes2W)
+                z[1,8] = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                z[1,9] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,10] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepes2W)
                 z[1,11] = rs
                 z[1,12] = s
                 z[1,13] = mod
-                z[1,14] = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                z[1,15] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,16] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
                 println(z[end, :])
             else
                 itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
@@ -342,33 +335,29 @@ function optimLR(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
                 println("## CV ##")
                 f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
                 traincvtrain = avgScore(f1_10_train, 3) 
-                itest = score(reg, Matrix(Xx_test), Vector(Yy_test))
-                f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepest2W)
-                mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepest2W)
-                itest2 = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                f1s2 = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                mccs2 = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z = vcat(z, [pn c itrain jtrain ival jval traincvtrain itest f1s mccs rs s mod itest2 f1s2 mccs2])
+                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z = vcat(z, [pn c itrain jtrain ival jval traincvtrain itest f1s mccs rs s mod])
                 println(z[end, :])
             end
             println("End of ", itr, " iterations")
             itr += 1
         end
     end
-    z_df = DataFrame(Penalty = z[:,1], C_value = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_3Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11], Solver = z[:,12], model = z[:,13], acc_pest2 = z[:,14], f1_pest2 = z[:,15], mcc_pest2 = z[:,16])
-    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest2, ], rev=true)
+    z_df = DataFrame(Penalty = z[:,1], C_value = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_3Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11], Solver = z[:,12], model = z[:,13])
+    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest, ], rev=true)
     return z_df_sorted
 end
 
-optiSearch_df = optimLR(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
+optiSearch_df = optimLR(inputDB, inputDB_test, inputDB_pest2)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare4.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare4_all.csv"
 CSV.write(savePath, optiSearch_df)
 
 
-
-function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
+function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest2)
     #lr_r = vcat(1, 0.5, 0.25, 0.1, 0.05)
     lr_r = vcat(0.5, 0.25, 0.1, 0.05)
     #leaf_r = vcat(collect(2:2:24))
@@ -395,19 +384,19 @@ function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
             println("## loading in data ##")
             M_train = inputDB
             M_val = inputDB_test
-            M_pest = inputDB_pest
+            M_pest2 = inputDB_pest2
             if mod == 8
                 Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
                 Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
-                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
             elseif mod == 9
                 Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
                 Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13, end-2)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
             end
             Yy_train = deepcopy(M_train[:, end-4])
             Yy_val = deepcopy(M_val[:, end-4])
-            Yy_test = deepcopy(M_pest[:, end-1])
+            Yy_test2 = deepcopy(M_pest2[:, end-1])
             println("## Classification ##")
             reg = GradientBoostingClassifier(learning_rate=lr, n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, random_state=rs)
             println("## fit ##")
@@ -423,9 +412,9 @@ function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
                 println("## CV ##")
                 f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
                 z[1,8] = avgScore(f1_10_train, 3)
-                z[1,9] = score(reg, Matrix(Xx_test), Vector(Yy_test))
-                z[1,10] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepest2W)
-                z[1,11] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepest2W)
+                z[1,9] = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                z[1,10] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,11] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
                 z[1,12] = rs
                 z[1,13] = d
                 z[1,14] = r
@@ -439,9 +428,9 @@ function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
                 println("## CV ##")
                 f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
                 traincvtrain = avgScore(f1_10_train, 3) 
-                itest = score(reg, Matrix(Xx_test), Vector(Yy_test))
-                f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepest2W)
-                mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepest2W)
+                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
                 z = vcat(z, [lr l t itrain jtrain ival jval traincvtrain itest f1s mccs rs d r mod])
                 println(z[end, :])
             end
@@ -454,10 +443,10 @@ function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
     return z_df_sorted
 end
 
-optiSearch_df = optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
+optiSearch_df = optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest2)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_GBMwithhlnew2Compare1.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_GBMwithhlnew2Compare1_all.csv"
 CSV.write(savePath, optiSearch_df)
 
 #===============================================================================#
