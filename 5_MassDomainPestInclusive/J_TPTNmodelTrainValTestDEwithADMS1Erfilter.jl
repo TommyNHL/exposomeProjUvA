@@ -185,8 +185,8 @@ describe((inputDB_pest2))[vcat(5,6,8,9,10, 13, end-2), :]
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
     leaf_r = vcat(collect(2:2:40))
     tree_r = vcat(collect(50:50:400))
-    depth_r = vcat(collect(30:10:100))
-    split_r = vcat(collect(2:1:10))
+    depth_r = vcat(collect(30:10:130))
+    split_r = vcat(collect(2:1:12))
     model_r = vcat(9, 8)
     rs = 42
     z = zeros(1,14)
@@ -313,8 +313,8 @@ function optimLR(inputDB, inputDB_test, inputDB_pest2)
             if itr == 1
                 z[1,1] = pn
                 z[1,2] = c
-                z[1,3] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                z[1,4] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                z[1,3] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), average="weighted", sample_weight=sampleW)
+                z[1,4] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), average="weighted", sample_weight=sampleW)
                 z[1,5] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 z[1,6] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 println("## CV ##")
