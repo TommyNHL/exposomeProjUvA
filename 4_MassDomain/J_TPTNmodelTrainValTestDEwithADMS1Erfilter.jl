@@ -216,15 +216,15 @@ describe((inputDB_pest))[vcat(5,6,8,9,10, 13, end-2), :]
 describe((inputDB_pest2))[vcat(5,6,8,9,10, 13, end-2), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    leaf_r = vcat(collect(2:2:20))
-    tree_r = vcat(collect(50:50:500))
-    depth_r = vcat(collect(30:10:100))
-    split_r = vcat(collect(2:1:10))
+    leaf_r = vcat(collect(14:1:18))
+    tree_r = vcat(collect(380:5:420))
+    depth_r = vcat(collect(50:2:70))
+    split_r = vcat(collect(6:1:10))
     model_r = vcat(9, 8)
     rs = 42
     z = zeros(1,17)
     itr = 1
-    while itr < 129
+    while itr < 65
         l = rand(leaf_r)
         t = rand(tree_r)
         d = rand(depth_r)
