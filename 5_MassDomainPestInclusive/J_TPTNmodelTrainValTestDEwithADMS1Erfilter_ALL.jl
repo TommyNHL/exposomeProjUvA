@@ -366,15 +366,15 @@ CSV.write(savePath, optiSearch_df)
 #-------------------------------------------------------------------------------
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
-    leaf_r = vcat(collect(150:5:160))
-    tree_r = vcat(collect(64:8:128))
-    depth_r = vcat(collect(25:1:35))
-    split_r = vcat(collect(2:1:30))
+    leaf_r = vcat(collect(14:1:18))
+    tree_r = vcat(collect(380:5:420))
+    depth_r = vcat(collect(50:2:70))
+    split_r = vcat(collect(6:1:10))
     model_r = vcat(9, 8)
     rs = 42
     z = zeros(1,14)
     itr = 1
-    while itr < 193
+    while itr < 65
         l = rand(leaf_r)
         t = rand(tree_r)
         d = rand(depth_r)
@@ -445,7 +445,7 @@ end
 optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare45_all.csv"
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare89_all.csv"
 CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
