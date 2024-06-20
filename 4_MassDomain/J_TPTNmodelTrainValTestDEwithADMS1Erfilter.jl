@@ -152,7 +152,11 @@ using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: GradientBoostingClassifier
 @sk_import linear_model: LogisticRegression
 @sk_import ensemble: RandomForestClassifier
+@sk_import ensemble: AdaBoostClassifier
+@sk_import tree: DecisionTreeClassifier
 @sk_import metrics: recall_score
+@sk_import neural_network : MLPClassifier
+@sk_import svm : SVC
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
@@ -212,15 +216,15 @@ describe((inputDB_pest))[vcat(5,6,8,9,10, 13, end-2), :]
 describe((inputDB_pest2))[vcat(5,6,8,9,10, 13, end-2), :]
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    leaf_r = vcat(collect(2:2:20))
-    tree_r = vcat(collect(50:50:500))
-    depth_r = vcat(collect(30:10:100))
-    split_r = vcat(collect(2:1:10))
+    leaf_r = vcat(collect(175:5:185))
+    tree_r = vcat(collect(64:8:128))
+    depth_r = vcat(collect(20:1:30))
+    split_r = vcat(collect(2:1:22))
     model_r = vcat(9, 8)
     rs = 42
     z = zeros(1,17)
     itr = 1
-    while itr < 129
+    while itr < 193
         l = rand(leaf_r)
         t = rand(tree_r)
         d = rand(depth_r)
@@ -303,6 +307,108 @@ optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inpu
 # save, ouputing 180 x 8 df
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare45.csv"
 CSV.write(savePath, optiSearch_df)
+
+#-------------------------------------------------------------------------------
+
+function optimDecisionTreeClass(inputDB, inputDB_test, inputDB_pest2)
+    #leaf_r = vcat(collect(50:5:200))  #20
+    #depth_r = vcat(collect(25:5:50))  #10+6
+    #split_r = vcat(collect(2:2:20))  #10
+    leaf_r = vcat(collect(175:1:185)) #11
+    depth_r = vcat(collect(20:1:30)) #11
+    split_r = vcat(collect(2:10:22)) #3
+    model_r = vcat(9, 8) #2
+    rs = 42
+    z = zeros(1,16)
+    itr = 1
+    #while itr < 129
+    for l in leaf_r
+        for d in depth_r
+        #l = rand(leaf_r)
+        #d = rand(depth_r)
+        #r = rand(split_r)
+            for r in split_r
+                for mod in model_r
+                    println("itr=", itr, ", leaf=", l, ", depth=", d, ", minSsplit=", r, ", model=", mod)
+                    println("## loading in data ##")
+                    M_train = inputDB
+                    M_val = inputDB_test
+                    M_pest = inputDB_pest
+                    M_pest2 = inputDB_pest2
+                    if mod == 8
+                        Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
+                        Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
+                        Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13)])
+                        Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
+                    elseif mod == 9
+                        Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                        Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
+                        Xx_test = deepcopy(M_pest[:, vcat(5,6,8,9,10, 13, end-2)])
+                        Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
+                    end
+                    Yy_train = deepcopy(M_train[:, end-4])
+                    Yy_val = deepcopy(M_val[:, end-4])
+                    Yy_test = deepcopy(M_pest[:, end-1])
+                    Yy_test2 = deepcopy(M_pest2[:, end-1])
+                    println("## Classification ##")
+                    reg = DecisionTreeClassifier(max_depth=d, min_samples_leaf=l, min_samples_split=r, random_state=rs, class_weight=Dict(0=>0.7183, 1=>1.6453))  #0.7183; 1.6453
+                    println("## fit ##")
+                    fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+                    if itr == 1
+                        z[1,1] = l
+                        z[1,2] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                        z[1,3] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                        z[1,4] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                        z[1,5] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                        println("## CV ##")
+                        f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                        z[1,6] = avgScore(f1_10_train, 3)
+                        z[1,7] = score(reg, Matrix(Xx_test), Vector(Yy_test))
+                        z[1,8] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                        z[1,9] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                        z[1,10] = rs
+                        z[1,11] = d
+                        z[1,12] = r
+                        z[1,13] = mod
+                        z[1,14] = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                        z[1,15] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                        z[1,16] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                        println(z[end, :])
+                    else
+                        itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                        jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                        ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                        jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                        println("## CV ##")
+                        f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                        traincvtrain = avgScore(f1_10_train, 3) 
+                        itest = score(reg, Matrix(Xx_test), Vector(Yy_test))
+                        f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                        mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                        itest2 = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                        f1s2 = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                        mccs2 = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                        z = vcat(z, [l itrain jtrain ival jval traincvtrain itest f1s mccs rs d r mod itest2 f1s2 mccs2])
+                        println(z[end, :])
+                    end
+                    println("End of ", itr, " iterations")
+                    itr += 1
+                end
+            end
+        end
+    end
+    z_df = DataFrame(leaves = z[:,1], f1_train = z[:,2], mcc_train = z[:,3], f1_val = z[:,4], mcc_val = z[:,5], f1_3Ftrain = z[:,6], acc_pest = z[:,7], f1_pest = z[:,8], mcc_pest = z[:,9], state = z[:,10], depth = z[:,11], minSampleSplit = z[:,12], model = z[:,13], acc_pest2 = z[:,14], f1_pest2 = z[:,15], mcc_pest2 = z[:,16])
+    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest2], rev=true)
+    return z_df_sorted
+end
+
+optiSearch_df = optimDecisionTreeClass(inputDB, inputDB_test, inputDB_pest2)
+
+# save, ouputing 180 x 8 df
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_DTwithhlnew2Compare4.csv"
+CSV.write(savePath, optiSearch_df)
+
+#-------------------------------------------------------------------------------
 
 function optimLR(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
     penalty_r = vcat("l1", "l2")
@@ -405,7 +511,7 @@ optiSearch_df = optimLR(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_LRwithhlnew2Compare4.csv"
 CSV.write(savePath, optiSearch_df)
 
-
+#-------------------------------------------------------------------------------
 
 function optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
     #lr_r = vcat(1, 0.5, 0.25, 0.1, 0.05)
@@ -498,6 +604,8 @@ optiSearch_df = optimGradientBoostClass(inputDB, inputDB_test, inputDB_pest)
 # save, ouputing 180 x 8 df
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_GBMwithhlnew2Compare1.csv"
 CSV.write(savePath, optiSearch_df)
+
+
 
 #===============================================================================#
 
