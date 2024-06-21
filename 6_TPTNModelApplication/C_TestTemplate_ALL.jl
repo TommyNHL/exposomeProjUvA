@@ -126,7 +126,7 @@
     combinedDB[!, "FinalScoreRatio"] = ratioScore
     combinedDB[!, "LABEL"] = trueOrFalse
     
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_check.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_check.csv"
     CSV.write(savePath, combinedDB)
     
     outputDf = combinedDB[:, ["INCHIKEY_ID", "Inchikey", "ID", "RefMatchFragRatio", "UsrMatchFragRatio", 
@@ -134,7 +134,7 @@
     "FinalScoreRatio", "MS1Mass", "FragMZ", "LABEL"]]
     
     # output csv is a __ x 14 df
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_checked.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_checked.csv"
     CSV.write(savePath, outputDf)
 
     #handle the delta Ri feature
@@ -162,10 +162,10 @@
         sort!(outputDf, [:LABEL, :INCHIKEY_ID])
 
 #output csv __ x 15 df
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_ready4CNLdf.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_ready4CNLdf.csv"
     CSV.write(savePath, outputDf)
 
-    inputTPTNdf = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_ready4CNLdf.csv", DataFrame)
+    inputTPTNdf = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_ready4CNLdf.csv", DataFrame)
 
 #create CNL df
     function getVec(matStr)
@@ -265,10 +265,10 @@
         end
     end
     inputTPTNdf = inputTPTNdf[retain, :]
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_extractedWithCNLsList.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_extractedWithCNLsList.csv"
     CSV.write(savePath, inputTPTNdf)
 
-    inputTPTNdf = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_extractedWithCNLsList.csv", DataFrame)
+    inputTPTNdf = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_extractedWithCNLsList.csv", DataFrame)
 
     # storing data in a Matrix
     X = zeros(17385, 15961)
@@ -321,11 +321,11 @@
     dfCNLs[!, "LABEL"] = inputTPTNdf[:, "LABEL"]
         
     # saving csv
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_withCNLRideltaRi.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_withCNLRideltaRi.csv"
         CSV.write(savePath, dfCNLs)
         println("done for saving csv")
 
-    dfOutput = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_withCNLRideltaRi.csv", DataFrame)
+    dfOutput = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_withCNLRideltaRi.csv", DataFrame)
 
 #leverage
     describe(dfOutput)[end-4:end-2, :]
@@ -358,11 +358,11 @@
     dfOutput = dfOutput[:, vcat(collect(1:13), end-4, end-3, end-2, end-1, end)]
 
     # saving csv
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling.csv"
     CSV.write(savePath, dfOutput)
 
 #TP/TN prediction
-    inputDB_test = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling.csv", DataFrame)
+    inputDB_test = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling.csv", DataFrame)
     sort!(inputDB_test, [:ENTRY])
     insertcols!(inputDB_test, 10, ("MatchDiff"=>float(0)))
     inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
@@ -378,7 +378,7 @@
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
     end
     # save, ouputing 4757 x 18 df, 0:3423; 1:1334 = 0.6949; 1.7830
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter.csv"
     CSV.write(savePath, inputDB_test)
     inputDB_test[inputDB_test.LABEL .== 1, :]
     
@@ -448,11 +448,11 @@
         predictedTPTN_test = predict(model, Matrix(inputDB_test[:, vcat(5,6,8,9,10, 13, end-2)]))
         inputDB_test[!, "withDeltaRIpredictTPTN"] = predictedTPTN_test
         # save, ouputing testSet df __ x 19 df
-        savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv"
+        savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv"
         CSV.write(savePath, inputDB_test)
 
     #show prediction performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv", DataFrame)
+        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv", DataFrame)
         describe((inputTestDB_withDeltaRiTPTN))[end-5:end, :]
 
         # DT: 1, 0.43178473828042885, 0.657103293463386
@@ -470,7 +470,7 @@
         inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
         inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
         # save, ouputing trainSet df __ x 19+2 df
-        savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTNpTP.csv"
+        savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTNpTP.csv"
         CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
 
         describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
