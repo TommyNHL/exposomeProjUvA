@@ -377,18 +377,18 @@
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
     end
-    # save, ouputing 4757 x 18 df, 0:3423; 1:1334 = 0.6949; 1.7830
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter.csv"
+    # save, ouputing 4692 x 18 df, 0:3168; 1:1524 = 0.7405; 1.5394
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter.csv"
     CSV.write(savePath, inputDB_test)
     inputDB_test[inputDB_test.LABEL .== 1, :]
     
-    Yy_test = deepcopy(inputDB_test[:, end-1])  # 0.6949; 1.7830
+    Yy_test = deepcopy(inputDB_test[:, end-1])  # 0.7405; 1.5394
     samplepestW = []
     for w in Vector(Yy_test)
         if w == 0
-            push!(samplepestW, 0.6949)
+            push!(samplepestW, 0.7405)
         elseif w == 1
-            push!(samplepestW, 1.7830)
+            push!(samplepestW, 1.5394)
         end
     end 
 
@@ -448,29 +448,29 @@
         predictedTPTN_test = predict(model, Matrix(inputDB_test[:, vcat(5,6,8,9,10, 13, end-2)]))
         inputDB_test[!, "withDeltaRIpredictTPTN"] = predictedTPTN_test
         # save, ouputing testSet df __ x 19 df
-        savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv"
+        savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv"
         CSV.write(savePath, inputDB_test)
 
     #show prediction performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv", DataFrame)
+        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv", DataFrame)
         describe((inputTestDB_withDeltaRiTPTN))[end-5:end, :]
 
-        # DT: 1, 0.43178473828042885, 0.657103293463386
+        # DT: 1, 0.4505541346973572, 0.6712332937938621
         maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
-        # DT: -0.865140506715314
+        # DT: -0.9910664962292948
         rSquare_val = rSquareDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
 
         # __ × 2 Matrix
         pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5,6,8,9,10, 13, end-3)]))
-        # DT: 0.4111238532110092, 0.5492040894474248
+        # DT: 0.3854651162790698, 0.475314379556277
         f1_test = f1_score(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)
-        # DT: 0.10619454670087872, 0.11778156982480285
+        # DT: 0.03765417445555857, 0.040101553657033884
         mcc_test = matthews_corrcoef(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)
 
         inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
         inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
         # save, ouputing trainSet df __ x 19+2 df
-        savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTNpTP.csv"
+        savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTNpTP.csv"
         CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
 
         describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
