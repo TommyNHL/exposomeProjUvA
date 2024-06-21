@@ -52,7 +52,7 @@
     ## RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
     ## DirectMatch, ReversMatch, Probability, FinalScore, 
     ## SpecType, MatchedFrags, Inchikey, FragMZ, FragInt
-    inputDB1 = CSV.read("F:\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs.csv", DataFrame)
+    inputDB1 = CSV.read("F:\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs.csv", DataFrame)
     #inputDB5 = CSV.read("F:\\Cand_synth_rr10_4001_5000.csv", DataFrame)
     #combinedDB = vcat(inputDB1, inputDB2, inputDB3, inputDB4, inputDB5)
     combinedDB = inputDB1[:, ["ID", 
@@ -126,7 +126,7 @@
     combinedDB[!, "FinalScoreRatio"] = ratioScore
     combinedDB[!, "LABEL"] = trueOrFalse
     
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_check.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_check.csv"
     CSV.write(savePath, combinedDB)
     
     outputDf = combinedDB[:, ["INCHIKEY_ID", "Inchikey", "ID", "RefMatchFragRatio", "UsrMatchFragRatio", 
@@ -134,7 +134,7 @@
     "FinalScoreRatio", "MS1Mass", "FragMZ", "LABEL"]]
     
     # output csv is a __ x 14 df
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_checked.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_checked.csv"
     CSV.write(savePath, outputDf)
 
     #handle the delta Ri feature
@@ -162,10 +162,10 @@
         sort!(outputDf, [:LABEL, :INCHIKEY_ID])
 
 #output csv __ x 15 df
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_ready4CNLdf.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_ready4CNLdf.csv"
     CSV.write(savePath, outputDf)
 
-    inputTPTNdf = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_ready4CNLdf.csv", DataFrame)
+    inputTPTNdf = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_ready4CNLdf.csv", DataFrame)
 
 #create CNL df
     function getVec(matStr)
@@ -265,15 +265,15 @@
         end
     end
     inputTPTNdf = inputTPTNdf[retain, :]
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_extractedWithCNLsList.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_extractedWithCNLsList.csv"
     CSV.write(savePath, inputTPTNdf)
 
-    inputTPTNdf = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_extractedWithCNLsList.csv", DataFrame)
+    inputTPTNdf = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_extractedWithCNLsList.csv", DataFrame)
 
     # storing data in a Matrix
-    X = zeros(17385, 15961)
+    X = zeros(17502, 15961)
 
-    for i in 1:17385
+    for i in 1:17502
         println(i)
         arr = []
         arr = getMasses(inputTPTNdf, i, arr, "str")#"dig")
@@ -290,7 +290,7 @@
 
     # creating df with 11 + 1(monoisotopic mass) + 15961(CNLs)
     dfCNLs = DataFrame(X, CNLfeaturesStr)
-        insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:17385)))
+        insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:17502)))
         insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[:, "INCHIKEY_ID"]))
         insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[:, "Inchikey"]))
         insertcols!(dfCNLs, 4, ("INCHIKEYreal"=>inputTPTNdf[:, "ID"]))
@@ -321,11 +321,11 @@
     dfCNLs[!, "LABEL"] = inputTPTNdf[:, "LABEL"]
         
     # saving csv
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_withCNLRideltaRi.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_withCNLRideltaRi.csv"
         CSV.write(savePath, dfCNLs)
         println("done for saving csv")
 
-    dfOutput = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_withCNLRideltaRi.csv", DataFrame)
+    dfOutput = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_withCNLRideltaRi.csv", DataFrame)
 
 #leverage
     describe(dfOutput)[end-4:end-2, :]
@@ -340,7 +340,7 @@
     hipinv[:,:] .= pinv(Xmat'*Xmat)
     
     function leverage_dist(X)
-        h = zeros(17385,1)
+        h = zeros(17502,1)
         for i in ProgressBar(1: size(X,1)) #check dimensions
             x = X[i,:]
             #hi = x'*pinv(X'*X)*x
@@ -358,11 +358,11 @@
     dfOutput = dfOutput[:, vcat(collect(1:13), end-4, end-3, end-2, end-1, end)]
 
     # saving csv
-    savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling.csv"
+    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_dataframeTPTNModeling.csv"
     CSV.write(savePath, dfOutput)
 
 #TP/TN prediction
-    inputDB_test = CSV.read("F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling.csv", DataFrame)
+    inputDB_test = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_dataframeTPTNModeling.csv", DataFrame)
     sort!(inputDB_test, [:ENTRY])
     insertcols!(inputDB_test, 10, ("MatchDiff"=>float(0)))
     inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
