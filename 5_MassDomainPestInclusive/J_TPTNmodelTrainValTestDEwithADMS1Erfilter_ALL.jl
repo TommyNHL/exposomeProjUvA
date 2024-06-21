@@ -32,8 +32,18 @@ for i = 1:size(inputDB, 1)
     inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
     inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
 end
+
+for f = 5:13
+    avg = float(mean(inputDB[:, f]))
+    top = float(maximum(inputDB[:, f]))
+    down = float(minimum(inputDB[:, f]))
+    for i = 1:size(inputDB, 1)
+        inputDB[i, f] = (inputDB[i, f] - avg) / (top - down)
+    end
+end
 # save, ouputing 485631 x 21+1 df, 0:334321; 1:151310 = 0.7263; 1.6048
 savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE2Filter_all.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDFwithhl0d5FinalScoreRatio2DE2Filter_allSTD.csv"
 CSV.write(savePath, inputDB)
 inputDB[inputDB.LABEL .== 1, :]
 
@@ -53,8 +63,18 @@ for i = 1:size(inputDB_test, 1)
     inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
     inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
 end
+
+for f = 5:13
+    avg = float(mean(inputDB_test[:, f]))
+    top = float(maximum(inputDB_test[:, f]))
+    down = float(minimum(inputDB_test[:, f]))
+    for i = 1:size(inputDB_test, 1)
+        inputDB_test[i, f] = (inputDB_test[i, f] - avg) / (top - down)
+    end
+end
 # save, ouputing 121946 x 21+1 df, 0:83981; 1:37965 = 0.7260; 1.6060
 savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE2Filter_all.csv"
+savePath = "F:\\UvA\\dataframeTPTNModeling_TestDFwithhl0d5FinalScoreRatio2DE2Filter_allSTD.csv"
 CSV.write(savePath, inputDB_test)
 inputDB_test[inputDB_test.LABEL .== 1, :]
 
@@ -81,8 +101,18 @@ for i = 1:size(inputDB_pest2, 1)
     inputDB_pest2[i, "FinalScoreRatio"] = log10(inputDB_pest2[i, "FinalScoreRatio"])
     inputDB_pest2[i, "MatchDiff"] = inputDB_pest2[i, "DirectMatch"] - inputDB_pest2[i, "ReversMatch"]
 end
+
+for f = 5:13
+    avg = float(mean(inputDB_pest2[:, f]))
+    top = float(maximum(inputDB_pest2[:, f]))
+    down = float(minimum(inputDB_pest2[:, f]))
+    for i = 1:size(inputDB_pest2, 1)
+        inputDB_pest2[i, f] = (inputDB_pest2[i, f] - avg) / (top - down)
+    end
+end
 # save, ouputing 4757 x 18+1 df, 0:3423; 1:1334 = 0.6949; 1.7830
 savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_testDFwithhl0d5FinalScoreRatioDEFilter.csv"
+savePath = "F:\\UvA\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_testDFwithhl0d5FinalScoreRatioDEFilter_STD.csv"
 CSV.write(savePath, inputDB_pest2)
 inputDB_pest2[inputDB_pest2.LABEL .== 1, :]
 
@@ -129,6 +159,7 @@ using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import metrics: recall_score
 @sk_import neural_network : MLPClassifier
 @sk_import svm : SVC
+@sk_import neighbors : KNeighborsClassifier
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
@@ -185,6 +216,96 @@ end
 describe((inputDB))[vcat(5,6,8,9,10, 13, end-5), :]
 describe((inputDB_test))[vcat(5,6,8,9,10, 13, end-5), :]
 describe((inputDB_pest2))[vcat(5,6,8,9,10, 13, end-2), :]
+
+#-------------------------------------------------------------------------------
+
+function optimKNN(inputDB, inputDB_test, inputDB_pest2)
+    k_n_r = vcat(collect(1:1:30))
+    leaf_r = vcat(collect(1:1:50))
+    w_r = ["uniform", "distance"]
+    met_r = ["minkowski", "euclidean", "manhattan"]
+    p_r = vcat(1, 2)
+    model_r = vcat(9, 8)
+    z = zeros(1,14)
+    itr = 1
+    while itr < 193
+        k_n = rand(k_n_r)
+        leaf = rand(leaf_r)
+        w = rand(vcat(1,2))
+        met = rand(vcat(1,2,3))
+        p = rand(p_r)
+        for mod in model_r
+            println("k_n=", k_n, ", leaf=", leaf, ", w=", w_r[w], ", met=", met_r[met], ", p=", p, ", model=", mod)
+            println("## loading in data ##")
+            N_train = inputDB
+            M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :])
+            M_val = inputDB_test
+            M_pest2 = inputDB_pest2
+            if mod == 8
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
+                nn_train = deepcopy(N_train[:, vcat(5,6,8,9,10, 13)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
+            elseif mod == 9
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                nn_train = deepcopy(N_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
+            end
+            Yy_train = deepcopy(M_train[:, end-4])
+            mm_train = deepcopy(N_train[:, end-4])
+            Yy_val = deepcopy(M_val[:, end-4])
+            Yy_test2 = deepcopy(M_pest2[:, end-1])
+            println("## Classification ##")
+            reg = KNeighborsClassifier(n_neighbors=k_n, weights=w_r[w], leaf_size=leaf, p=p, metric=met_r[met])  # 0.7263; 1.6048
+            println("## fit ##")
+            fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+            if itr == 1
+                z[1,1] = k_n
+                z[1,2] = w
+                z[1,3] = leaf
+                z[1,4] = p
+                z[1,5] = met
+                z[1,6] = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,7] = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,8] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                z[1,9] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(nn_train), Vector(mm_train); cv = 3, scoring=f1)
+                z[1,10] = avgScore(f1_10_train, 3)
+                z[1,11] = score(reg, Matrix(Xx_test2), Vector(Yy_test2), sample_weight=samplepest2W)
+                z[1,12] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,13] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,14] = mod
+                println(z[end, :])
+            else
+                itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                jtrain = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(nn_train), Vector(mm_train); cv = 3, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 3) 
+                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2), sample_weight=samplepest2W)
+                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z = vcat(z, [k_n w leaf p met itrain jtrain ival jval traincvtrain itest f1s mccs mod])
+                println(z[end, :])
+            end
+            println("End of ", itr, " iterations")
+            itr += 1
+        end
+    end
+    z_df = DataFrame(k_n = z[:,1], weight = z[:,2], leaf = z[:,3], p = z[:,4], met = z[:,5], f1_train = z[:,6], mcc_train = z[:,7], f1_val = z[:,8], mcc_val = z[:,9], f1_3Ftrain = z[:,10], acc_pest = z[:,11], f1_pest = z[:,12], mcc_pest = z[:,13], model = z[:,14])
+    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
+    return z_df_sorted
+end
+
+optiSearch_df = optimKNN(inputDB, inputDB_test, inputDB_pest2)
+
+# save, ouputing 180 x 8 df
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE4_KNNwithhlnew2Compare1_all.csv"
+CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
 
