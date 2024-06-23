@@ -90,7 +90,6 @@ describe(inputDB)
         inputDB[i, "UsrMatchFragRatio"] = log10(inputDB[i, "UsrMatchFragRatio"])
         inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
         inputDB[i, "MatchDiff"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
-        inputDB[i, "DeltaRi"] = abs(inputDB[i, "DeltaRi"])
         inputDB[i, "MONOISOTOPICMASS"] = log10(inputDB[i, "MONOISOTOPICMASS"])
     end
     # save, ouputing 485631 x 21+1 df, 0:334321; 1:151310 = 
@@ -111,7 +110,6 @@ describe(inputDB)
         inputDB[i, "UsrMatchFragRatio"] = log10(inputDB[i, "UsrMatchFragRatio"])
         inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
         inputDB[i, "MatchDiff"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
-        inputDB[i, "DeltaRi"] = abs(inputDB[i, "DeltaRi"])
         inputDB[i, "MONOISOTOPICMASS"] = log10(inputDB[i, "MONOISOTOPICMASS"])
     end
     describe(inputDB[:, 5:14])
@@ -174,7 +172,6 @@ describe(inputDB_test)
         inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
-        inputDB_test[i, "DeltaRi"] = abs(inputDB_test[i, "DeltaRi"])
         inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
     end
     # save, ouputing 121946 x 21+1 df, 0:83981; 1:37965 = 
@@ -195,7 +192,6 @@ describe(inputDB_test)
         inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
-        inputDB_test[i, "DeltaRi"] = abs(inputDB_test[i, "DeltaRi"])
         inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
     end
     describe(inputDB_test[:, 5:14])
@@ -257,7 +253,6 @@ describe(dfOutput_noTea)
         dfOutput_noTea[i, "UsrMatchFragRatio"] = log10(dfOutput_noTea[i, "UsrMatchFragRatio"])
         dfOutput_noTea[i, "FinalScoreRatio"] = log10(dfOutput_noTea[i, "FinalScoreRatio"])
         dfOutput_noTea[i, "MatchDiff"] = dfOutput_noTea[i, "DirectMatch"] - dfOutput_noTea[i, "ReversMatch"]
-        dfOutput_noTea[i, "DeltaRi"] = abs(dfOutput_noTea[i, "DeltaRi"])
         dfOutput_noTea[i, "MONOISOTOPICMASS"] = log10(dfOutput_noTea[i, "MONOISOTOPICMASS"])
     end
     # save, ouputing 10868 x 18+1 df, 0:7133; 1:3735 = 
@@ -278,7 +273,6 @@ describe(dfOutput_noTea)
         dfOutput_noTea[i, "UsrMatchFragRatio"] = log10(dfOutput_noTea[i, "UsrMatchFragRatio"])
         dfOutput_noTea[i, "FinalScoreRatio"] = log10(dfOutput_noTea[i, "FinalScoreRatio"])
         dfOutput_noTea[i, "MatchDiff"] = dfOutput_noTea[i, "DirectMatch"] - dfOutput_noTea[i, "ReversMatch"]
-        dfOutput_noTea[i, "DeltaRi"] = abs(dfOutput_noTea[i, "DeltaRi"])
         dfOutput_noTea[i, "MONOISOTOPICMASS"] = log10(dfOutput_noTea[i, "MONOISOTOPICMASS"])
     end
     describe(dfOutput_noTea[:, 5:14])
@@ -340,7 +334,6 @@ describe(dfOutput_Tea)
         dfOutput_Tea[i, "UsrMatchFragRatio"] = log10(dfOutput_Tea[i, "UsrMatchFragRatio"])
         dfOutput_Tea[i, "FinalScoreRatio"] = log10(dfOutput_Tea[i, "FinalScoreRatio"])
         dfOutput_Tea[i, "MatchDiff"] = dfOutput_Tea[i, "DirectMatch"] - dfOutput_Tea[i, "ReversMatch"]
-        dfOutput_Tea[i, "DeltaRi"] = abs(dfOutput_Tea[i, "DeltaRi"])
         dfOutput_Tea[i, "MONOISOTOPICMASS"] = log10(dfOutput_Tea[i, "MONOISOTOPICMASS"])
     end
     # save, ouputing 29397 x 18+1 df, 0:21210; 1:8187 = 
@@ -361,7 +354,6 @@ describe(dfOutput_Tea)
         dfOutput_Tea[i, "UsrMatchFragRatio"] = log10(dfOutput_Tea[i, "UsrMatchFragRatio"])
         dfOutput_Tea[i, "FinalScoreRatio"] = log10(dfOutput_Tea[i, "FinalScoreRatio"])
         dfOutput_Tea[i, "MatchDiff"] = dfOutput_Tea[i, "DirectMatch"] - dfOutput_Tea[i, "ReversMatch"]
-        dfOutput_Tea[i, "DeltaRi"] = abs(dfOutput_Tea[i, "DeltaRi"])
         dfOutput_Tea[i, "MONOISOTOPICMASS"] = log10(dfOutput_Tea[i, "MONOISOTOPICMASS"])
     end
     describe(dfOutput_Tea[:, 5:14])
