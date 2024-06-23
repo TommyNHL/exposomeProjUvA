@@ -98,7 +98,7 @@ describe(inputDB)
     inputDB[inputDB.LABEL .== 1, :]
 
     # std
-    insertcols!(inputDB, 10, ("MatchRatio"=>float(0)))
+    insertcols!(inputDB, 10, ("MatchDiff"=>float(0)))
     inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
     inputDB = inputDB[inputDB.Leverage .<= 0.14604417882015916, :]
     describe(inputDB[inputDB.LABEL .== 0, :])
@@ -109,7 +109,7 @@ describe(inputDB)
         inputDB[i, "RefMatchFragRatio"] = log10(inputDB[i, "RefMatchFragRatio"])
         inputDB[i, "UsrMatchFragRatio"] = log10(inputDB[i, "UsrMatchFragRatio"])
         inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
-        inputDB[i, "MatchRatio"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
+        inputDB[i, "MatchDiff"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
         inputDB[i, "MONOISOTOPICMASS"] = log10(inputDB[i, "MONOISOTOPICMASS"])
     end
     describe(inputDB[:, 5:14])
@@ -180,7 +180,7 @@ describe(inputDB_test)
     inputDB_test[inputDB_test.LABEL .== 1, :]
 
     # std
-    insertcols!(inputDB_test, 10, ("MatchRatio"=>float(0)))
+    insertcols!(inputDB_test, 10, ("MatchDiff"=>float(0)))
     inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
     inputDB_test = inputDB_test[inputDB_test.Leverage .<= 0.14604417882015916, :]
     describe(inputDB_test[inputDB_test.LABEL .== 0, :])
@@ -191,7 +191,7 @@ describe(inputDB_test)
         inputDB_test[i, "RefMatchFragRatio"] = log10(inputDB_test[i, "RefMatchFragRatio"])
         inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
-        inputDB_test[i, "MatchRatio"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
+        inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
         inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
     end
     describe(inputDB_test[:, 5:14])
@@ -261,7 +261,7 @@ describe(dfOutput_noTea)
     dfOutput_noTea[dfOutput_noTea.LABEL .== 1, :]
 
     # std
-    insertcols!(dfOutput_noTea, 10, ("MatchRatio"=>float(0)))
+    insertcols!(dfOutput_noTea, 10, ("MatchDiff"=>float(0)))
     dfOutput_noTea = dfOutput_noTea[dfOutput_noTea.FinalScoreRatio .>= float(0.5), :]
     dfOutput_noTea = dfOutput_noTea[dfOutput_noTea.Leverage .<= 0.14604417882015916, :]
     describe(dfOutput_noTea[dfOutput_noTea.LABEL .== 0, :])
@@ -272,7 +272,7 @@ describe(dfOutput_noTea)
         dfOutput_noTea[i, "RefMatchFragRatio"] = log10(dfOutput_noTea[i, "RefMatchFragRatio"])
         dfOutput_noTea[i, "UsrMatchFragRatio"] = log10(dfOutput_noTea[i, "UsrMatchFragRatio"])
         dfOutput_noTea[i, "FinalScoreRatio"] = log10(dfOutput_noTea[i, "FinalScoreRatio"])
-        dfOutput_noTea[i, "MatchRatio"] = dfOutput_noTea[i, "DirectMatch"] - dfOutput_noTea[i, "ReversMatch"]
+        dfOutput_noTea[i, "MatchDiff"] = dfOutput_noTea[i, "DirectMatch"] - dfOutput_noTea[i, "ReversMatch"]
         dfOutput_noTea[i, "MONOISOTOPICMASS"] = log10(dfOutput_noTea[i, "MONOISOTOPICMASS"])
     end
     describe(dfOutput_noTea[:, 5:14])
@@ -342,7 +342,7 @@ describe(dfOutput_Tea)
     dfOutput_Tea[dfOutput_Tea.LABEL .== 1, :]
 
     # std
-    insertcols!(dfOutput_Tea, 10, ("MatchRatio"=>float(0)))
+    insertcols!(dfOutput_Tea, 10, ("MatchDiff"=>float(0)))
     dfOutput_Tea = dfOutput_Tea[dfOutput_Tea.FinalScoreRatio .>= float(0.5), :]
     dfOutput_Tea = dfOutput_Tea[dfOutput_Tea.Leverage .<= 0.14604417882015916, :]
     describe(dfOutput_Tea[dfOutput_Tea.LABEL .== 0, :])
@@ -353,7 +353,7 @@ describe(dfOutput_Tea)
         dfOutput_Tea[i, "RefMatchFragRatio"] = log10(dfOutput_Tea[i, "RefMatchFragRatio"])
         dfOutput_Tea[i, "UsrMatchFragRatio"] = log10(dfOutput_Tea[i, "UsrMatchFragRatio"])
         dfOutput_Tea[i, "FinalScoreRatio"] = log10(dfOutput_Tea[i, "FinalScoreRatio"])
-        dfOutput_Tea[i, "MatchRatio"] = dfOutput_Tea[i, "DirectMatch"] - dfOutput_Tea[i, "ReversMatch"]
+        dfOutput_Tea[i, "MatchDiff"] = dfOutput_Tea[i, "DirectMatch"] - dfOutput_Tea[i, "ReversMatch"]
         dfOutput_Tea[i, "MONOISOTOPICMASS"] = log10(dfOutput_Tea[i, "MONOISOTOPICMASS"])
     end
     describe(dfOutput_Tea[:, 5:14])
