@@ -98,6 +98,7 @@ using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import neural_network : MLPClassifier
 @sk_import svm : SVC
 @sk_import neighbors : KNeighborsClassifier
+@sk_import metrics : recall_score
 #using ScikitLearn.GridSearch: RandomizedSearchCV
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
@@ -165,7 +166,7 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
     met_r = ["minkowski", "euclidean", "manhattan"]
     p_r = vcat(1, 2)
     model_r = vcat(9, 8)
-    z = zeros(1,15)
+    z = zeros(1,14)
     itr = 1
     while itr < 193
         k_n = rand(k_n_r)
@@ -214,13 +215,12 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
                 z[1,8] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 z[1,9] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(nn_train), Vector(mm_train); cv = 3, scoring=f1)
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
                 z[1,10] = avgScore(f1_10_train, 3)
                 z[1,11] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
                 z[1,12] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
-                z[1,13] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,14] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,15] = mod
+                z[1,13] = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                z[1,14] = mod
                 println(z[end, :])
             else
                 itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
@@ -228,21 +228,20 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
                 ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(nn_train), Vector(mm_train); cv = 3, scoring=f1)
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
                 traincvtrain = avgScore(f1_10_train, 3) 
                 f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
                 mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
-                f1s2 = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                mccs2 = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z = vcat(z, [k_n w leaf p met itrain jtrain ival jval traincvtrain f1s mccs f1s2 mccs2 mod])
+                rec = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                z = vcat(z, [k_n w leaf p met itrain jtrain ival jval traincvtrain f1s mccs rec mod])
                 println(z[end, :])
             end
             println("End of ", itr, " iterations")
             itr += 1
         end
     end
-    z_df = DataFrame(k_n = z[:,1], weight = z[:,2], leaf = z[:,3], p = z[:,4], met = z[:,5], f1_train = z[:,6], mcc_train = z[:,7], f1_val = z[:,8], mcc_val = z[:,9], f1_3Ftrain = z[:,10], f1_pest = z[:,11], mcc_pest = z[:,12], f1_pest2 = z[:,13], mcc_pest2 = z[:,14], model = z[:,15])
-    z_df_sorted = sort(z_df, [:f1_pest2, :f1_pest1, :f1_3Ftrain], rev=true)
+    z_df = DataFrame(k_n = z[:,1], weight = z[:,2], leaf = z[:,3], p = z[:,4], met = z[:,5], f1_train = z[:,6], mcc_train = z[:,7], f1_val = z[:,8], mcc_val = z[:,9], f1_3Ftrain = z[:,10], f1_pest = z[:,11], mcc_pest = z[:,12], recall = z[:,13], model = z[:,14])
+    z_df_sorted = sort(z_df, [:recall, :f1_pest, :f1_3Ftrain], rev=true)
     return z_df_sorted
 end
 
@@ -254,193 +253,16 @@ CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
 
-function optimSVM(inputDB, inputDB_test, inputDB_pest2)
-    c_values_r = vcat(1000, 500, 100, 50, 10, 1.0)
-    kernel_r = ["linear", "poly", "rbf", "sigmoid"]
-    gamma_r = ["scale", "auto"]
-    model_r = vcat(9, 8)
-    rs = 42
-    z = zeros(1,13)
-    itr = 1
-    while itr < 65
-        c = rand(c_values_r)
-        k = rand(vcat(1,2,3,4))
-        g = rand(vcat(1,2))
-        for mod in model_r
-            println("itr=", itr, ",C=", c, ", K=", k, ", G=", g, ", model=", mod)
-            println("## loading in data ##")
-            M_train = inputDB
-            M_val = inputDB_test
-            M_pest2 = inputDB_pest2
-            if mod == 8
-                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
-                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
-                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
-            elseif mod == 9
-                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
-            end
-            Yy_train = deepcopy(M_train[:, end-4])
-            Yy_val = deepcopy(M_val[:, end-4])
-            Yy_test2 = deepcopy(M_pest2[:, end-1])
-            println("## Classification ##")
-            reg = SVC(C=c, kernel=kernel_r[k], gamma=gamma_r[g], random_state=rs, class_weight=Dict(0=>0.7263, 1=>1.6048))  # 0.7263; 1.6048
-            println("## fit ##")
-            fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-            if itr == 1
-                z[1,1] = c
-                z[1,2] = k
-                z[1,3] = g
-                z[1,4] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                z[1,5] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val), sample_weight=sampletestW)
-                z[1,7] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                z[1,8] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                z[1,9] = avgScore(f1_10_train, 3)
-                z[1,10] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,11] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,12] = rs
-                z[1,13] = mod
-                println(z[end, :])
-            else
-                itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                traincvtrain = avgScore(f1_10_train, 3) 
-                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z = vcat(z, [c k g itrain jtrain ival jval traincvtrain itest f1s mccs rs mod])
-                println(z[end, :])
-            end
-            println("End of ", itr, " iterations")
-            itr += 1
-        end
-    end
-    z_df = DataFrame(C = z[:,1], kernel = z[:,2], gamma = z[:,3], f1_train = z[:,4], mcc_train = z[:,5], f1_val = z[:,6], mcc_val = z[:,7], f1_3Ftrain = z[:,8], acc_pest = z[:,9], f1_pest = z[:,10], mcc_pest = z[:,11], state = z[:,12], model = z[:,13])
-    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
-    return z_df_sorted
-end
-
-optiSearch_df = optimSVM(inputDB, inputDB_test, inputDB_pest2)
-
-# save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_SVMwithhlnew2Compare1_all.csv"
-CSV.write(savePath, optiSearch_df)
-
-#-------------------------------------------------------------------------------
-
-function optimMLP(inputDB, inputDB_test, inputDB_pest2)
-    hls_r = [(50,50,50,), (50,100,50), (100,50,30), (100,50,50), (120,80,40), (150,100,50)]
-    maxIter_r = vcat(collect(50:50:200))
-    act_r = ["tanh", "relu"]
-    solver_r = ["sgd", "adam"]
-    alpha_r = [0.0001, 0.05]
-    lr_r = ["constant", "adaptive"]
-    model_r = vcat(9, 8)
-    rs = 42
-    z = zeros(1,18)
-    itr = 1
-    while itr < 33
-        hls = rand(vcat(1,2,3,4,5,6))
-        it = rand(maxIter_r)
-        act = rand(vcat(1,2))
-        sol = rand(vcat(1,2))
-        alph = rand(alpha_r)
-        lr = rand(vcat(1,2))
-        for mod in model_r
-            println("itr=", itr, ", hls=", hls, ", maxit=", it, ", act=", act, ", solver=", sol, ", alph=", alph, ", lr=", lr, ", model=", mod)
-            println("## loading in data ##")
-            M_train = inputDB
-            M_val = inputDB_test
-            M_pest2 = inputDB_pest2
-            if mod == 8
-                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
-                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
-                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
-            elseif mod == 9
-                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
-            end
-            Yy_train = deepcopy(M_train[:, end-4])
-            Yy_val = deepcopy(M_val[:, end-4])
-            Yy_test2 = deepcopy(M_pest2[:, end-1])
-            println("## Classification ##")
-            reg = MLPClassifier(hidden_layer_sizes=hls_r[hls], max_iter=it, activation=act_r[act], solver=solver_r[sol], alpha=alph, learning_rate=lr_r[lr], random_state=rs)  # 0.7263; 1.6048
-            println("## fit ##")
-            fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-            if itr == 1
-                z[1,1] = hls
-                z[1,2] = it
-                z[1,3] = act
-                z[1,4] = sol
-                z[1,5] = alph
-                z[1,6] = lr
-                z[1,7] = score(reg, Matrix(Xx_train), Vector(Yy_train), sample_weight=sampleW)
-                z[1,8] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                z[1,9] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                z[1,10] = score(reg, Matrix(Xx_val), Vector(Yy_val), sample_weight=sampletestW)
-                z[1,11] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                z[1,12] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                z[1,13] = avgScore(f1_10_train, 3)
-                z[1,14] = score(reg, Matrix(Xx_test2), Vector(Yy_test2), sample_weight=samplepest2W)
-                z[1,15] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,16] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,17] = rs
-                z[1,18] = mod
-                println(z[end, :])
-            else
-                strain = score(reg, Matrix(Xx_train), Vector(Yy_train), sample_weight=sampleW)
-                itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                sval = score(reg, Matrix(Xx_val), Vector(Yy_val), sample_weight=sampletestW)
-                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                println("## CV ##")
-                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                traincvtrain = avgScore(f1_10_train, 3) 
-                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z = vcat(z, [hls it act sol alph lr strain itrain jtrain sval ival jval traincvtrain itest f1s mccs rs mod])
-                println(z[end, :])
-            end
-            println("End of ", itr, " iterations")
-            itr += 1
-        end
-    end
-    z_df = DataFrame(layers = z[:,1], maxIt = z[:,2], act = z[:,3], solver = z[:,4], alpha = z[:,5], lr = z[:,6], Strain = z[:,7], f1_train = z[:,8], mcc_train = z[:,9], Sval = z[:,10],f1_val = z[:,11], mcc_val = z[:,12], f1_3Ftrain = z[:,13], acc_pest = z[:,14], f1_pest = z[:,15], mcc_pest = z[:,16], state = z[:,17], model = z[:,18])
-    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
-    return z_df_sorted
-end
-
-optiSearch_df = optimMLP(inputDB, inputDB_test, inputDB_pest2)
-
-# save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_MLPwithhlnew2Compare1_all.csv"
-CSV.write(savePath, optiSearch_df)
-
-#-------------------------------------------------------------------------------
-
-function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
-    leaf_r = vcat(collect(14:1:18))
-    tree_r = vcat(collect(380:5:420))
-    depth_r = vcat(collect(50:2:70))
-    split_r = vcat(collect(6:1:10))
+function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
+    leaf_r = vcat(collect(5:5:100))
+    tree_r = vcat(collect(50:50:350))
+    depth_r = vcat(collect(5:5:200))
+    split_r = vcat(collect(2:10:202))
     model_r = vcat(9, 8)
     rs = 42
     z = zeros(1,14)
     itr = 1
-    while itr < 65
+    while itr < 193
         l = rand(leaf_r)
         t = rand(tree_r)
         d = rand(depth_r)
@@ -448,160 +270,176 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
         for mod in model_r
             println("itr=", itr, ", leaf=", l, ", tree=", t, ", depth=", d, ", minSsplit=", r)
             println("## loading in data ##")
-            M_train = inputDB
+            N_train = inputDB
+            M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :])
             M_val = inputDB_test
+            M_pest = inputDB_pest
             M_pest2 = inputDB_pest2
             if mod == 8
-                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
-                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
-                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,9,10,13,14)])
+                nn_train = deepcopy(N_train[:, vcat(5,6,9,10,13,14)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,9,10,13,14)])
+                Xx_test = deepcopy(M_pest[:,vcat(5,6,9,10,13,14)])
+                Xx_test2 = deepcopy(M_pest2[:,vcat(5,6,9,10,13,14)])
             elseif mod == 9
-                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
-                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
+                Xx_train = deepcopy(M_train[:, vcat(5,6,9,10,13,14, end-5)])
+                nn_train = deepcopy(N_train[:, vcat(5,6,9,10,13,14, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,9,10,13,14, end-5)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,9,10,13,14, end-2)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,9,10,13,14, end-2)])
             end
             Yy_train = deepcopy(M_train[:, end-4])
+            mm_train = deepcopy(N_train[:, end-4])
             Yy_val = deepcopy(M_val[:, end-4])
+            Yy_test = deepcopy(M_pest[:, end-1])
             Yy_test2 = deepcopy(M_pest2[:, end-1])
             println("## Classification ##")
-            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.7263, 1=>1.6048))  # 0.7263; 1.6048
+            reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.9526, 1=>1.0524))  # 0.7263; 1.6048
             println("## fit ##")
             fit!(reg, Matrix(Xx_train), Vector(Yy_train))
             if itr == 1
                 z[1,1] = l
                 z[1,2] = t
-                z[1,3] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                z[1,4] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                z[1,5] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                z[1,6] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                z[1,3] = d
+                z[1,4] = r
+                z[1,5] = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,6] = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,7] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                z[1,8] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 println("## CV ##")
                 f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                z[1,7] = avgScore(f1_10_train, 3)
-                z[1,8] = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                z[1,9] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,10] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z[1,11] = rs
-                z[1,12] = d
-                z[1,13] = r
+                z[1,9] = avgScore(f1_10_train, 3)
+                z[1,10] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                z[1,11] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                z[1,12] = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                z[1,13] = rs
                 z[1,14] = mod
                 println(z[end, :])
             else
-                itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                jtrain = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
                 ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
                 println("## CV ##")
                 f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
                 traincvtrain = avgScore(f1_10_train, 3) 
-                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                z = vcat(z, [l t itrain jtrain ival jval traincvtrain itest f1s mccs rs d r mod])
+                f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                rec = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                z = vcat(z, [l t d r itrain jtrain ival jval traincvtrain f1s mccs rec rs mod])
                 println(z[end, :])
             end
             println("End of ", itr, " iterations")
             itr += 1
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], f1_train = z[:,3], mcc_train = z[:,4], f1_val = z[:,5], mcc_val = z[:,6], f1_3Ftrain = z[:,7], acc_pest = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], state = z[:,11], depth = z[:,12], minSampleSplit = z[:,13], model = z[:,14])
-    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], depth = z[:,3], minSplit = z[:,4], f1_train = z[:,5], mcc_train = z[:,6], f1_val = z[:,7], mcc_val = z[:,8], f1_3Ftrain = z[:,9], f1_pest = z[:,10], mcc_pest = z[:,11], recall = z[:,12], state = z[:,13], model = z[:,14])
+    z_df_sorted = sort(z_df, [:recall, :f1_pest, :f1_3Ftrain], rev=true)
     return z_df_sorted
 end
 
-optiSearch_df = optimRandomForestClass(inputDB, inputDB_test, inputDB_pest2)
+optiSearch_RFdf = optimRandomForestClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_RFwithhlnew2Compare89_all.csv"
-CSV.write(savePath, optiSearch_df)
+savePathRF = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF1.csv"
+CSV.write(savePathRF, optiSearch_RFdf)
 
 #-------------------------------------------------------------------------------
 
-function optimDecisionTreeClass(inputDB, inputDB_test, inputDB_pest2)
-    #leaf_r = vcat(collect(5:5:100))
-    #depth_r = vcat(collect(2:2:20), collect(25:5:50))
-    #split_r = vcat(collect(2:2:20))
-    leaf_r = vcat(collect(150:1:160)) #11
-    depth_r = vcat(collect(25:1:30)) #6
-    split_r = vcat(2, collect(2:1:10)) #9
+function optimDecisionTreeClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
+    leaf_r = vcat(collect(5:5:100))
+    depth_r = vcat(collect(2:1:4), collect(5:5:200))
+    split_r = vcat(collect(2:10:202))
+    #leaf_r = vcat(collect(150:1:160)) #11
+    #depth_r = vcat(collect(25:1:30)) #6
+    #split_r = vcat(2, collect(2:1:10)) #9
     model_r = vcat(9, 8) #2
     rs = 42
     z = zeros(1,13)
     itr = 1
-    #while itr < 129
-    for l in leaf_r
-        for d in depth_r
-        #l = rand(leaf_r)
-        #d = rand(depth_r)
-        #r = rand(split_r)
-            for r in split_r
-                for mod in model_r
-                    println("itr=", itr, ", leaf=", l, ", depth=", d, ", minSsplit=", r, ", model=", mod)
-                    println("## loading in data ##")
-                    M_train = inputDB
-                    M_val = inputDB_test
-                    M_pest2 = inputDB_pest2
-                    if mod == 8
-                        Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
-                        Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
-                        Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
-                    elseif mod == 9
-                        Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
-                        Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
-                        Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
-                    end
-                    Yy_train = deepcopy(M_train[:, end-4])
-                    Yy_val = deepcopy(M_val[:, end-4])
-                    Yy_test2 = deepcopy(M_pest2[:, end-1])
-                    println("## Classification ##")
-                    reg = DecisionTreeClassifier(max_depth=d, min_samples_leaf=l, min_samples_split=r, random_state=rs, class_weight=Dict(0=>0.7263, 1=>1.6048))  # 0.7263; 1.6048
-                    println("## fit ##")
-                    fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-                    if itr == 1
-                        z[1,1] = l
-                        z[1,2] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                        z[1,3] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                        z[1,4] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        z[1,5] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        println("## CV ##")
-                        f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                        z[1,6] = avgScore(f1_10_train, 3)
-                        z[1,7] = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                        z[1,8] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                        z[1,9] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                        z[1,10] = rs
-                        z[1,11] = d
-                        z[1,12] = r
-                        z[1,13] = mod
-                        println(z[end, :])
-                    else
-                        itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                        jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
-                        ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        println("## CV ##")
-                        f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                        traincvtrain = avgScore(f1_10_train, 3) 
-                        itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
-                        f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                        mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
-                        z = vcat(z, [l itrain jtrain ival jval traincvtrain itest f1s mccs rs d r mod])
-                        println(z[end, :])
-                    end
-                    println("End of ", itr, " iterations")
-                    itr += 1
-                end
+    while itr < 193
+    #for l in leaf_r
+        #for d in depth_r
+        l = rand(leaf_r)
+        d = rand(depth_r)
+        r = rand(split_r)
+            #for r in split_r
+        for mod in model_r
+            println("itr=", itr, ", leaf=", l, ", depth=", d, ", minSsplit=", r, ", model=", mod)
+            println("## loading in data ##")
+            N_train = inputDB
+            M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :])
+            M_val = inputDB_test
+            M_pest = inputDB_pest
+            M_pest2 = inputDB_pest2
+            if mod == 8
+                Xx_train = deepcopy(M_train[:, vcat(5,6,9,10,13,14)])
+                nn_train = deepcopy(N_train[:, vcat(5,6,9,10,13,14)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,9,10,13,14)])
+                Xx_test = deepcopy(M_pest[:,vcat(5,6,9,10,13,14)])
+                Xx_test2 = deepcopy(M_pest2[:,vcat(5,6,9,10,13,14)])
+            elseif mod == 9
+                Xx_train = deepcopy(M_train[:, vcat(5,6,9,10,13,14, end-5)])
+                nn_train = deepcopy(N_train[:, vcat(5,6,9,10,13,14, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,9,10,13,14, end-5)])
+                Xx_test = deepcopy(M_pest[:, vcat(5,6,9,10,13,14, end-2)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,9,10,13,14, end-2)])
             end
+            Yy_train = deepcopy(M_train[:, end-4])
+            mm_train = deepcopy(N_train[:, end-4])
+            Yy_val = deepcopy(M_val[:, end-4])
+            Yy_test = deepcopy(M_pest[:, end-1])
+            Yy_test2 = deepcopy(M_pest2[:, end-1])
+            println("## Classification ##")
+            reg = DecisionTreeClassifier(max_depth=d, min_samples_leaf=l, min_samples_split=r, random_state=rs, class_weight=Dict(0=>0.9526, 1=>1.0524))  # 0.7263; 1.6048
+            println("## fit ##")
+            fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+            if itr == 1
+                z[1,1] = l
+                z[1,2] = d
+                z[1,3] = r
+                z[1,4] = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,5] = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,6] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                z[1,7] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                z[1,8] = avgScore(f1_10_train, 3)
+                z[1,9] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                z[1,10] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                z[1,11] = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                z[1,12] = rs
+                z[1,13] = mod
+                println(z[end, :])
+            else
+                itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                jtrain = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 3) 
+                f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                rec = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                z = vcat(z, [l d r itrain jtrain ival jval traincvtrain f1s mccs rec rs mod])
+                println(z[end, :])
+            end
+            println("End of ", itr, " iterations")
+            itr += 1
+                #end
+            #end
         end
     end
-    z_df = DataFrame(leaves = z[:,1], f1_train = z[:,2], mcc_train = z[:,3], f1_val = z[:,4], mcc_val = z[:,5], f1_3Ftrain = z[:,6], acc_pest = z[:,7], f1_pest = z[:,8], mcc_pest = z[:,9], state = z[:,10], depth = z[:,11], minSampleSplit = z[:,12], model = z[:,13])
-    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
+    z_df = DataFrame(leaves = z[:,1], depth = z[:,2], minSplit = z[:,3], f1_train = z[:,4], mcc_train = z[:,5], f1_val = z[:,6], mcc_val = z[:,7], f1_3Ftrain = z[:,8], f1_pest = z[:,9], mcc_pest = z[:,10], recall = z[:,11], state = z[:,12], model = z[:,13])
+    z_df_sorted = sort(z_df, [:recall, :f1_pest, :f1_3Ftrain], rev=true)
     return z_df_sorted
 end
 
-optiSearch_df = optimDecisionTreeClass(inputDB, inputDB_test, inputDB_pest2)
+optiSearch_df = optimDecisionTreeClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_DTwithhlnew2Compare4_all.csv"
+savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_DT1.csv"
 CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
@@ -871,6 +709,184 @@ optiSearch_df = optimAdaBoostClass(inputDB, inputDB_test, inputDB_pest2)
 
 # save, ouputing 180 x 8 df
 savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_AdaBwithhlnew2Compare1_all.csv"
+CSV.write(savePath, optiSearch_df)
+
+#-------------------------------------------------------------------------------
+
+function optimSVM(inputDB, inputDB_test, inputDB_pest2)
+    c_values_r = vcat(1000, 500, 100, 50, 10, 1.0)
+    kernel_r = ["linear", "poly", "rbf", "sigmoid"]
+    gamma_r = ["scale", "auto"]
+    model_r = vcat(9, 8)
+    rs = 42
+    z = zeros(1,13)
+    itr = 1
+    while itr < 65
+        c = rand(c_values_r)
+        k = rand(vcat(1,2,3,4))
+        g = rand(vcat(1,2))
+        for mod in model_r
+            println("itr=", itr, ",C=", c, ", K=", k, ", G=", g, ", model=", mod)
+            println("## loading in data ##")
+            M_train = inputDB
+            M_val = inputDB_test
+            M_pest2 = inputDB_pest2
+            if mod == 8
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
+            elseif mod == 9
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
+            end
+            Yy_train = deepcopy(M_train[:, end-4])
+            Yy_val = deepcopy(M_val[:, end-4])
+            Yy_test2 = deepcopy(M_pest2[:, end-1])
+            println("## Classification ##")
+            reg = SVC(C=c, kernel=kernel_r[k], gamma=gamma_r[g], random_state=rs, class_weight=Dict(0=>0.7263, 1=>1.6048))  # 0.7263; 1.6048
+            println("## fit ##")
+            fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+            if itr == 1
+                z[1,1] = c
+                z[1,2] = k
+                z[1,3] = g
+                z[1,4] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                z[1,5] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                z[1,6] = score(reg, Matrix(Xx_val), Vector(Yy_val), sample_weight=sampletestW)
+                z[1,7] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                z[1,8] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                z[1,9] = avgScore(f1_10_train, 3)
+                z[1,10] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,11] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,12] = rs
+                z[1,13] = mod
+                println(z[end, :])
+            else
+                itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 3) 
+                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z = vcat(z, [c k g itrain jtrain ival jval traincvtrain itest f1s mccs rs mod])
+                println(z[end, :])
+            end
+            println("End of ", itr, " iterations")
+            itr += 1
+        end
+    end
+    z_df = DataFrame(C = z[:,1], kernel = z[:,2], gamma = z[:,3], f1_train = z[:,4], mcc_train = z[:,5], f1_val = z[:,6], mcc_val = z[:,7], f1_3Ftrain = z[:,8], acc_pest = z[:,9], f1_pest = z[:,10], mcc_pest = z[:,11], state = z[:,12], model = z[:,13])
+    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
+    return z_df_sorted
+end
+
+optiSearch_df = optimSVM(inputDB, inputDB_test, inputDB_pest2)
+
+# save, ouputing 180 x 8 df
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_SVMwithhlnew2Compare1_all.csv"
+CSV.write(savePath, optiSearch_df)
+
+#-------------------------------------------------------------------------------
+
+
+function optimMLP(inputDB, inputDB_test, inputDB_pest2)
+    hls_r = [(50,50,50,), (50,100,50), (100,50,30), (100,50,50), (120,80,40), (150,100,50)]
+    maxIter_r = vcat(collect(50:50:200))
+    act_r = ["tanh", "relu"]
+    solver_r = ["sgd", "adam"]
+    alpha_r = [0.0001, 0.05]
+    lr_r = ["constant", "adaptive"]
+    model_r = vcat(9, 8)
+    rs = 42
+    z = zeros(1,18)
+    itr = 1
+    while itr < 33
+        hls = rand(vcat(1,2,3,4,5,6))
+        it = rand(maxIter_r)
+        act = rand(vcat(1,2))
+        sol = rand(vcat(1,2))
+        alph = rand(alpha_r)
+        lr = rand(vcat(1,2))
+        for mod in model_r
+            println("itr=", itr, ", hls=", hls, ", maxit=", it, ", act=", act, ", solver=", sol, ", alph=", alph, ", lr=", lr, ", model=", mod)
+            println("## loading in data ##")
+            M_train = inputDB
+            M_val = inputDB_test
+            M_pest2 = inputDB_pest2
+            if mod == 8
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13)])
+            elseif mod == 9
+                Xx_train = deepcopy(M_train[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_val = deepcopy(M_val[:, vcat(5,6,8,9,10, 13, end-5)])
+                Xx_test2 = deepcopy(M_pest2[:, vcat(5,6,8,9,10, 13, end-2)])
+            end
+            Yy_train = deepcopy(M_train[:, end-4])
+            Yy_val = deepcopy(M_val[:, end-4])
+            Yy_test2 = deepcopy(M_pest2[:, end-1])
+            println("## Classification ##")
+            reg = MLPClassifier(hidden_layer_sizes=hls_r[hls], max_iter=it, activation=act_r[act], solver=solver_r[sol], alpha=alph, learning_rate=lr_r[lr], random_state=rs)  # 0.7263; 1.6048
+            println("## fit ##")
+            fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+            if itr == 1
+                z[1,1] = hls
+                z[1,2] = it
+                z[1,3] = act
+                z[1,4] = sol
+                z[1,5] = alph
+                z[1,6] = lr
+                z[1,7] = score(reg, Matrix(Xx_train), Vector(Yy_train), sample_weight=sampleW)
+                z[1,8] = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                z[1,9] = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                z[1,10] = score(reg, Matrix(Xx_val), Vector(Yy_val), sample_weight=sampletestW)
+                z[1,11] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                z[1,12] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                z[1,13] = avgScore(f1_10_train, 3)
+                z[1,14] = score(reg, Matrix(Xx_test2), Vector(Yy_test2), sample_weight=samplepest2W)
+                z[1,15] = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,16] = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z[1,17] = rs
+                z[1,18] = mod
+                println(z[end, :])
+            else
+                strain = score(reg, Matrix(Xx_train), Vector(Yy_train), sample_weight=sampleW)
+                itrain = f1_score(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                jtrain = matthews_corrcoef(Vector(Yy_train), predict(reg, Matrix(Xx_train)), sample_weight=sampleW)
+                sval = score(reg, Matrix(Xx_val), Vector(Yy_val), sample_weight=sampletestW)
+                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 3) 
+                itest = score(reg, Matrix(Xx_test2), Vector(Yy_test2))
+                f1s = f1_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                mccs = matthews_corrcoef(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)), sample_weight=samplepest2W)
+                z = vcat(z, [hls it act sol alph lr strain itrain jtrain sval ival jval traincvtrain itest f1s mccs rs mod])
+                println(z[end, :])
+            end
+            println("End of ", itr, " iterations")
+            itr += 1
+        end
+    end
+    z_df = DataFrame(layers = z[:,1], maxIt = z[:,2], act = z[:,3], solver = z[:,4], alpha = z[:,5], lr = z[:,6], Strain = z[:,7], f1_train = z[:,8], mcc_train = z[:,9], Sval = z[:,10],f1_val = z[:,11], mcc_val = z[:,12], f1_3Ftrain = z[:,13], acc_pest = z[:,14], f1_pest = z[:,15], mcc_pest = z[:,16], state = z[:,17], model = z[:,18])
+    z_df_sorted = sort(z_df, [:f1_3Ftrain, :f1_pest], rev=true)
+    return z_df_sorted
+end
+
+optiSearch_df = optimMLP(inputDB, inputDB_test, inputDB_pest2)
+
+# save, ouputing 180 x 8 df
+savePath = "F:\\UvA\\hyperparameterTuning_TPTNwithAbsDeltaRi3F_0d5FinalScoreRatioDE3_MLPwithhlnew2Compare1_all.csv"
 CSV.write(savePath, optiSearch_df)
 
 #===============================================================================#
