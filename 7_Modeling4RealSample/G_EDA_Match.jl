@@ -9,25 +9,25 @@ using Plots
 trainDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 trainDEDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 trainDEFDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 # 421381/421381 / 121946/121946 x 21 / 22 / 22 / 22
 testDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 testDEDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 testDEFDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-testDEFSDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+testDEFSDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 # 10908/10908 / 10868/10868 x 18 / 19 / 19 / 19
 noTeaDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 noTeaDEDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 noTeaDEFDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-noTeaDEFSDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+noTeaDEFSDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 # 29599/29599 / 29397/29397 x 18 / 19 / 19 / 19
 TeaDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 TeaDEDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 TeaDEFDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-TeaDEFSDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+TeaDEFSDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 describe(trainDf)[5:14, :]
 describe(TeaDEFDf)[5:14, :]
@@ -73,7 +73,7 @@ using DataSci4Chem
 layout = @layout [a{0.25w,0.25h} b{0.25w,0.25h} c{0.25w,0.25h} d{0.25w,0.25h} 
                   e{0.25w,0.25h} f{0.25w,0.25h} g{0.25w,0.25h} h{0.25w,0.25h} 
                   i{0.25w,0.25h} j{0.25w,0.25h} k{0.25w,0.25h} l{0.25w,0.25h} 
-                  m{0.25w,0.25h} n{0.25w,0.25h} o{0.25w,0.25h} p{0.25w,0.25h} ]
+                  m{0.25w,0.25h} n{0.25w,0.25h} o{0.25w,0.25h} p{0.25w,0.25h}]
 default(grid = false, legend = false)
 gr()
 
@@ -207,7 +207,7 @@ histogram!(TeaDf_1[:, "DirectMatch"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 
-histogram!(trainDEDf_0[:, "ReversMatch"], bins = 150, 
+histogram!(trainDf_0[:, "ReversMatch"], bins = 150, 
     subplot = 2, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -225,7 +225,7 @@ histogram!(trainDEDf_0[:, "ReversMatch"], bins = 150,
     title = "Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
-    histogram!(trainDEDf_1[:, "ReversMatch"], bins = 150, 
+    histogram!(trainDf_1[:, "ReversMatch"], bins = 150, 
     subplot = 2, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -243,7 +243,7 @@ histogram!(trainDEDf_0[:, "ReversMatch"], bins = 150,
     title = "Training Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(testDEDf_0[:, "ReversMatch"], bins = 150, 
+histogram!(testDf_0[:, "ReversMatch"], bins = 150, 
     subplot = 6, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -261,7 +261,7 @@ histogram!(testDEDf_0[:, "ReversMatch"], bins = 150,
     title = "Testing Dataset", 
     titlefont = font(12), 
     dpi = 300)
-    histogram!(testDEDf_1[:, "ReversMatch"], bins = 150, 
+    histogram!(testDf_1[:, "ReversMatch"], bins = 150, 
     subplot = 6, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -279,7 +279,7 @@ histogram!(testDEDf_0[:, "ReversMatch"], bins = 150,
     title = "Testing Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(noTeaDEDf_0[:, "ReversMatch"], bins = 150, 
+histogram!(noTeaDf_0[:, "ReversMatch"], bins = 150, 
     subplot = 10, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -297,7 +297,7 @@ histogram!(noTeaDEDf_0[:, "ReversMatch"], bins = 150,
     title = "Validation Dataset", 
     titlefont = font(12), 
     dpi = 300)
-    histogram!(noTeaDEDf_1[:, "ReversMatch"], bins = 150, 
+    histogram!(noTeaDf_1[:, "ReversMatch"], bins = 150, 
     subplot = 10, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -315,7 +315,7 @@ histogram!(noTeaDEDf_0[:, "ReversMatch"], bins = 150,
     title = "Validation Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(TeaDEDf_1[:, "ReversMatch"], bins = 150, 
+histogram!(TeaDf_1[:, "ReversMatch"], bins = 150, 
     subplot = 14, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -334,7 +334,7 @@ histogram!(TeaDEDf_1[:, "ReversMatch"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 
-histogram!(trainDEFDf_0[:, "MatchDiff"], bins = 150, 
+histogram!(trainDEDf_0[:, "MatchDiff"], bins = 150, 
     subplot = 3, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -349,10 +349,10 @@ histogram!(trainDEFDf_0[:, "MatchDiff"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Filtered Scaled\nTraining Dataset", 
+    title = "Scaled\nTraining Dataset", 
     titlefont = font(12), 
     dpi = 300)
-    histogram!(trainDEFDf_1[:, "MatchDiff"], bins = 150, 
+    histogram!(trainDEDf_1[:, "MatchDiff"], bins = 150, 
     subplot = 3, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -367,10 +367,10 @@ histogram!(trainDEFDf_0[:, "MatchDiff"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Filtered Scaled\nTraining Dataset", 
+    title = "Scaled\nTraining Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(testDEFDf_0[:, "MatchDiff"], bins = 150, 
+histogram!(testDEDf_0[:, "MatchDiff"], bins = 150, 
     subplot = 7, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -385,10 +385,10 @@ histogram!(testDEFDf_0[:, "MatchDiff"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Filtered Scaled\nTesting Dataset", 
+    title = "Scaled\nTesting Dataset", 
     titlefont = font(12), 
     dpi = 300)
-    histogram!(testDEFDf_1[:, "MatchDiff"], bins = 150, 
+    histogram!(testDEDf_1[:, "MatchDiff"], bins = 150, 
     subplot = 7, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -403,10 +403,10 @@ histogram!(testDEFDf_0[:, "MatchDiff"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Filtered Scaled\nTesting Dataset", 
+    title = "Scaled\nTesting Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(noTeaDEFDf_0[:, "MatchDiff"], bins = 150, 
+histogram!(noTeaDEDf_0[:, "MatchDiff"], bins = 150, 
     subplot = 11, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -421,10 +421,10 @@ histogram!(noTeaDEFDf_0[:, "MatchDiff"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Filtered Scaled\nValidation Dataset", 
+    title = "Scaled\nValidation Dataset", 
     titlefont = font(12), 
     dpi = 300)
-    histogram!(noTeaDEFDf_1[:, "MatchDiff"], bins = 150, 
+    histogram!(noTeaDEDf_1[:, "MatchDiff"], bins = 150, 
     subplot = 11, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -439,10 +439,10 @@ histogram!(noTeaDEFDf_0[:, "MatchDiff"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Filtered Scaled\nValidation Dataset", 
+    title = "Scaled\nValidation Dataset", 
     titlefont = font(12), 
     dpi = 300)
-histogram!(TeaDEFDf_1[:, "MatchDiff"], bins = 150, 
+histogram!(TeaDEDf_1[:, "MatchDiff"], bins = 150, 
     subplot = 15, 
     framestyle = :box, 
     seriestype=:stephist, 
@@ -457,7 +457,7 @@ histogram!(TeaDEFDf_1[:, "MatchDiff"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Filtered Scaled\nReal Sample Dataset", 
+    title = "Scaled\nReal Sample Dataset", 
     titlefont = font(12), 
     dpi = 300)
 
@@ -590,4 +590,4 @@ histogram!(TeaDEFSDf_1[:, "MatchDiff"], bins = 150,
 
 
 # Saving
-savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\app\\outplot_TPTNDistrution_FeatureMatch.png")
+savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\app\\outplot_TPTNDistrution_FeatureMatch_noFilter.png")
