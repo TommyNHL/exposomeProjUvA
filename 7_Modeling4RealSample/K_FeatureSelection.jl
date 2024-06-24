@@ -19,65 +19,65 @@ matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
 make_scorer = pyimport("sklearn.metrics").make_scorer
 f1 = make_scorer(f1_score, pos_label=1, average="binary")
 
-# inputing 485631 x 22 df
-# 0: 334321; 1: 151310 = 0.7263; 1.6048
-trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+# inputing 1686319 x 22 df
+# 0: 1535009; 1: 151310 = 0.5493; 5.5724
+trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 trainDEFSDf[trainDEFSDf.LABEL .== 1, :]
 describe(trainDEFSDf)
 
-Yy_train = deepcopy(trainDEFSDf[:, end-4])  # 0.7263; 1.6048
+Yy_train = deepcopy(trainDEFSDf[:, end-4])  # 0.5493; 5.5724
 sampleW = []
 for w in Vector(Yy_train)
     if w == 0
-        push!(sampleW, 0.7263)
+        push!(sampleW, 0.5493)
     elseif w == 1
-        push!(sampleW, 1.6048)
+        push!(sampleW, 5.5724)
     end
 end 
 
-# inputing 121946 x 22 df
-# 0: 83981; 1: 37965 = 0.7260; 1.6060
-testDEFSDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+# inputing 421381 x 22 df
+# 0: 383416; 1: 37965 = 0.5495; 5.5496
+testDEFSDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 testDEFSDf[testDEFSDf.LABEL .== 1, :]
 
-Yy_val = deepcopy(testDEFSDf[:, end-4])  # 0.7260; 1.6060
+Yy_val = deepcopy(testDEFSDf[:, end-4])  # 0.5495; 5.5496
 sampletestW = []
 for w in Vector(Yy_val)
     if w == 0
-        push!(sampletestW, 0.7260)
+        push!(sampletestW, 0.5495)
     elseif w == 1
-        push!(sampletestW, 1.6060)
+        push!(sampletestW, 5.5496)
     end
 end 
 
-# 607577 x 22 df; 
-# 485631+121946= 607577, 0:418302; 1:189275 = 
+# 2107700 x 22 df; 
+# 1686319+421381= 2107700, 0:1918425; 1:189275 = 
 wholeDEFSDf = vcat(trainDEFSDf, testDEFSDf)
 sort!(wholeDEFSDf, [:ENTRY])
 wholeDEFSDf[wholeDEFSDf.LABEL .== 1, :]
 
 
-# 10868 x 19 df
-# 0: 7133; 1: 3735 = 0.7618; 1.4549
-noTeaDEFSDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+# 10908 x 19 df
+# 0: 7173; 1: 3735 = 0.7604; 1.4602
+noTeaDEFSDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 noTeaDEFSDf[noTeaDEFSDf.LABEL .== 1, :]
 
-Yy_test = deepcopy(noTeaDEFSDf[:, end-1])  #  0.7618; 1.4549
+Yy_test = deepcopy(noTeaDEFSDf[:, end-1])  # 0.7604; 1.4602
 samplepestW = []
 for w in Vector(Yy_test)
     if w == 0
-        push!(samplepestW, 0.7618)
+        push!(samplepestW, 0.7604)
     elseif w == 1
-        push!(samplepestW, 1.4549)
+        push!(samplepestW, 1.4602)
     end
 end 
 
-# 29397 x 19 df
+# 29599 x 19 df
 # 1: 8187
-TeaDEFSDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+TeaDEFSDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 TeaDEFSDf = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
 
-Yy_test2 = deepcopy(TeaDEFSDf[:, end-1])  #  0.7618; 1.4549
+Yy_test2 = deepcopy(TeaDEFSDf[:, end-1])
 samplepest2W = []
 for w in Vector(Yy_test2)
     if w == 0
@@ -153,100 +153,52 @@ function avgScore(arrAcc, cv)
 end
 
 # modeling, 5 x 4 x 5 x 9 = 225 times
-describe((trainDEFSDf))[vcat(5,6,9,10,13,14, end-5), :]
+describe((trainDEFSDf))[vcat(5,6,7,9,10,13,14, 17), :]
 describe((testDEFSDf))[vcat(5,6,9,10,13,14, end-5), :]
 describe((noTeaDEFSDf))[vcat(5,6,9,10,13,14, end-2), :]
 describe((TeaDEFSDf))[vcat(5,6,9,10,13,14, end-2), :]
 describe((TeaDEFSDf))
 #-------------------------------------------------------------------------------
-function rankRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    leaf_r = 5  # 3
-    depth_r = 185 # 3
-    split_r = 52  # 5
-    rs = 42
-    z = zeros(1,14)
-    itr = 1
-    t = 150
-    mod = 0
-    rank = vcat(5,6,7,9,10,13,14, 17)
-    N_train = inputDB
-    M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :])
-    M_val = inputDB_test
-    M_pest = inputDB_pest
-    M_pest2 = inputDB_pest2
-    for l in leaf_r
-        for d in depth_r
-            for r in split_r
-                if itr == 1
-                    println("itr=", itr, ", leaf=", l, ", tree=", t, ", depth=", d, ", minSsplit=", r)
-                    println("## loading in data ##")
-                    Xx_train = deepcopy(M_train[:, rank])
-                    nn_train = deepcopy(N_train[:, rank])
-                    Xx_val = deepcopy(M_val[:, rank])
-                    Xx_test = deepcopy(M_pest[:, rank])
-                    Xx_test2 = deepcopy(M_pest2[:, rank])
-                    #
-                    Yy_train = deepcopy(M_train[:, end-4])
-                    mm_train = deepcopy(N_train[:, end-4])
-                    Yy_val = deepcopy(M_val[:, end-4])
-                    Yy_test = deepcopy(M_pest[:, end-1])
-                    Yy_test2 = deepcopy(M_pest2[:, end-1])
-                    println("## Classification ##")
-                    reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.9526, 1=>1.0524))  # 0.7263; 1.6048
-                    println("## fit ##")
-                    fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-                    importances = permutation_importance(reg, Matrix(Xx_test), Vector(Yy_test), n_repeats=10, random_state=42, n_jobs=-1)
-                    return importances
-                end
-            end
-        end
-    end
-end
-
-rank = rankRandomForestClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
-#-------------------------------------------------------------------------------
-rank
 #-------------------------------------------------------------------------------
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    leaf_r = vcat(collect(50:25:100))  # 3
-    depth_r = vcat(collect(2:20:62))  # 3
+    leaf_r = vcat(collect(2:20:102))  # 5
+    depth_r = vcat(collect(2:10:62))  # 7
     split_r = vcat(collect(2:20:102))  # 5
     rs = 42
-    z = zeros(1,14)
+    z = zeros(1,22)
     itr = 1
     t = 50
     mod = 0
     rank = vcat(5,6,7,9,10,13,14, 17)
     N_train = inputDB
-    M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :])
+    M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :])
     M_val = inputDB_test
     M_pest = inputDB_pest
     M_pest2 = inputDB_pest2
     for l in leaf_r
         for d in depth_r
             for r in split_r
+                println("itr=", itr, ", leaf=", l, ", tree=", t, ", depth=", d, ", minSsplit=", r)
+                println("## loading in data ##")
+                Xx_train = deepcopy(M_train[:, rank])
+                nn_train = deepcopy(N_train[:, rank])
+                Xx_val = deepcopy(M_val[:, rank])
+                Xx_test = deepcopy(M_pest[:, rank])
+                Xx_test2 = deepcopy(M_pest2[:, rank])
+                #
+                Yy_train = deepcopy(M_train[:, end-4])
+                mm_train = deepcopy(N_train[:, end-4])
+                Yy_val = deepcopy(M_val[:, end-4])
+                Yy_test = deepcopy(M_pest[:, end-1])
+                Yy_test2 = deepcopy(M_pest2[:, end-1])
+                println("## Classification ##")
+                reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.9929, 1=>1.0072))  # 0.7263; 1.6048
+                println("## fit ##")
+                fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+                importances = permutation_importance(reg, Matrix(Xx_test), Vector(Yy_test), n_repeats=10, random_state=42, n_jobs=-1)
+                print(importances["importances_mean"])
                 if itr == 1
-                    println("itr=", itr, ", leaf=", l, ", tree=", t, ", depth=", d, ", minSsplit=", r)
-                    println("## loading in data ##")
-                    Xx_train = deepcopy(M_train[:, rank])
-                    nn_train = deepcopy(N_train[:, rank])
-                    Xx_val = deepcopy(M_val[:, rank])
-                    Xx_test = deepcopy(M_pest[:, rank])
-                    Xx_test2 = deepcopy(M_pest2[:, rank])
-                    #
-                    Yy_train = deepcopy(M_train[:, end-4])
-                    mm_train = deepcopy(N_train[:, end-4])
-                    Yy_val = deepcopy(M_val[:, end-4])
-                    Yy_test = deepcopy(M_pest[:, end-1])
-                    Yy_test2 = deepcopy(M_pest2[:, end-1])
-                    println("## Classification ##")
-                    reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.9526, 1=>1.0524))  # 0.7263; 1.6048
-                    println("## fit ##")
-                    fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-                    importances = permutation_importance(reg, Matrix(Xx_test), Vector(Yy_test), n_repeats=10, random_state=42, n_jobs=-1)
-                    importances["importances_mean", :]
-                    print(importances)
                     z[1,1] = l
                     z[1,2] = t
                     z[1,3] = d
@@ -263,26 +215,16 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
                     z[1,12] = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
                     z[1,13] = rs
                     z[1,14] = mod
+                    z[1,15] = importances["importances_mean"][1]
+                    z[1,16] = importances["importances_mean"][2]
+                    z[1,17] = importances["importances_mean"][3]
+                    z[1,18] = importances["importances_mean"][4]
+                    z[1,19] = importances["importances_mean"][5]
+                    z[1,20] = importances["importances_mean"][6]
+                    z[1,21] = importances["importances_mean"][7]
+                    z[1,22] = importances["importances_mean"][8]
                     println(z[end, :])
                 else
-                    println("itr=", itr, ", leaf=", l, ", tree=", t, ", depth=", d, ", minSsplit=", r)
-                    println("## loading in data ##")
-                    Xx_train = deepcopy(M_train[:, rank])
-                    nn_train = deepcopy(N_train[:, rank])
-                    Xx_val = deepcopy(M_val[:, rank])
-                    Xx_test = deepcopy(M_pest[:, rank])
-                    Xx_test2 = deepcopy(M_pest2[:, rank])
-                    #
-                    Yy_train = deepcopy(M_train[:, end-4])
-                    mm_train = deepcopy(N_train[:, end-4])
-                    Yy_val = deepcopy(M_val[:, end-4])
-                    Yy_test = deepcopy(M_pest[:, end-1])
-                    Yy_test2 = deepcopy(M_pest2[:, end-1])
-                    println("## Classification ##")
-                    reg = RandomForestClassifier(n_estimators=t, max_depth=d, min_samples_leaf=l, min_samples_split=r, n_jobs=-1, oob_score =true, random_state=rs, class_weight=Dict(0=>0.9526, 1=>1.0524))  # 0.7263; 1.6048
-                    println("## fit ##")
-                    fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-                    
                     itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
                     jtrain = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
                     ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
@@ -293,7 +235,15 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
                     f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
                     mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
                     rec = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
-                    z = vcat(z, [l t d r itrain jtrain ival jval traincvtrain f1s mccs rec rs mod])
+                    im1 = importances["importances_mean"][1]
+                    im2 = importances["importances_mean"][2]
+                    im3 = importances["importances_mean"][3]
+                    im4 = importances["importances_mean"][4]
+                    im5 = importances["importances_mean"][5]
+                    im6 = importances["importances_mean"][6]
+                    im7 = importances["importances_mean"][7]
+                    im8 = importances["importances_mean"][8]
+                    z = vcat(z, [l t d r itrain jtrain ival jval traincvtrain f1s mccs rec rs mod im1 im2 im3 im4 im5 im6 im7 im8])
                     println(z[end, :])
                 end
                 println("End of ", itr, " iterations")
@@ -301,7 +251,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
             end
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], depth = z[:,3], minSplit = z[:,4], f1_train = z[:,5], mcc_train = z[:,6], f1_val = z[:,7], mcc_val = z[:,8], f1_3Ftrain = z[:,9], f1_pest = z[:,10], mcc_pest = z[:,11], recall = z[:,12], state = z[:,13], model = z[:,14])
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], depth = z[:,3], minSplit = z[:,4], f1_train = z[:,5], mcc_train = z[:,6], f1_val = z[:,7], mcc_val = z[:,8], f1_3Ftrain = z[:,9], f1_pest = z[:,10], mcc_pest = z[:,11], recall = z[:,12], state = z[:,13], model = z[:,14], im1 = z[:,15], im2 = z[:,16], im3 = z[:,17], im4 = z[:,18], im5 = z[:,19], im6 = z[:,20], im7 = z[:,21], im8 = z[:,22])
     z_df_sorted = sort(z_df, [:recall, :f1_pest, :f1_3Ftrain], rev=true)
     return z_df_sorted
 end
@@ -309,7 +259,7 @@ end
 optiSearch_df = optimRandomForestClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF2.csv"
+savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF1_noFilter.csv"
 CSV.write(savePath, optiSearch_df)
 
 #===============================================================================#
