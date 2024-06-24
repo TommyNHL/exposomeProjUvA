@@ -84,10 +84,10 @@ describe(inputDB)
     insertcols!(inputDB, 10, ("MatchDiff"=>float(0)))
     inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
     inputDB = inputDB[inputDB.Leverage .<= 0.14604417882015916, :]
-    describe(inputDB[inputDB.LABEL .== 0, :])  #  0.000160256  -0.03                            0.0           0.03
+#=     describe(inputDB[inputDB.LABEL .== 0, :])  #  0.000160256  -0.03                            0.0           0.03
     describe(inputDB[inputDB.LABEL .== 1, :])  # -3.30447e-8  -0.001                           0.0         0.001
     inputDB = inputDB[inputDB.MS1Error .>= float(-0.001), :]
-    inputDB = inputDB[inputDB.MS1Error .<= float(0.001), :]
+    inputDB = inputDB[inputDB.MS1Error .<= float(0.001), :] =#
     for i = 1:size(inputDB, 1)
         inputDB[i, "RefMatchFragRatio"] = log10(inputDB[i, "RefMatchFragRatio"])
         inputDB[i, "UsrMatchFragRatio"] = log10(inputDB[i, "UsrMatchFragRatio"])
@@ -107,10 +107,10 @@ describe(inputDB)
     insertcols!(inputDB, 10, ("MatchDiff"=>float(0)))
     inputDB = inputDB[inputDB.FinalScoreRatio .>= float(0.5), :]
     inputDB = inputDB[inputDB.Leverage .<= 0.14604417882015916, :]
-    describe(inputDB[inputDB.LABEL .== 0, :])
+#=     describe(inputDB[inputDB.LABEL .== 0, :])
     describe(inputDB[inputDB.LABEL .== 1, :])
     inputDB = inputDB[inputDB.MS1Error .>= float(-0.001), :]
-    inputDB = inputDB[inputDB.MS1Error .<= float(0.001), :]
+    inputDB = inputDB[inputDB.MS1Error .<= float(0.001), :] =#
     for i = 1:size(inputDB, 1)
         inputDB[i, "RefMatchFragRatio"] = log10(inputDB[i, "RefMatchFragRatio"])
         inputDB[i, "UsrMatchFragRatio"] = log10(inputDB[i, "UsrMatchFragRatio"])
@@ -131,7 +131,7 @@ describe(inputDB)
         end
     end
     # save, ouputing 485631 x 21+1 df, 0:334321; 1:151310 = 
-    savePath = "F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
+    savePath = "F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv"
     CSV.write(savePath, inputDB)
     inputDB[inputDB.LABEL .== 1, :]
 
@@ -198,10 +198,10 @@ describe(inputDB_test)
     insertcols!(inputDB_test, 10, ("MatchDiff"=>float(0)))
     inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
     inputDB_test = inputDB_test[inputDB_test.Leverage .<= 0.14604417882015916, :]
-    describe(inputDB_test[inputDB_test.LABEL .== 0, :])
+#=     describe(inputDB_test[inputDB_test.LABEL .== 0, :])
     describe(inputDB_test[inputDB_test.LABEL .== 1, :])
     inputDB_test = inputDB_test[inputDB_test.MS1Error .>= float(-0.001), :]
-    inputDB_test = inputDB_test[inputDB_test.MS1Error .<= float(0.001), :]
+    inputDB_test = inputDB_test[inputDB_test.MS1Error .<= float(0.001), :] =#
     for i = 1:size(inputDB_test, 1)
         inputDB_test[i, "RefMatchFragRatio"] = log10(inputDB_test[i, "RefMatchFragRatio"])
         inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
@@ -222,7 +222,7 @@ describe(inputDB_test)
         end
     end
     # save, ouputing 121946 x 21+1 df, 0:83981; 1:37965 = 
-    savePath = "F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
+    savePath = "F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv"
     CSV.write(savePath, inputDB_test)
     inputDB_test[inputDB_test.LABEL .== 1, :]
 
@@ -288,10 +288,10 @@ describe(dfOutput_noTea)
     insertcols!(dfOutput_noTea, 10, ("MatchDiff"=>float(0)))
     dfOutput_noTea = dfOutput_noTea[dfOutput_noTea.FinalScoreRatio .>= float(0.5), :]
     dfOutput_noTea = dfOutput_noTea[dfOutput_noTea.Leverage .<= 0.14604417882015916, :]
-    describe(dfOutput_noTea[dfOutput_noTea.LABEL .== 0, :])
+#=     describe(dfOutput_noTea[dfOutput_noTea.LABEL .== 0, :])
     describe(dfOutput_noTea[dfOutput_noTea.LABEL .== 1, :])
     dfOutput_noTea = dfOutput_noTea[dfOutput_noTea.MS1Error .>= float(-0.046), :]
-    dfOutput_noTea = dfOutput_noTea[dfOutput_noTea.MS1Error .<= float(0.066), :]
+    dfOutput_noTea = dfOutput_noTea[dfOutput_noTea.MS1Error .<= float(0.066), :] =#
     for i = 1:size(dfOutput_noTea, 1)
         dfOutput_noTea[i, "RefMatchFragRatio"] = log10(dfOutput_noTea[i, "RefMatchFragRatio"])
         dfOutput_noTea[i, "UsrMatchFragRatio"] = log10(dfOutput_noTea[i, "UsrMatchFragRatio"])
@@ -312,7 +312,7 @@ describe(dfOutput_noTea)
         end
     end
     # save, ouputing 10868 x 18+1 df, 0:7133; 1:3735 = 
-    savePath = "F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
+    savePath = "F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv"
     CSV.write(savePath, dfOutput_noTea)
     dfOutput_noTea[dfOutput_noTea.LABEL .== 1, :]
 
@@ -378,10 +378,10 @@ describe(dfOutput_Tea)
     insertcols!(dfOutput_Tea, 10, ("MatchDiff"=>float(0)))
     dfOutput_Tea = dfOutput_Tea[dfOutput_Tea.FinalScoreRatio .>= float(0.5), :]
     dfOutput_Tea = dfOutput_Tea[dfOutput_Tea.Leverage .<= 0.14604417882015916, :]
-    describe(dfOutput_Tea[dfOutput_Tea.LABEL .== 0, :])
+#=     describe(dfOutput_Tea[dfOutput_Tea.LABEL .== 0, :])
     describe(dfOutput_Tea[dfOutput_Tea.LABEL .== 1, :])
     dfOutput_Tea = dfOutput_Tea[dfOutput_Tea.MS1Error .>= float(-0.061), :]
-    dfOutput_Tea = dfOutput_Tea[dfOutput_Tea.MS1Error .<= float(0.058), :]
+    dfOutput_Tea = dfOutput_Tea[dfOutput_Tea.MS1Error .<= float(0.058), :] =#
     for i = 1:size(dfOutput_Tea, 1)
         dfOutput_Tea[i, "RefMatchFragRatio"] = log10(dfOutput_Tea[i, "RefMatchFragRatio"])
         dfOutput_Tea[i, "UsrMatchFragRatio"] = log10(dfOutput_Tea[i, "UsrMatchFragRatio"])
@@ -402,6 +402,6 @@ describe(dfOutput_Tea)
         end
     end
     # save, ouputing 29397 x 18+1 df, 0:21210; 1:8187 = 
-    savePath = "F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
+    savePath = "F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv"
     CSV.write(savePath, dfOutput_Tea)
     dfOutput_Tea[dfOutput_Tea.LABEL .== 1, :]
