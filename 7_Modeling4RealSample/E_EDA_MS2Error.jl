@@ -71,9 +71,9 @@ TeaDEFSDf_1 = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
 using DataSci4Chem
 
 layout = @layout [a{0.50w,0.25h} b{0.50w,0.25h} 
-                  d{0.50w,0.25h} e{0.50w,0.25h} 
-                  g{0.50w,0.25h} h{0.50w,0.25h} 
-                  j{0.50w,0.25h} k{0.50w,0.25h}]
+                  c{0.50w,0.25h} d{0.50w,0.25h} 
+                  e{0.50w,0.25h} f{0.50w,0.25h} 
+                  g{0.50w,0.25h} h{0.50w,0.25h}]
 default(grid = false, legend = false)
 gr()
 
