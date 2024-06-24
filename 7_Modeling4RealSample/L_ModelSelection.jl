@@ -254,10 +254,14 @@ CSV.write(savePath, optiSearch_df)
 #-------------------------------------------------------------------------------
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    leaf_r = vcat(collect(5:5:100))
-    tree_r = vcat(collect(50:50:350))
-    depth_r = vcat(collect(5:5:200))
-    split_r = vcat(collect(2:10:202))
+    #leaf_r = vcat(collect(5:5:100))
+    #tree_r = vcat(collect(50:50:350))
+    #depth_r = vcat(collect(5:5:200))
+    #split_r = vcat(collect(2:10:202))
+    leaf_r = vcat(collect(50:5:100))
+    tree_r = vcat(collect(50:5:350))
+    depth_r = vcat(collect(2:2:100))
+    split_r = vcat(collect(8:8:192))
     model_r = vcat(9, 8)
     rs = 42
     z = zeros(1,14)
@@ -338,11 +342,11 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
     return z_df_sorted
 end
 
-optiSearch_RFdf = optimRandomForestClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
+optiSearch_df = optimRandomForestClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePathRF = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF1.csv"
-CSV.write(savePathRF, optiSearch_RFdf)
+savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF2.csv"
+CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
 
@@ -357,7 +361,7 @@ function optimDecisionTreeClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
     rs = 42
     z = zeros(1,13)
     itr = 1
-    while itr < 193
+    while itr < 2049
     #for l in leaf_r
         #for d in depth_r
         l = rand(leaf_r)
@@ -439,7 +443,7 @@ end
 optiSearch_df = optimDecisionTreeClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_DT1.csv"
+savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_DT2.csv"
 CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------

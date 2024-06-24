@@ -71,6 +71,9 @@ describe(inputDB)
         inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
         inputDB[i, "MatchDiff"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
         inputDB[i, "MONOISOTOPICMASS"] = log10(inputDB[i, "MONOISOTOPICMASS"])
+        if inputDB[i, "DeltaRi"] !== float(0)
+            inputDB[i, "DeltaRi"] = inputDB[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 1686319 x 21+1 df, 0:1535009; 1:151310 = 
     savePath = "F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv"
@@ -91,6 +94,9 @@ describe(inputDB)
         inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
         inputDB[i, "MatchDiff"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
         inputDB[i, "MONOISOTOPICMASS"] = log10(inputDB[i, "MONOISOTOPICMASS"])
+        if inputDB[i, "DeltaRi"] !== float(0)
+            inputDB[i, "DeltaRi"] = inputDB[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 485631 x 21+1 df, 0:334321; 1:151310 = 
     savePath = "F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv"
@@ -111,6 +117,9 @@ describe(inputDB)
         inputDB[i, "FinalScoreRatio"] = log10(inputDB[i, "FinalScoreRatio"])
         inputDB[i, "MatchDiff"] = inputDB[i, "DirectMatch"] - inputDB[i, "ReversMatch"]
         inputDB[i, "MONOISOTOPICMASS"] = log10(inputDB[i, "MONOISOTOPICMASS"])
+        if inputDB[i, "DeltaRi"] !== float(0)
+            inputDB[i, "DeltaRi"] = inputDB[i, "DeltaRi"] * float(-1)
+        end
     end
     describe(inputDB[:, 5:14])
     for f = 5:14
@@ -153,6 +162,9 @@ describe(inputDB_test)
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
         inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
+        if inputDB_test[i, "DeltaRi"] !== float(0)
+            inputDB_test[i, "DeltaRi"] = inputDB_test[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 421381 x 21+1 df, 0:383416; 1:37965 = 
     savePath = "F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv"
@@ -173,6 +185,9 @@ describe(inputDB_test)
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
         inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
+        if inputDB_test[i, "DeltaRi"] !== float(0)
+            inputDB_test[i, "DeltaRi"] = inputDB_test[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 121946 x 21+1 df, 0:83981; 1:37965 = 
     savePath = "F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv"
@@ -193,6 +208,9 @@ describe(inputDB_test)
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
         inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
+        if inputDB_test[i, "DeltaRi"] !== float(0)
+            inputDB_test[i, "DeltaRi"] = inputDB_test[i, "DeltaRi"] * float(-1)
+        end
     end
     describe(inputDB_test[:, 5:14])
     for f = 5:14
@@ -234,6 +252,9 @@ describe(dfOutput_noTea)
         dfOutput_noTea[i, "FinalScoreRatio"] = log10(dfOutput_noTea[i, "FinalScoreRatio"])
         dfOutput_noTea[i, "MatchDiff"] = dfOutput_noTea[i, "DirectMatch"] - dfOutput_noTea[i, "ReversMatch"]
         dfOutput_noTea[i, "MONOISOTOPICMASS"] = log10(dfOutput_noTea[i, "MONOISOTOPICMASS"])
+        if dfOutput_noTea[i, "DeltaRi"] !== float(0)
+            dfOutput_noTea[i, "DeltaRi"] = dfOutput_noTea[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 10908 x 18+1 df, 0:7173; 1:3735 = 
     savePath = "F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv"
@@ -254,6 +275,9 @@ describe(dfOutput_noTea)
         dfOutput_noTea[i, "FinalScoreRatio"] = log10(dfOutput_noTea[i, "FinalScoreRatio"])
         dfOutput_noTea[i, "MatchDiff"] = dfOutput_noTea[i, "DirectMatch"] - dfOutput_noTea[i, "ReversMatch"]
         dfOutput_noTea[i, "MONOISOTOPICMASS"] = log10(dfOutput_noTea[i, "MONOISOTOPICMASS"])
+        if dfOutput_noTea[i, "DeltaRi"] !== float(0)
+            dfOutput_noTea[i, "DeltaRi"] = dfOutput_noTea[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 10868 x 18+1 df, 0:7133; 1:3735 = 
     savePath = "F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv"
@@ -274,6 +298,9 @@ describe(dfOutput_noTea)
         dfOutput_noTea[i, "FinalScoreRatio"] = log10(dfOutput_noTea[i, "FinalScoreRatio"])
         dfOutput_noTea[i, "MatchDiff"] = dfOutput_noTea[i, "DirectMatch"] - dfOutput_noTea[i, "ReversMatch"]
         dfOutput_noTea[i, "MONOISOTOPICMASS"] = log10(dfOutput_noTea[i, "MONOISOTOPICMASS"])
+        if dfOutput_noTea[i, "DeltaRi"] !== float(0)
+            dfOutput_noTea[i, "DeltaRi"] = dfOutput_noTea[i, "DeltaRi"] * float(-1)
+        end
     end
     describe(dfOutput_noTea[:, 5:14])
     for f = 5:14
@@ -315,6 +342,9 @@ describe(dfOutput_Tea)
         dfOutput_Tea[i, "FinalScoreRatio"] = log10(dfOutput_Tea[i, "FinalScoreRatio"])
         dfOutput_Tea[i, "MatchDiff"] = dfOutput_Tea[i, "DirectMatch"] - dfOutput_Tea[i, "ReversMatch"]
         dfOutput_Tea[i, "MONOISOTOPICMASS"] = log10(dfOutput_Tea[i, "MONOISOTOPICMASS"])
+        if dfOutput_Tea[i, "DeltaRi"] !== float(0)
+            dfOutput_Tea[i, "DeltaRi"] = dfOutput_Tea[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 29599 x 18+1 df, 0:21412; 1:8187 = 
     savePath = "F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv"
@@ -335,6 +365,9 @@ describe(dfOutput_Tea)
         dfOutput_Tea[i, "FinalScoreRatio"] = log10(dfOutput_Tea[i, "FinalScoreRatio"])
         dfOutput_Tea[i, "MatchDiff"] = dfOutput_Tea[i, "DirectMatch"] - dfOutput_Tea[i, "ReversMatch"]
         dfOutput_Tea[i, "MONOISOTOPICMASS"] = log10(dfOutput_Tea[i, "MONOISOTOPICMASS"])
+        if dfOutput_Tea[i, "DeltaRi"] !== float(0)
+            dfOutput_Tea[i, "DeltaRi"] = dfOutput_Tea[i, "DeltaRi"] * float(-1)
+        end
     end
     # save, ouputing 29397 x 18+1 df, 0:21210; 1:8187 = 
     savePath = "F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv"
@@ -355,6 +388,9 @@ describe(dfOutput_Tea)
         dfOutput_Tea[i, "FinalScoreRatio"] = log10(dfOutput_Tea[i, "FinalScoreRatio"])
         dfOutput_Tea[i, "MatchDiff"] = dfOutput_Tea[i, "DirectMatch"] - dfOutput_Tea[i, "ReversMatch"]
         dfOutput_Tea[i, "MONOISOTOPICMASS"] = log10(dfOutput_Tea[i, "MONOISOTOPICMASS"])
+        if dfOutput_Tea[i, "DeltaRi"] !== float(0)
+            dfOutput_Tea[i, "DeltaRi"] = dfOutput_Tea[i, "DeltaRi"] * float(-1)
+        end
     end
     describe(dfOutput_Tea[:, 5:14])
     for f = 5:14
