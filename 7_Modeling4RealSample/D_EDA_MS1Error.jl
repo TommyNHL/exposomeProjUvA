@@ -9,25 +9,25 @@ using Plots
 trainDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 trainDEDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 trainDEFDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 # 421381/421381 / 121946/121946 x 21 / 22 / 22 / 22
 testDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 testDEDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 testDEFDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-testDEFSDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+testDEFSDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 # 10908/10908 / 10868/10868 x 18 / 19 / 19 / 19
 noTeaDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 noTeaDEDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 noTeaDEFDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-noTeaDEFSDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+noTeaDEFSDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 # 29599/29599 / 29397/29397 x 18 / 19 / 19 / 19
 TeaDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 TeaDEDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 TeaDEFDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-TeaDEFSDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv", DataFrame)
+TeaDEFSDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 describe(trainDf)[5:14, :]
 describe(TeaDEFDf)[5:14, :]
@@ -70,15 +70,15 @@ TeaDEFSDf_1 = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
 
 using DataSci4Chem
 
-layout = @layout [a{0.50w,0.25h} b{0.50w,0.25h} 
-                  e{0.50w,0.25h} f{0.50w,0.25h} 
-                  i{0.50w,0.25h} j{0.50w,0.25h} 
-                  m{0.50w,0.25h} n{0.50w,0.25h}]
+layout = @layout [a{0.33w,0.25h} b{0.33w,0.25h} c{0.33w,0.25h} 
+                  d{0.33w,0.25h} e{0.33w,0.25h} f{0.33w,0.25h} 
+                  g{0.33w,0.25h} h{0.33w,0.25h} i{0.33w,0.25h} 
+                  j{0.33w,0.25h} k{0.33w,0.25h} l{0.33w,0.25h}]
 default(grid = false, legend = false)
 gr()
 
 outplotTPTNdetaRiDistrution = plot(layout = layout, link = :both, 
-        size = (1500, 1000), margin = (8, :mm), dpi = 300)
+        size = (1500, 1500), margin = (8, :mm), dpi = 300)
 
 histogram!(trainDf_0[:, "MS1Error"], bins = 150, 
     subplot = 1, 
@@ -117,7 +117,7 @@ histogram!(trainDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 histogram!(testDf_0[:, "MS1Error"], bins = 150, 
-    subplot = 3, 
+    subplot = 4, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "1-Way MS1Error", xguidefontsize=10, 
@@ -135,7 +135,7 @@ histogram!(testDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
     histogram!(testDf_1[:, "MS1Error"], bins = 150, 
-    subplot = 3, 
+    subplot = 4, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "1-Way MS1Error", xguidefontsize=10, 
@@ -153,7 +153,7 @@ histogram!(testDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 histogram!(noTeaDf_0[:, "MS1Error"], bins = 150, 
-    subplot = 5, 
+    subplot = 7, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "1-Way MS1Error", xguidefontsize=10, 
@@ -171,7 +171,7 @@ histogram!(noTeaDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
     histogram!(noTeaDf_1[:, "MS1Error"], bins = 150, 
-    subplot = 5, 
+    subplot = 7, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "1-Way MS1Error", xguidefontsize=10, 
@@ -189,7 +189,7 @@ histogram!(noTeaDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 histogram!(TeaDf_1[:, "MS1Error"], bins = 150, 
-    subplot = 7, 
+    subplot = 10, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "1-Way MS1Error", xguidefontsize=10, 
@@ -244,7 +244,7 @@ histogram!(trainDEDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 histogram!(testDEDf_0[:, "MS1Error"], bins = 150, 
-    subplot = 4, 
+    subplot = 5, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "2-Way MS1Error", xguidefontsize=10, 
@@ -262,7 +262,7 @@ histogram!(testDEDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
     histogram!(testDEDf_1[:, "MS1Error"], bins = 150, 
-    subplot = 4, 
+    subplot = 5, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "2-Way MS1Error", xguidefontsize=10, 
@@ -280,7 +280,7 @@ histogram!(testDEDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 histogram!(noTeaDEDf_0[:, "MS1Error"], bins = 150, 
-    subplot = 6, 
+    subplot = 8, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "2-Way MS1Error", xguidefontsize=10, 
@@ -298,7 +298,7 @@ histogram!(noTeaDEDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
     histogram!(noTeaDEDf_1[:, "MS1Error"], bins = 150, 
-    subplot = 6, 
+    subplot = 8, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "2-Way MS1Error", xguidefontsize=10, 
@@ -316,7 +316,7 @@ histogram!(noTeaDEDf_0[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 histogram!(TeaDEDf_1[:, "MS1Error"], bins = 150, 
-    subplot = 8, 
+    subplot = 11, 
     framestyle = :box, 
     seriestype=:stephist, 
     xlabel = "2-Way MS1Error", xguidefontsize=10, 
@@ -334,6 +334,133 @@ histogram!(TeaDEDf_1[:, "MS1Error"], bins = 150,
     titlefont = font(12), 
     dpi = 300)
 
+histogram!(trainDEFSDf_0[:, "MS1Error"], bins = 150, 
+    subplot = 3, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 0", 
+    fc = "pink", 
+    lc = "pink", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Training Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+    histogram!(trainDEFSDf_1[:, "MS1Error"], bins = 150, 
+    subplot = 3, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Training Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+histogram!(testDEFSDf_0[:, "MS1Error"], bins = 150, 
+    subplot = 6, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 0", 
+    fc = "pink", 
+    lc = "pink", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Testing Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+    histogram!(testDEFSDf_1[:, "MS1Error"], bins = 150, 
+    subplot = 6, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Testing Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+histogram!(noTeaDEFSDf_0[:, "MS1Error"], bins = 150, 
+    subplot = 9, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 0", 
+    fc = "pink", 
+    lc = "pink", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Validation Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+    histogram!(noTeaDEFSDf_1[:, "MS1Error"], bins = 150, 
+    subplot = 9, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Validation Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+histogram!(TeaDEFSDf_1[:, "MS1Error"], bins = 150, 
+    subplot = 12, 
+    framestyle = :box, 
+    seriestype=:stephist, 
+    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    ylabel = "Count", yguidefontsize=10, 
+    label = "LABEL 1", 
+    fc = "skyblue", 
+    lc = "skyblue", 
+    lw = 1, 
+    margin = (5, :mm), 
+    xtickfontsize = 8, 
+    ytickfontsize= 8, 
+    legend = :topright, 
+    legendfont = font(8), 
+    title = "Real Sample Dataset", 
+    titlefont = font(12), 
+    dpi = 300)
+
 
 # Saving
-savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\app\\outplot_TPTNDistrution_FeatureMS1Error.png")
+savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\app\\outplot_TPTNDistrution_FeatureMS1Error_noFilter.png")
