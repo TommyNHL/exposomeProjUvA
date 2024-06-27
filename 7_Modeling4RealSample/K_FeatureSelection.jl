@@ -161,16 +161,17 @@ describe((TeaDEFSDf))
 #-------------------------------------------------------------------------------
 
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    leaf_r = vcat(collect(2:250:1002))  # 5
+    leaf_r = 2  # 1
     depth_r = vcat(collect(2:1:7))  # 6
     split_r = 2  # 1
+    l = 2
     r = 2
     rs = 42
-    z = zeros(1,22)
+    z = zeros(1,28)
     itr = 1
-    tree_r = vcat(40, collect(50:100:450))  # 5
+    tree_r = vcat(collect(50:50:500))  # 9
     mod = 0
-    rank = vcat(5,6,7,9,10,13,14, 17)
+    rank = vcat(5, 7,9,10,13,14, 17)
     N_train = inputDB
     M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :])
     M_val = inputDB_test
@@ -219,10 +220,16 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
                     z[1,16] = importances["importances_mean"][2]
                     z[1,17] = importances["importances_mean"][3]
                     z[1,18] = importances["importances_mean"][4]
-                    z[1,19] = importances["importances_std"][1]
-                    z[1,20] = importances["importances_std"][2]
-                    z[1,21] = importances["importances_std"][3]
-                    z[1,22] = importances["importances_std"][4]
+                    z[1,19] = importances["importances_mean"][5]
+                    z[1,20] = importances["importances_mean"][6]
+                    z[1,21] = importances["importances_mean"][7]
+                    z[1,22] = importances["importances_std"][1]
+                    z[1,23] = importances["importances_std"][2]
+                    z[1,24] = importances["importances_std"][3]
+                    z[1,25] = importances["importances_std"][4]
+                    z[1,26] = importances["importances_std"][5]
+                    z[1,27] = importances["importances_std"][6]
+                    z[1,28] = importances["importances_std"][7]
                     println(z[end, :])
                 else
                     itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
@@ -239,11 +246,17 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
                     im2 = importances["importances_mean"][2]
                     im3 = importances["importances_mean"][3]
                     im4 = importances["importances_mean"][4]
+                    im5 = importances["importances_mean"][5]
+                    im6 = importances["importances_mean"][6]
+                    im7 = importances["importances_mean"][7]
                     sd1 = importances["importances_std"][1]
                     sd2 = importances["importances_std"][2]
                     sd3 = importances["importances_std"][3]
                     sd4 = importances["importances_std"][4]
-                    z = vcat(z, [l t d r itrain jtrain ival jval traincvtrain f1s mccs rec rs mod im1 im2 im3 im4 sd1 sd2 sd3 sd4])
+                    sd5 = importances["importances_std"][5]
+                    sd6 = importances["importances_std"][6]
+                    sd7 = importances["importances_std"][7]
+                    z = vcat(z, [l t d r itrain jtrain ival jval traincvtrain f1s mccs rec rs mod im1 im2 im3 im4 im5 im6 im7 sd1 sd2 sd3 sd4 sd5 sd6 sd7])
                     println(z[end, :])
                 end
                 println("End of ", itr, " iterations")
@@ -251,7 +264,7 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
             end
         end
     end
-    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], depth = z[:,3], minSplit = z[:,4], f1_train = z[:,5], mcc_train = z[:,6], f1_val = z[:,7], mcc_val = z[:,8], f1_3Ftrain = z[:,9], f1_pest = z[:,10], mcc_pest = z[:,11], recall = z[:,12], state = z[:,13], model = z[:,14], im1 = z[:,15], im2 = z[:,16], im3 = z[:,17], im4 = z[:,18], sd1 = z[:,19], sd2 = z[:,20], sd3 = z[:,21], sd4 = z[:,22])
+    z_df = DataFrame(leaves = z[:,1], trees = z[:,2], depth = z[:,3], minSplit = z[:,4], f1_train = z[:,5], mcc_train = z[:,6], f1_val = z[:,7], mcc_val = z[:,8], f1_3Ftrain = z[:,9], f1_pest = z[:,10], mcc_pest = z[:,11], recall = z[:,12], state = z[:,13], model = z[:,14], im1 = z[:,15], im2 = z[:,16], im3 = z[:,17], im4 = z[:,18], im5 = z[:,19], im6 = z[:,20], im7 = z[:,21], sd1 = z[:,22], sd2 = z[:,23], sd3 = z[:,24], sd4 = z[:,25], sd5 = z[:,26], sd6 = z[:,27], sd7 = z[:,28])
     z_df_sorted = sort(z_df, [:recall, :f1_pest, :f1_3Ftrain], rev=true)
     return z_df_sorted
 end
@@ -259,14 +272,14 @@ end
 optiSearch_df = optimRandomForestClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF5_noFilterMONOISOTOPICMASS.csv"
+savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF6_noFilterLog(UsrFragMatchRatio).csv"
 CSV.write(savePath, optiSearch_df)
 #-------------------------------------------------------------------------------
 
 function optimDecisionTreeClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    leaf_r = vcat(collect(2:250:1002))  # 5
+    leaf_r = vcat(collect(2:250:2002))  # 9
     depth_r = vcat(collect(2:1:5))  # 4
-    split_r = vcat(collect(2:250:1002))  # 5
+    split_r = vcat(collect(2:1:10))  # 9
     rs = 42
     z = zeros(1,27)
     itr = 1
