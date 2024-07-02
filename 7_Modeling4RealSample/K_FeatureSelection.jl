@@ -503,8 +503,8 @@ CSV.write(savePath, optiSearch_df)
 #-------------------------------------------------------------------------------
 
 function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    k_n_r = vcat(10, 15, 25, 40, 60)  # 5
-    leaf_r = vcat(1, 30, 200, 400)  # 4
+    k_n_r = vcat(50, 60, 80, 100)  # 4
+    leaf_r = vcat(150, 200, 250)  # 3
     w_r = ["uniform", "distance"]
     met_r = ["minkowski", "euclidean", "manhattan"]
     p_r = vcat(1, 2)
@@ -512,6 +512,8 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
     w = 1
     mod = 0
     itr = 1
+    met = 1
+    p = 2
     rank = vcat(5,6,7,9,10,13,14, 17)
     N_train = inputDB
     M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :])
@@ -521,97 +523,97 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
     for k_n in k_n_r
         for leaf in leaf_r
             #for w in 1:2
-            for met in vcat(1,3)
-                for p in p_r
-                    println("k_n=", k_n, ", leaf=", leaf, ", w=", w_r[w], ", met=", met_r[met], ", p=", p, ", model=", mod)
-                    println("## loading in data ##")
-                    Xx_train = deepcopy(M_train[:, rank])
-                    nn_train = deepcopy(N_train[:, rank])
-                    Xx_val = deepcopy(M_val[:, rank])
-                    Xx_test = deepcopy(M_pest[:, rank])
-                    Xx_test2 = deepcopy(M_pest2[:, rank])
-                    #
-                    Yy_train = deepcopy(M_train[:, end-4])
-                    mm_train = deepcopy(N_train[:, end-4])
-                    Yy_val = deepcopy(M_val[:, end-4])
-                    Yy_test = deepcopy(M_pest[:, end-1])
-                    Yy_test2 = deepcopy(M_pest2[:, end-1])
-                    println("## Classification ##")
-                    reg = KNeighborsClassifier(n_neighbors=k_n, weights=w_r[w], leaf_size=leaf, p=p, metric=met_r[met])  # 0.7263; 1.6048
-                    println("## fit ##")
-                    fit!(reg, Matrix(Xx_train), Vector(Yy_train))
-                    importances = permutation_importance(reg, Matrix(Xx_test), Vector(Yy_test), n_repeats=10, random_state=42)
-                    print(importances["importances_mean"])
-                    if itr == 1
-                        z[1,1] = k_n
-                        z[1,2] = leaf
-                        z[1,3] = w
-                        z[1,4] = met
-                        z[1,5] = p
-                        z[1,6] = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
-                        z[1,7] = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
-                        z[1,8] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        z[1,9] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        println("## CV ##")
-                        f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                        z[1,10] = avgScore(f1_10_train, 3)
-                        z[1,11] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
-                        z[1,12] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
-                        z[1,13] = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
-                        z[1,14] = mod
-                        z[1,15] = importances["importances_mean"][1]
-                        z[1,16] = importances["importances_mean"][2]
-                        z[1,17] = importances["importances_mean"][3]
-                        z[1,18] = importances["importances_mean"][4]
-                        z[1,19] = importances["importances_mean"][5]
-                        z[1,20] = importances["importances_mean"][6]
-                        z[1,21] = importances["importances_mean"][7]
-                        z[1,22] = importances["importances_mean"][8]
-                        z[1,23] = importances["importances_std"][1]
-                        z[1,24] = importances["importances_std"][2]
-                        z[1,25] = importances["importances_std"][3]
-                        z[1,26] = importances["importances_std"][4]
-                        z[1,27] = importances["importances_std"][5]
-                        z[1,28] = importances["importances_std"][6]
-                        z[1,29] = importances["importances_std"][7]
-                        z[1,30] = importances["importances_std"][8]
-                        println(z[end, :])
-                    else
-                        itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
-                        jtrain = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
-                        ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
-                        println("## CV ##")
-                        f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
-                        traincvtrain = avgScore(f1_10_train, 3) 
-                        f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
-                        mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
-                        rec = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
-                        im1 = importances["importances_mean"][1]
-                        im2 = importances["importances_mean"][2]
-                        im3 = importances["importances_mean"][3]
-                        im4 = importances["importances_mean"][4]
-                        im5 = importances["importances_mean"][5]
-                        im6 = importances["importances_mean"][6]
-                        im7 = importances["importances_mean"][7]
-                        im8 = importances["importances_mean"][8]
-                        sd1 = importances["importances_std"][1]
-                        sd2 = importances["importances_std"][2]
-                        sd3 = importances["importances_std"][3]
-                        sd4 = importances["importances_std"][4]
-                        sd5 = importances["importances_std"][5]
-                        sd6 = importances["importances_std"][6]
-                        sd7 = importances["importances_std"][7]
-                        sd8 = importances["importances_std"][8]
-                        z = vcat(z, [k_n leaf w met p itrain jtrain ival jval traincvtrain f1s mccs rec mod im1 im2 im3 im4 im5 im6 im7 im8 sd1 sd2 sd3 sd4 sd5 sd6 sd7 sd8])
-                        println(z[end, :])
-                    end
-                    println("End of ", itr, " iterations")
-                    itr += 1
-                end
-                #end
+            #for met in vcat(1,3)
+                #for p in p_r
+            println("k_n=", k_n, ", leaf=", leaf, ", w=", w_r[w], ", met=", met_r[met], ", p=", p, ", model=", mod)
+            println("## loading in data ##")
+            Xx_train = deepcopy(M_train[:, rank])
+            nn_train = deepcopy(N_train[:, rank])
+            Xx_val = deepcopy(M_val[:, rank])
+            Xx_test = deepcopy(M_pest[:, rank])
+            Xx_test2 = deepcopy(M_pest2[:, rank])
+            #
+            Yy_train = deepcopy(M_train[:, end-4])
+            mm_train = deepcopy(N_train[:, end-4])
+            Yy_val = deepcopy(M_val[:, end-4])
+            Yy_test = deepcopy(M_pest[:, end-1])
+            Yy_test2 = deepcopy(M_pest2[:, end-1])
+            println("## Classification ##")
+            reg = KNeighborsClassifier(n_neighbors=k_n, weights=w_r[w], leaf_size=leaf, p=p, metric=met_r[met])  # 0.7263; 1.6048
+            println("## fit ##")
+            fit!(reg, Matrix(Xx_train), Vector(Yy_train))
+            importances = permutation_importance(reg, Matrix(Xx_test), Vector(Yy_test), n_repeats=10, random_state=42)
+            print(importances["importances_mean"])
+            if itr == 1
+                z[1,1] = k_n
+                z[1,2] = leaf
+                z[1,3] = w
+                z[1,4] = met
+                z[1,5] = p
+                z[1,6] = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,7] = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                z[1,8] = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                z[1,9] = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                z[1,10] = avgScore(f1_10_train, 3)
+                z[1,11] = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                z[1,12] = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                z[1,13] = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                z[1,14] = mod
+                z[1,15] = importances["importances_mean"][1]
+                z[1,16] = importances["importances_mean"][2]
+                z[1,17] = importances["importances_mean"][3]
+                z[1,18] = importances["importances_mean"][4]
+                z[1,19] = importances["importances_mean"][5]
+                z[1,20] = importances["importances_mean"][6]
+                z[1,21] = importances["importances_mean"][7]
+                z[1,22] = importances["importances_mean"][8]
+                z[1,23] = importances["importances_std"][1]
+                z[1,24] = importances["importances_std"][2]
+                z[1,25] = importances["importances_std"][3]
+                z[1,26] = importances["importances_std"][4]
+                z[1,27] = importances["importances_std"][5]
+                z[1,28] = importances["importances_std"][6]
+                z[1,29] = importances["importances_std"][7]
+                z[1,30] = importances["importances_std"][8]
+                println(z[end, :])
+            else
+                itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                jtrain = matthews_corrcoef(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
+                ival = f1_score(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                jval = matthews_corrcoef(Vector(Yy_val), predict(reg, Matrix(Xx_val)), sample_weight=sampletestW)
+                println("## CV ##")
+                f1_10_train = cross_val_score(reg, Matrix(Xx_train), Vector(Yy_train); cv = 3, scoring=f1)
+                traincvtrain = avgScore(f1_10_train, 3) 
+                f1s = f1_score(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                mccs = matthews_corrcoef(Vector(Yy_test), predict(reg, Matrix(Xx_test)), sample_weight=samplepestW)
+                rec = recall_score(Vector(Yy_test2), predict(reg, Matrix(Xx_test2)))
+                im1 = importances["importances_mean"][1]
+                im2 = importances["importances_mean"][2]
+                im3 = importances["importances_mean"][3]
+                im4 = importances["importances_mean"][4]
+                im5 = importances["importances_mean"][5]
+                im6 = importances["importances_mean"][6]
+                im7 = importances["importances_mean"][7]
+                im8 = importances["importances_mean"][8]
+                sd1 = importances["importances_std"][1]
+                sd2 = importances["importances_std"][2]
+                sd3 = importances["importances_std"][3]
+                sd4 = importances["importances_std"][4]
+                sd5 = importances["importances_std"][5]
+                sd6 = importances["importances_std"][6]
+                sd7 = importances["importances_std"][7]
+                sd8 = importances["importances_std"][8]
+                z = vcat(z, [k_n leaf w met p itrain jtrain ival jval traincvtrain f1s mccs rec mod im1 im2 im3 im4 im5 im6 im7 im8 sd1 sd2 sd3 sd4 sd5 sd6 sd7 sd8])
+                println(z[end, :])
             end
+            println("End of ", itr, " iterations")
+            itr += 1
         end
+                #end
+            #end
+        #end
     end
     z_df = DataFrame(k_n = z[:,1], leaf = z[:,2], weight = z[:,3], met = z[:,4], p = z[:,5], f1_train = z[:,6], mcc_train = z[:,7], f1_val = z[:,8], mcc_val = z[:,9], f1_3Ftrain = z[:,10], f1_pest = z[:,11], mcc_pest = z[:,12], recall = z[:,13], model = z[:,14], im1 = z[:,15], im2 = z[:,16], im3 = z[:,17], im4 = z[:,18], im5 = z[:,19], im6 = z[:,20], im7 = z[:,21], im8 = z[:,22], sd1 = z[:,23], sd2 = z[:,24], sd3 = z[:,25], sd4 = z[:,26], sd5 = z[:,27], sd6 = z[:,28], sd7 = z[:,29], sd8 = z[:,30])
     z_df_sorted = sort(z_df, [:recall, :f1_pest, :f1_3Ftrain], rev=true)
@@ -621,7 +623,7 @@ end
 optiSearch_df = optimKNN(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_KNN2_noFilter.csv"
+savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_KNN3_noFilter.csv"
 CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
