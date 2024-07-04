@@ -503,8 +503,8 @@ CSV.write(savePath, optiSearch_df)
 #-------------------------------------------------------------------------------
 
 function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    k_n_r = vcat(collect(40:5:60))  # 5
-    leaf_r = vcat(150, 200, 250)  # 3
+    k_n_r = vcat(collect(59:1:65))  # 7
+    leaf_r = vcat(300, 400)  # 2
     w_r = ["uniform", "distance"]
     met_r = ["minkowski", "euclidean", "manhattan"]
     p_r = vcat(1, 2)
@@ -623,7 +623,7 @@ end
 optiSearch_df = optimKNN(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_KNN3_noFilter.csv"
+savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_KNN5_noFilter.csv"
 CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
