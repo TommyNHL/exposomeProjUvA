@@ -503,19 +503,19 @@ CSV.write(savePath, optiSearch_df)
 #-------------------------------------------------------------------------------
 
 function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
-    k_n_r = vcat(collect(390:1:399))  # 11
+    k_n_r = vcat(collect(380:5:400))  # 11
     leaf_r = vcat(300, 400)  # 2
     w_r = ["uniform", "distance"]
     met_r = ["minkowski", "euclidean", "manhattan"]
     p_r = vcat(1, 2)
-    z = zeros(1,30)
+    z = zeros(1,28)
     w = 1
     mod = 0
     itr = 1
     met = 1
     p = 2
     leaf = 300
-    rank = vcat(5,6,7,9,10,13,14, 17)
+    rank = vcat(5, 7,9,10,13,14, 17)
     N_train = inputDB
     M_train = vcat(inputDB, inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :], inputDB[inputDB.LABEL .== 1, :])
     M_val = inputDB_test
@@ -569,15 +569,13 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
             z[1,19] = importances["importances_mean"][5]
             z[1,20] = importances["importances_mean"][6]
             z[1,21] = importances["importances_mean"][7]
-            z[1,22] = importances["importances_mean"][8]
-            z[1,23] = importances["importances_std"][1]
-            z[1,24] = importances["importances_std"][2]
-            z[1,25] = importances["importances_std"][3]
-            z[1,26] = importances["importances_std"][4]
-            z[1,27] = importances["importances_std"][5]
-            z[1,28] = importances["importances_std"][6]
-            z[1,29] = importances["importances_std"][7]
-            z[1,30] = importances["importances_std"][8]
+            z[1,22] = importances["importances_std"][1]
+            z[1,23] = importances["importances_std"][2]
+            z[1,24] = importances["importances_std"][3]
+            z[1,25] = importances["importances_std"][4]
+            z[1,26] = importances["importances_std"][5]
+            z[1,27] = importances["importances_std"][6]
+            z[1,28] = importances["importances_std"][7]
             println(z[end, :])
         else
             itrain = f1_score(Vector(mm_train), predict(reg, Matrix(nn_train)), sample_weight=sampleW)
@@ -597,7 +595,6 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
             im5 = importances["importances_mean"][5]
             im6 = importances["importances_mean"][6]
             im7 = importances["importances_mean"][7]
-            im8 = importances["importances_mean"][8]
             sd1 = importances["importances_std"][1]
             sd2 = importances["importances_std"][2]
             sd3 = importances["importances_std"][3]
@@ -605,8 +602,7 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
             sd5 = importances["importances_std"][5]
             sd6 = importances["importances_std"][6]
             sd7 = importances["importances_std"][7]
-            sd8 = importances["importances_std"][8]
-            z = vcat(z, [k_n leaf w met p itrain jtrain ival jval traincvtrain f1s mccs rec mod im1 im2 im3 im4 im5 im6 im7 im8 sd1 sd2 sd3 sd4 sd5 sd6 sd7 sd8])
+            z = vcat(z, [k_n leaf w met p itrain jtrain ival jval traincvtrain f1s mccs rec mod im1 im2 im3 im4 im5 im6 im7 sd1 sd2 sd3 sd4 sd5 sd6 sd7])
             println(z[end, :])
         end
         println("End of ", itr, " iterations")
@@ -616,7 +612,7 @@ function optimKNN(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
             #end
         #end
     end
-    z_df = DataFrame(k_n = z[:,1], leaf = z[:,2], weight = z[:,3], met = z[:,4], p = z[:,5], f1_train = z[:,6], mcc_train = z[:,7], f1_val = z[:,8], mcc_val = z[:,9], f1_3Ftrain = z[:,10], f1_pest = z[:,11], mcc_pest = z[:,12], recall = z[:,13], model = z[:,14], im1 = z[:,15], im2 = z[:,16], im3 = z[:,17], im4 = z[:,18], im5 = z[:,19], im6 = z[:,20], im7 = z[:,21], im8 = z[:,22], sd1 = z[:,23], sd2 = z[:,24], sd3 = z[:,25], sd4 = z[:,26], sd5 = z[:,27], sd6 = z[:,28], sd7 = z[:,29], sd8 = z[:,30])
+    z_df = DataFrame(k_n = z[:,1], leaf = z[:,2], weight = z[:,3], met = z[:,4], p = z[:,5], f1_train = z[:,6], mcc_train = z[:,7], f1_val = z[:,8], mcc_val = z[:,9], f1_3Ftrain = z[:,10], f1_pest = z[:,11], mcc_pest = z[:,12], recall = z[:,13], model = z[:,14], im1 = z[:,15], im2 = z[:,16], im3 = z[:,17], im4 = z[:,18], im5 = z[:,19], im6 = z[:,20], im7 = z[:,21], sd1 = z[:,22], sd2 = z[:,23], sd3 = z[:,24], sd4 = z[:,25], sd5 = z[:,26], sd6 = z[:,27], sd7 = z[:,28])
     z_df_sorted = sort(z_df, [:recall, :f1_pest, :f1_3Ftrain], rev=true)
     return z_df_sorted
 end
@@ -624,7 +620,7 @@ end
 optiSearch_df = optimKNN(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
 # save, ouputing 180 x 8 df
-savePath = "F:\\UvA\\F\\UvA\\app\\hyperparameterTuning_modelSelection_KNN9_noFilter.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\hyperparameterTuning_modelSelection_KNN10_noFilterLog(UsrFragMatchRatio).csv"
 CSV.write(savePath, optiSearch_df)
 
 #-------------------------------------------------------------------------------
