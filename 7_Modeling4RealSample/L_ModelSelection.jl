@@ -241,19 +241,19 @@ predictedTPTN_train = predict(model, Matrix(trainDEFSDf[:, rank]))
 train_withRI = deepcopy(trainDEFSDf)
 train_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 3283078 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatioDE_GBMs.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
 CSV.write(savePath, train_withRI)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\modelTPTNModeling_withoutAbsDeltaRi_0d5FinalScoreRatioDE_GBMs.joblib")
-size(model)
+model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio)_noRI.joblib")
 #predictedTPTN_train = predict(model, Matrix(inputDB[:, 5:12]))
-predictedTPTN_train = predict(model, Matrix(inputDB[:, vcat(collect(5:10), 13)]))
-inputDB[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
+predictedTPTN_train = predict(model_noRI, Matrix(trainDEFSDf[:, rank2]))
+train_withoutRI = deepcopy(trainDEFSDf)
+train_withoutRI[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 3283078 x 19 df
-savePath = "F:\\UvA\\dataframeTPTNModeling_TrainDF_withoutAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatioDE_GBMs.csv"
-CSV.write(savePath, inputDB)
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+CSV.write(savePath, train_withoutRI)
 
 # ==================================================================================================
 inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\dataframeTPTNModeling_TrainDF_withAbsDeltaRiandPredictedTPTN_0d5FinalScoreRatioDE_GBMs.csv", DataFrame)
