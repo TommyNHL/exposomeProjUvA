@@ -161,14 +161,14 @@ describe((TeaDEFSDf))
 #===============================================================================#
 
 model = KNeighborsClassifier(
-      n_neighbors = 393, 
+      n_neighbors = 379, 
       weights = "uniform", 
       leaf_size = 300, 
       p = 2, 
       metric = "minkowski"
       )
 
-rank = vcat(5, 7,9,10,13,14, 17)
+rank = vcat(5, 7,9, 13,14, 17)
     N_train = trainDEFSDf
     M_train = vcat(trainDEFSDf, trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
             trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
@@ -197,23 +197,23 @@ rank = vcat(5, 7,9,10,13,14, 17)
     fit!(model, Matrix(Xx_train), Vector(Yy_train))
     importances = permutation_importance(model, Matrix(Xx_test), Vector(Yy_test), n_repeats=10, random_state=42)
     print(importances["importances_mean"])
-    #"importances_std"  => [0.00390345, 0.00454657, 0.00114062, 0.00124979, 0.0026168, 0.00213004, 0.00140369]
-    #"importances_mean" => [0.0160616, 0.0678585, 0.000733407, -0.00270444, 0.00319032, 0.00462046, -0.00619729]
+    #"importances_std"  => [0.00365488, 0.0042455, 0.000954662, 0.00135283, 0.00220259, 0.00230624]
+    #"importances_mean" => [0.00671984, 0.107105, 0.00196186, 0.000385039, 0.0118812, -0.00462963]
 
 # saving model
-modelSavePath = "F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio).joblib"
+modelSavePath = "F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 # --------------------------------------------------------------------------------------------------
 
 model_noRI = KNeighborsClassifier(
-      n_neighbors = 393, 
+      n_neighbors = 379, 
       weights = "uniform", 
       leaf_size = 300, 
       p = 2, 
       metric = "minkowski"
       )
 
-rank2 = vcat(5, 7,9,10,13,14)
+rank2 = vcat(5, 7,9, 13,14)
     Xx_train_noRI = deepcopy(M_train[:, rank2])
     nn_train_noRI = deepcopy(N_train[:, rank2])
     Xx_val_noRI = deepcopy(M_val[:, rank2])
@@ -227,7 +227,7 @@ rank2 = vcat(5, 7,9,10,13,14)
     #"importances_mean" => [0.0126421, 0.0797488, 0.00553722, -0.00176934, 0.00484965, 0.00163183]
 
 # saving model
-modelSavePath = "F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio)_noRI.joblib"
+modelSavePath = "F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib"
 jl.dump(model_noRI, modelSavePath, compress = 5)
 # --------------------------------------------------------------------------------------------------
 
