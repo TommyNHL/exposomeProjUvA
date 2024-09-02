@@ -231,68 +231,68 @@ modelSavePath = "F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOu
 jl.dump(model_noRI, modelSavePath, compress = 5)
 # --------------------------------------------------------------------------------------------------
 
-describe((inputDB_pest))[vcat(collect(5:12), end-1), :]
+describe((TeaDEFSDf))[vcat(collect(5:14), 17, end-1), :]
 
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio).joblib")
+model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
 # training performace, withDeltaRi vs. withoutDeltaRi
 predictedTPTN_train = predict(model, Matrix(trainDEFSDf[:, rank]))
 train_withRI = deepcopy(trainDEFSDf)
 train_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 1686319 x 23 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, train_withRI)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio)_noRI.joblib")
+model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib")
 predictedTPTN_train = predict(model_noRI, Matrix(trainDEFSDf[:, rank2]))
 train_withoutRI = deepcopy(trainDEFSDf)
 train_withoutRI[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
 # save, ouputing trainSet df 1686319 x 23 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, train_withoutRI)
 
 # ==================================================================================================
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.2062166173778508, 0.4541107985699644
+inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.21323664146581994, 0.46177553147153644
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])
-# -0.6767467120167443
+# -0.6894203790038584
 rSquare_train = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])
 
 # 1686319 × 2 Matrix
 pTP_train = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))
-# 0.8906582419964537
+# 0.8895717113929443
 f1_train = f1_score(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)
-# 0.7755594369275933
+# 0.7738684612060831
 mcc_train = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)
 
 inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
 inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
 # save, ouputing trainSet df 1686319 x (23+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 describe((inputDB_withDeltaRiTPTN))[end-5:end, :]
 # --------------------------------------------------------------------------------------------------
-inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.20957897052692878, 0.45779795819436414
+inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.2081682054225802, 0.45625454016653927
 maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])
-# -0.6749732051953234
+# -0.6695318478337433
 rSquare_train = rSquareDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])
 
 # 1686319 × 2 Matrix
 pTP_train = predict_proba(model_noRI, Matrix(inputDB_withoutDeltaRiTPTN[:, rank2]))
-# 0.8938640349604612
+# 0.895403648988781
 f1_train = f1_score(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampleW)
-# 0.7838199833912999
+# 0.7873822419345989
 mcc_train = matthews_corrcoef(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampleW)
 
 inputDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
 inputDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
 # save, ouputing trainSet df 1686319 x (23+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withoutDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withoutDeltaRiTPTN)
 
 describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
@@ -302,64 +302,64 @@ describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
 # model validation
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio).joblib")
+model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
 # validation performace, withDeltaRi vs. withoutDeltaRi
 predictedTPTN_val = predict(model, Matrix(testDEFSDf[:, rank]))
 val_withRI = deepcopy(testDEFSDf)
 val_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_val
 # save, ouputing valSet df 421381 x 23 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, val_withRI)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio)_noRI.joblib")
+model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib")
 predictedTPTN_val = predict(model_noRI, Matrix(testDEFSDf[:, rank2]))
 val_withoutRI = deepcopy(testDEFSDf)
 val_withoutRI[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_val
 # save, ouputing valSet df 421381 x 23 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withOutDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, val_withoutRI)
 
 # ==================================================================================================
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.2062166173778508, 0.4541107985699644 -> 1, 0.20810857632403928, 0.4561891891792694
+inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.2153965176408049, 0.4641083037835079
 maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])
-# -0.6767467120167443 -> -0.6800043760275616
+# -0.692877495763629
 rSquare_val = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])
 
 # 421381 × 2 Matrix
 pTP_val = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))
-# 0.8906582419964537 -> 0.888647278024707
+# 0.8874084658561004
 f1_val = f1_score(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampletestW)
-# 0.7755594369275933 -> 0.7709834532828233
+# 0.7689142728578838
 mcc_val = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampletestW)
 
 inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_val[:, 1]
 inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_val[:, 2]
 # save, ouputing valSet df 421381 x (23+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 describe((inputDB_withDeltaRiTPTN))[end-5:end, :]
 # --------------------------------------------------------------------------------------------------
-inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.20957897052692878, 0.45779795819436414 -> 1, 0.2108044738609477, 0.4591344834152056
+inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withOutDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.20958704830070649, 0.45780678053159773
 maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])
-# -0.6749732051953234 -> -0.6752141263321645
+# -0.669871035967158
 rSquare_val = rSquareDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])
 
 # 421381 × 2 Matrix
 pTP_val = predict_proba(model_noRI, Matrix(inputDB_withoutDeltaRiTPTN[:, rank2]))
-# 0.8938640349604612 -> 0.8926886171397372
+# 0.8943354518762837
 f1_val = f1_score(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampletestW)
-# 0.7838199833912999 -> 0.7811328144276187
+# 0.784990521464426
 mcc_val = matthews_corrcoef(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampletestW)
 
 inputDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_val[:, 1]
 inputDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_val[:, 2]
 # save, ouputing valSet df 421381 x (23+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withoutDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withoutDeltaRiTPTN)
 
 describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
@@ -369,64 +369,64 @@ describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
 # NoTea Pest
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio).joblib")
+model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
 # testing performace, withDeltaRi vs. withoutDeltaRi
 predictedTPTN_pest = predict(model, Matrix(noTeaDEFSDf[:, rank]))
 pest_withRI = deepcopy(noTeaDEFSDf)
 pest_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_pest
 # save, ouputing pestSet df 10908 x 20 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, pest_withRI)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio)_noRI.joblib")
+model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib")
 predictedTPTN_pest = predict(model_noRI, Matrix(noTeaDEFSDf[:, rank2]))
 pest_withoutRI = deepcopy(noTeaDEFSDf)
 pest_withoutRI[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_pest
 # save, ouputing pestSet df 10908 x 20 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withOutDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, pest_withoutRI)
 
 # ==================================================================================================
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.2062166173778508, 0.4541107985699644 -> 1, 0.3706453978731206, 0.6088065356688614
+inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.3534103410341034, 0.594483255469911
 maxAE_pest, MSE_pest, RMSE_pest = errorDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])
-# -0.6767467120167443 -> -0.5375978757246735
+# -0.47575189038599697
 rSquare_pest = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])
 
 # 10908 × 2 Matrix
 pTP_pest = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))
-# 0.8906582419964537 -> 0.6363034862947006
+# 0.6526465712267591
 f1_pest = f1_score(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)
-# 0.7755594369275933 -> 0.26522746362899
+# 0.2990024830957098
 mcc_pest = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)
 
 inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_pest[:, 1]
 inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_pest[:, 2]
 # save, ouputing pestSet df 10908 x (20+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 describe((inputDB_withDeltaRiTPTN))[end-5:end, :]
 # --------------------------------------------------------------------------------------------------
-inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.20957897052692878, 0.45779795819436414 -> 1, 0.36074440777411076, 0.6006200194583184
+inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withOutDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.3502933626696003, 0.5918558630862757
 maxAE_pest, MSE_pest, RMSE_pest = errorDetermination(inputDB_withoutDeltaRiTPTN[:, end-2], inputDB_withoutDeltaRiTPTN[:, end])
-# -0.6749732051953234 -> -0.48718607203500786
+# -0.4680324802812619
 rSquare_pest = rSquareDetermination(inputDB_withoutDeltaRiTPTN[:, end-2], inputDB_withoutDeltaRiTPTN[:, end])
 
 # 10908 × 2 Matrix
 pTP_pest = predict_proba(model_noRI, Matrix(inputDB_withoutDeltaRiTPTN[:, rank2]))
-# 0.8938640349604612 -> 0.6526482601628559
+# 0.6537818399417835
 f1_pest = f1_score(inputDB_withoutDeltaRiTPTN[:, end-2], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=samplepestW)
-# 0.7838199833912999 -> 0.29150282953492124
+# 0.3033305164298841
 mcc_pest = matthews_corrcoef(inputDB_withoutDeltaRiTPTN[:, end-2], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=samplepestW)
 
 inputDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_pest[:, 1]
 inputDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_pest[:, 2]
 # save, ouputing pestSet df 10908 x (20+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withoutDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withoutDeltaRiTPTN)
 
 describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
@@ -436,60 +436,60 @@ describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
 # withTea Pest
 #load a model
 # requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio).joblib")
+model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
 # application performace, withDeltaRi vs. withoutDeltaRi
 predictedTPTN_pest2 = predict(model, Matrix(TeaDEFSDf[:, rank]))
 pest2_withRI = deepcopy(TeaDEFSDf)
 pest2_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_pest2
 # save, ouputing pest2Set df 8187 x 20 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, pest2_withRI)
 # --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
-model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_KNN11_noFilterLog(UsrFragMatchRatio)_noRI.joblib")
+model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib")
 predictedTPTN_pest2 = predict(model_noRI, Matrix(TeaDEFSDf[:, rank2]))
 pest2_withoutRI = deepcopy(TeaDEFSDf)
 pest2_withoutRI[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_pest2
 # save, ouputing pest2Set df 8187 x 20 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withOutDeltaRIandPredictedTPTN_KNN.csv"
 CSV.write(savePath, pest2_withoutRI)
 
 # ==================================================================================================
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.2062166173778508, 0.4541107985699644 -> 1, 0.3620373763283254, 0.6016954182377704
+inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.40356663002320753, 0.6352689430652245
 maxAE_pest2, MSE_pest2, RMSE_pest2 = errorDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])
-# -0.6767467120167443 -> -1.762145748987658
+# -1.4779055690074117
 rSquare_pest2 = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])
 
 # 8187 × 2 Matrix
 pTP_pest2 = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))
-# 0.6379626236716746
+# 0.5964333699767925
 recall_pest2 = recall_score(Vector(inputDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputDB_withDeltaRiTPTN[:, rank])))
 
 inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_pest2[:, 1]
 inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_pest2[:, 2]
 # save, ouputing pest2Set df 8187 x (20+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 describe((inputDB_withDeltaRiTPTN))[end-5:end, :]
 # --------------------------------------------------------------------------------------------------
-inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withoutDeltaRIandPredictedTPTN_noFilterLog(UsrFragMatchRatio)_KNN.csv", DataFrame)
-# 1, 0.20957897052692878, 0.45779795819436414 -> 1, 0.36032734823500673, 0.600272728211941
+inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withOutDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+# 1, 0.4570660803713204, 0.6760666242104548
 maxAE_pest2, MSE_pest2, RMSE_pest2 = errorDetermination(inputDB_withoutDeltaRiTPTN[:, end-2], inputDB_withoutDeltaRiTPTN[:, end])
-# -0.6749732051953234 -> -1.775254237288729
+# -1.1878674505609874
 rSquare_pest2 = rSquareDetermination(inputDB_withoutDeltaRiTPTN[:, end-2], inputDB_withoutDeltaRiTPTN[:, end])
 
 # 8187 × 2 Matrix
 pTP_pest2 = predict_proba(model_noRI, Matrix(inputDB_withoutDeltaRiTPTN[:, rank2]))
-# 0.6396726517649933
+# 0.5429339196286797
 recall_pest2 = recall_score(Vector(inputDB_withoutDeltaRiTPTN[:, end-2]), predict(model_noRI, Matrix(inputDB_withoutDeltaRiTPTN[:, rank2])))
 
 inputDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_pest2[:, 1]
 inputDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_pest2[:, 2]
 # save, ouputing pest2Set df 8187 x (20+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withoutDeltaRIandPredictedTPTNandpTP_noFilterLog(UsrFragMatchRatio)_KNN.csv"
+savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv"
 CSV.write(savePath, inputDB_withoutDeltaRiTPTN)
 
 describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
