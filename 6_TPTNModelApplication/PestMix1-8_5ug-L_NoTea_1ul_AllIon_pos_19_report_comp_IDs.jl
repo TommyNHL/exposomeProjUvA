@@ -472,7 +472,7 @@
 
         inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
         inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
-        # save, ouputing trainSet df 549 x 19+1+2 df
+        # save, ouputing trainSet df 792 x 19+1+2 df
         savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_5ug-L_NoTea_1ul_AllIon_pos_19_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
         CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
 
