@@ -3,7 +3,7 @@
     #dataAllFP_withNewPredictedRiWithStratification.csv
     #TPTN_dfCNLfeaturesStr.csv
     #CocamideExtended_CNLsRi_RFwithStratification.joblib
-    #modelTPTNModeling_withDeltaRI_0d5thresholdNms1erFilter_DTwithhlnew.joblib
+    #modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib
 
 #import packages
     VERSION
@@ -11,7 +11,7 @@
     #Pkg.add("ScikitLearn")
     import Conda
     Conda.PYTHONDIR
-    ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+    ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
     Pkg.build("PyCall")
     Pkg.status()
     #Pkg.add(PackageSpec(url=""))
@@ -36,8 +36,10 @@
     @sk_import ensemble: AdaBoostClassifier
     @sk_import tree: DecisionTreeClassifier
     @sk_import metrics: recall_score
-    @sk_import neural_network : MLPClassifier
-    @sk_import svm : SVC
+    @sk_import neural_network: MLPClassifier
+    @sk_import svm: SVC
+    @sk_import neighbors: KNeighborsClassifier
+    @sk_import inspection: permutation_importance
     #using ScikitLearn.GridSearch: RandomizedSearchCV
     using ScikitLearn.CrossValidation: cross_val_score
     using ScikitLearn.CrossValidation: train_test_split
@@ -362,36 +364,39 @@
     CSV.write(savePath, dfOutput)
 
 #TP/TN prediction
-    inputDB_test = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling.csv", DataFrame)
+    inputDB_test = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_1ug-L_Tea_1-10dil_1ul_AllIon_pos_40_report_comp_IDs_dataframeTPTNModeling.csv", DataFrame)
     sort!(inputDB_test, [:ENTRY])
     insertcols!(inputDB_test, 10, ("MatchDiff"=>float(0)))
     inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
     inputDB_test = inputDB_test[inputDB_test.Leverage .<= 0.14604417882015916, :]
-    describe(inputDB_test[inputDB_test.LABEL .== 0, :])
-    describe(inputDB_test[inputDB_test.LABEL .== 1, :])
-    inputDB_test = inputDB_test[inputDB_test.MS1Error .>= float(-0.061), :]
-    inputDB_test = inputDB_test[inputDB_test.MS1Error .<= float(0.058), :]
+    #describe(inputDB_test[inputDB_test.LABEL .== 0, :])
+    #describe(inputDB_test[inputDB_test.LABEL .== 1, :])
+    #inputDB_test = inputDB_test[inputDB_test.MS1Error .>= float(-0.061), :]
+    #inputDB_test = inputDB_test[inputDB_test.MS1Error .<= float(0.058), :]
     for i = 1:size(inputDB_test, 1)
         inputDB_test[i, "RefMatchFragRatio"] = log10(inputDB_test[i, "RefMatchFragRatio"])
         inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
         inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
         inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
+        inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
+        if inputDB_test[i, "DeltaRi"] !== float(0)
+            inputDB_test[i, "DeltaRi"] = inputDB_test[i, "DeltaRi"] * float(-1)
+        end
     end
-    # save, ouputing 4757 x 18 df, 0:3423; 1:1334 = 0.6949; 1.7830
-    savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter.csv"
+    describe(inputDB_test[:, 5:14])
+    for f = 5:14
+        avg = float(mean(inputDB_test[:, f]))
+        top = float(maximum(inputDB_test[:, f]))
+        down = float(minimum(inputDB_test[:, f]))
+        for i = 1:size(inputDB_test, 1)
+            inputDB_test[i, f] = (inputDB_test[i, f] - avg) / (top - down)
+        end
+    end
+    # save, ouputing 976 x 18+1 df, 0:894; 1:82 = 
+    savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_1ug-L_Tea_1-10dil_1ul_AllIon_pos_40_report_comp_IDs_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
     CSV.write(savePath, inputDB_test)
     inputDB_test[inputDB_test.LABEL .== 1, :]
     
-    Yy_test = deepcopy(inputDB_test[:, end-1])  # 0.6949; 1.7830
-    samplepestW = []
-    for w in Vector(Yy_test)
-        if w == 0
-            push!(samplepestW, 0.6949)
-        elseif w == 1
-            push!(samplepestW, 1.7830)
-        end
-    end 
-
     # performace
         ## Maximum absolute error
         ## mean square error (MSE) calculation
@@ -439,38 +444,36 @@
             return sumAcc / cv
         end
 
-        describe((inputDB_test))[vcat(5,6,8,9,10, 13, end-2), :]
+        describe((inputDB_test))[vcat(5, 7,9, 13,14, 17), :]
         # load the pre-trained TP/TN model
         # requires python 3.11 or 3.12
-        model = jl.load("F:\\UvA\\modelTPTNModeling_withDeltaRI_0d5thresholdNms1erFilter_DTwithhlnew.joblib")
+        model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
 
         # predict TP/TN
-        predictedTPTN_test = predict(model, Matrix(inputDB_test[:, vcat(5,6,8,9,10, 13, end-2)]))
+        predictedTPTN_test = predict(model, Matrix(inputDB_test[:, vcat(5, 7,9, 13,14, 17)]))
         inputDB_test[!, "withDeltaRIpredictTPTN"] = predictedTPTN_test
-        # save, ouputing testSet df __ x 19 df
-        savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv"
+        # save, ouputing testSet df 976 x 19+1 df
+        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_1ug-L_Tea_1-10dil_1ul_AllIon_pos_40_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv"
         CSV.write(savePath, inputDB_test)
 
     #show prediction performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTN.csv", DataFrame)
+        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_1ug-L_Tea_1-10dil_1ul_AllIon_pos_40_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
         describe((inputTestDB_withDeltaRiTPTN))[end-5:end, :]
 
-        # DT: 1, 0.43178473828042885, 0.657103293463386
+        # 1, 0.3862704918032787, 0.6215066305384671
         maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
-        # DT: -0.865140506715314
+        # -1.7596468991172212
         rSquare_val = rSquareDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
 
-        # __ × 2 Matrix
-        pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5,6,8,9,10, 13, end-3)]))
-        # DT: 0.4111238532110092, 0.5492040894474248
-        f1_test = f1_score(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)
-        # DT: 0.10619454670087872, 0.11778156982480285
-        mcc_test = matthews_corrcoef(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)
+        # 976 × 2 Matrix
+        pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)]))
+        # 0.1951219512195122
+        recall_test = recall_score(Vector(inputTestDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)])))
 
         inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
         inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
-        # save, ouputing trainSet df __ x 19+2 df
-        savePath = "F:\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-10dil_1ul_AllIon_pos_43_report_comp_IDs_dataframeTPTNModeling_pestDFwithhl0d5FinalScoreRatioDEFilter_PredictedTPTNpTP.csv"
+        # save, ouputing trainSet df 976 x 19+1+2 df
+        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_1ug-L_Tea_1-10dil_1ul_AllIon_pos_40_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
         CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
 
         describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
