@@ -3,7 +3,7 @@
     #dataAllFP_withNewPredictedRiWithStratification.csv
     #TPTN_dfCNLfeaturesStr.csv
     #CocamideExtended_CNLsRi_RFwithStratification.joblib
-    #modelTPTNModeling_withDeltaRI_0d5thresholdNms1erFilter_DTwithhlnew.joblib
+    #modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib
 
 #import packages
     VERSION
