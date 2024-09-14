@@ -477,3 +477,68 @@
         CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
 
         describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
+
+    #count individual sample performance
+        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
+        sort!(inputTestDB_withDeltaRiTPTN, [:INCHIKEYreal, :INCHIKEY])
+
+        function checkID(inID, refID)
+            if (inID == refID)
+                return true
+            else
+                return false
+            end
+        end
+
+        function countID(count, inID, refID)
+            acc = count
+            if (checkID(inID, refID) == true)
+                acc += 1
+                return acc
+            else
+                return 1
+            end
+        end
+
+        function countP(pro, accPro, inID, refID)
+            acc = accPro
+            if (checkID(inID, refID) == true)
+                acc += pro
+                return acc
+            else
+                return pro
+            end
+        end
+
+        count = 1
+        colCount = [1]
+        accP0 = inputTestDB_withDeltaRiTPTN[1, "p(0)"]
+        colP0 = [accP0]
+        accP1 = inputTestDB_withDeltaRiTPTN[1, "p(1)"]
+        colP1 = [accP1]
+        colIDSummary = []
+        for id in 1:size(inputTestDB_withDeltaRiTPTN[:, "INCHIKEY"], 1) - 1
+            count = countID(count, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
+            accP0 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(0)"], accP0, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
+            accP1 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(1)"], accP1, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
+            push!(colCount, count)
+            push!(colP0, accP0)
+            push!(colP1, accP1)
+            if (colCount[id] >= colCount[id+1])
+                push!(colIDSummary, 1)
+            else
+                push!(colIDSummary, 0)
+            end
+        end
+        push!(colIDSummary, 1)
+
+        inputTestDB_withDeltaRiTPTN[!, "countID"] = colCount
+        inputTestDB_withDeltaRiTPTN[!, "countP(0)"] = colP0 ./ colCount
+        inputTestDB_withDeltaRiTPTN[!, "countP(1)"] = colP1 ./ colCount
+        inputTestDB_withDeltaRiTPTN[!, "colIDSummary"] = colIDSummary
+
+        inputTestDB_withDeltaRiTPTN = inputTestDB_withDeltaRiTPTN[inputTestDB_withDeltaRiTPTN."colIDSummary" .== 1, :]
+
+        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_1000ug-L_Tea_1-100dil_1ul_AllIon_pos_38_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN_ind.csv"
+        CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
+        

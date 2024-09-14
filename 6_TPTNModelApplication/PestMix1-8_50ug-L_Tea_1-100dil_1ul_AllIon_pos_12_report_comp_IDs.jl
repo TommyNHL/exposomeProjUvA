@@ -479,7 +479,7 @@
         describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
 
     #count individual sample performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_50ug-L_Tea_1-10dil_1ul_AllIon_pos_13_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
+        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_50ug-L_Tea_1-100dil_1ul_AllIon_pos_12_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
         sort!(inputTestDB_withDeltaRiTPTN, [:INCHIKEYreal, :INCHIKEY])
 
         function checkID(inID, refID)
@@ -539,6 +539,6 @@
 
         inputTestDB_withDeltaRiTPTN = inputTestDB_withDeltaRiTPTN[inputTestDB_withDeltaRiTPTN."colIDSummary" .== 1, :]
 
-        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_50ug-L_Tea_1-10dil_1ul_AllIon_pos_13_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN_ind.csv"
+        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_50ug-L_Tea_1-100dil_1ul_AllIon_pos_12_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN_ind.csv"
         CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
     
