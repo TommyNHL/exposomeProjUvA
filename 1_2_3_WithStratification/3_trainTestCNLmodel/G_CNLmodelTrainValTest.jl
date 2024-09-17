@@ -1,6 +1,6 @@
 VERSION
 using Pkg
-#Pkg.add("ScikitLearn")
+Pkg.add("Distributions")
 #Pkg.add(PackageSpec(url=""))
 import Conda
 Conda.PYTHONDIR
