@@ -4,7 +4,7 @@ using Pkg
 #Pkg.add(PackageSpec(url=""))
 import Conda
 Conda.PYTHONDIR
-ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
 
@@ -294,10 +294,10 @@ testCocamide = findall(inputDB_test[:, "Cocamides"] .== "yes")
 
 # inputing 693685*0.3 x 1+1+1+15961+1+1+1 df = 208106 x 15965
 # columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi, CNLpredictRi, Cocamides
-inputDB_test = CSV.read("F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+inputDB_test = CSV.read("F:\\UvA\\F\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
 
 # inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
-inputDB = CSV.read("F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+inputDB = CSV.read("F:\\UvA\\F\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
 
 inputDB_test[:, end-2:end]
 inputDB[:, end-2:end]
@@ -312,7 +312,7 @@ outplotTrain = plot(layout = layout, link = :both, legend = :topleft,
         size = (600, 600), margin = -2Plots.px, dpi = 300)
 scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
+        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :skyblue, 
         markerstrokewidth = 0, 
@@ -323,7 +323,7 @@ scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1],
         dpi = 300)
 scatter!(inputDB[trainCocamide, end-2], inputDB[trainCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
+        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :green, 
         markerstrokewidth = 0, 
@@ -351,7 +351,7 @@ histogram!(inputDB[:, end-1], bins = 165, subplot = 3,
         dpi = 300)
 plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
         # Saving
-savefig(outplotTrain, "F:\\UvA\\CNLRiPrediction73_RFTrainWithStratification_v2.png")
+savefig(outplotTrain, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTrainWithStratification_v3.png")
 
 
 tempDfTest = inputDB_test[:, end-1]
@@ -363,7 +363,7 @@ outplotTest = plot(layout = layout, link = :both, legend = :topleft,
         size = (600, 600), margin = -2Plots.px, dpi = 300)
 scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
+        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :skyblue, 
         markerstrokewidth = 0, 
@@ -374,7 +374,7 @@ scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end
         dpi = 300)
 scatter!(inputDB_test[testCocamide, end-2], inputDB_test[testCocamide, end-1], 
         subplot = 2, framestyle = :box, 
-        xlabel = "FP-derived RI values", ylabel = "CNL-derived RI values", 
+        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
         markershape = :star, 
         c = :green, 
         markerstrokewidth = 0, 
@@ -402,4 +402,4 @@ histogram!(inputDB_test[:, end-1], bins = 165, subplot = 3,
         dpi = 300)
 plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
         # Saving
-savefig(outplotTest, "F:\\UvA\\CNLRiPrediction73_RFTestWithStratification_v2.png")
+savefig(outplotTest, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTestWithStratification_v3.png")
