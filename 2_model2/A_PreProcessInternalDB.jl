@@ -11,6 +11,7 @@
 # massesCNLsDistrution.png
 
 ## install packages needed ##
+using Pkg
 #Pkg.add("PyCall")
 #Pkg.add(PackageSpec(url=""))
 

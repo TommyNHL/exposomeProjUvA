@@ -1,10 +1,10 @@
 # exposomeProjUvA
 # Procedure
 
-## I_tools  (folder)
+## 0_tools  (folder)
 ### A_Installer11.ipynb
 
-## II_model1  (folder)
+## 1_model1  (folder)
 ### A_CombinePubchemFP.jl
 #### - INPUT(S): ***dataPubchemFingerprinter.csv***
 #### - OUTPUT(S): ***dataPubchemFingerprinter_converted.csv***
@@ -17,7 +17,7 @@
 #### - INPUT(S): ***CocamideExtendedWithStratification.joblib***
 #### - OUTPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
 
-## III_model2  (folder)
+## 2_model2  (folder)
 ### A_PreProcessInternalDB.jl (README_dbColHeaders.md)
 #### - INPUT(S): ***Database_INTERNAL_2022-11-17.csv***
 #### - INPUT(S): ***CNLs_10mDa.csv***
@@ -76,8 +76,8 @@
 #### - OUTPUT(S): ***CNL model 95% leverage cut-off = 0.14604417882015916***
 #### - OUTPUT(S): ***CNLLeverageValueDistrution.png***
 
-## IV_model3  (folder)
-## IV_I_prepareSemisynData  (sub-folder)
+## 3_model3  (folder)
+## 3_I_prepareSemisynData  (sub-folder)
 ### A_DataSplitMatch.jl
 #### - INPUT(S): ***Cand_synth_rr10_1_1000.csv***
 #### - INPUT(S): ***Cand_synth_rr10_1001_2000.csv***
@@ -118,5 +118,10 @@
 #### - OUTPUT(S): ***dataframeTPTNModeling_TestDFwithhl_all.csv***
 #### - OUTPUT(S): ***dataframeTPTNModeling_TestYesIndex_all.csv***
 #### - OUTPUT(S): ***dataframeTPTNModeling_TestYesDFwithhl_all.csv***
-
+## 3_II_readyPestData  (sub-folder)
+### E_TestSamplesPre.jl
+#### - INPUT(S): ***CNL_Ref.csv***
+#### - OUTPUT(S): ***CNL_Ref_PestMix_1-8.csv***
+#### - OUTPUT(S): ***INCHIKEYs_CNL_Ref_PestMix_1-8.csv***
+#### - OUTPUT(S): ***INCHIKEYs_CNL_Ref_PestMix_1.csv - INCHIKEYs_CNL_Ref_PestMix_8.csv***
 
