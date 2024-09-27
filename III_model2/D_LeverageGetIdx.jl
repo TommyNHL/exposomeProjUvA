@@ -16,15 +16,14 @@ using Pkg
 ## import packages from Julia ##
 using CSV, DataFrames, LinearAlgebra, Statistics
 using ProgressBars
-using LinearAlgebra
 using ScikitLearn
-#using ScikitLearn.CrossValidation: train_test_split
+using ScikitLearn.CrossValidation: train_test_split
 
 ## perform Train/Test Split by Leverage ##
     ## import 693685 x 792 df ##
     dfOutputFP = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification_Freq.csv", DataFrame)
 
-    ## compute leverage
+    ## compute leverage ##
     X = deepcopy(dfOutputFP[:, 2:end-1])  # 693685 x 790 df
     size(X)
     Y = deepcopy(dfOutputFP[:, end])  #693685,

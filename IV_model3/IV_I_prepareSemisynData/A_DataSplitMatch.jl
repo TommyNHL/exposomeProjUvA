@@ -1,9 +1,28 @@
+## INPUT(S)
+# Cand_synth_rr10_1_1000.csv
+# Cand_synth_rr10_1001_2000.csv
+# Cand_synth_rr10_2001_3000.csv
+# Cand_synth_rr10_3001_4000.csv
+# Cand_synth_rr10_4001_5000.csv
+# dataAllFP_withNewPredictedRiWithStratification.csv
+# generated_susp.csv
+
+## OUTPUT(S)
+# Cand_synth_rr10_1-5000.csv
+# Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv
+# Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv
+# Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv
+
+## install packages needed ##
 using Pkg
-#Pkg.add("BSON")
+#Pkg.add("ScikitLearn")
 #Pkg.add(PackageSpec(url=""))
+
+## import packages from Julia ##
 using CSV, DataFrames
 
-# inputing 863582, 865290, 881258, 881919, 876853 x 19 dfs -> 4368902 x 13+4+1 df
+## input dfs of semi-synthetic data ##
+    # 863582, 865290, 881258, 881919, 876853 x 19 dfs -> 4368902 x 13+4+1 df
     ## ID, NAMEreal, INCHIKEYreal, ACCESSIONreal, MS1Mass, Name, 
     ## RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
     ## DirectMatch, ReversMatch, FinalScore, 
@@ -24,6 +43,7 @@ combinedDB[!, "UsrMatchFragRatio"] .= float(0)
 combinedDB[!, "FinalScoreRatio"] .= float(0)
 combinedDB[!, "INCHIKEY_ID"] .= ""
 
+## define a function for data pre-processing ##
 function takeRatio(str)
     num = ""
     ratio = float(0)
@@ -44,6 +64,7 @@ function takeRatio(str)
     return ratio
 end
 
+## call ##
 takeRatio(combinedDB[4368902, "RefMatchFrag"])
 ratioRef = []
 ratioUsr = []
@@ -61,36 +82,34 @@ for i in 1:size(combinedDB, 1)
         push!(trueOrFalse, 0)
     end
 end
-
 combinedDB[!, "RefMatchFragRatio"] = ratioRef
 combinedDB[!, "UsrMatchFragRatio"] = ratioUsr
 combinedDB[!, "FinalScoreRatio"] = ratioScore
 combinedDB[!, "LABEL"] = trueOrFalse
-
+#
 # 4368902 x 18 df
 combinedDB
 
+## save df as a spreadsheet ##
 # 4368902 x 3+8+2+1 df
 outputDf = combinedDB[:, ["INCHIKEY_ID", "INCHIKEY", "INCHIKEYreal", "RefMatchFragRatio", "UsrMatchFragRatio", 
     "MS1Error", "MS2Error", "MS2ErrorStd", "DirectMatch", "ReversMatch", 
     "FinalScoreRatio", "MS1Mass", "FragMZ", "LABEL"]]
-
 outputDf
 # output csv is a 4368902 x 3+8+2+1 df
 savePath = "F:\\Cand_synth_rr10_1-5000.csv"
 CSV.write(savePath, outputDf)
 
-
-# creating a 4368902 x 3+8+2+1+1 df, 
-    ## columns: INCHIKEY_ID, INCHIKEYreal, 8+1 ULSA features, LABEL
-    ##                      FP->Ri, CNL->Ri ^
+## input df ##
+    # a 4368902 x 3+8+2+1+1 df, 
+    # columns: INCHIKEY_ID, INCHIKEYreal, 8+1 ULSA features, LABEL
+    #                      FP->Ri, CNL->Ri ^
 # matching INCHIKEY, 30684 x 793 df
 inputFP2Ri = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
 sort!(inputFP2Ri, [:INCHIKEY, :SMILES])
 
-# FP-derived Ri values
+## insert FP-derived Ri values ##
 outputDf[!, "predictRi"] .= float(0)
-
 for i in 1:size(outputDf, 1)
     println(i)
     if outputDf[i, "INCHIKEY"] in Array(inputFP2Ri[:, "INCHIKEY"])
@@ -100,32 +119,34 @@ for i in 1:size(outputDf, 1)
         outputDf[i, "predictRi"] = float(8888888)
     end
 end
-
 # 4368902 x 3+8+2+1+1
 outputDf
 describe(outputDf)
-# filtering in INCHIKEY_ID with Ri values
+
+## filter in INCHIKEY_ID with Ri values ##
 # 4307198 x 15 df
 outputDf = outputDf[outputDf.predictRi .!= float(8888888), :]
 sort!(outputDf, [:LABEL, :INCHIKEY_ID])
 
+## filiter out NaN ##
 outputDf = outputDf[outputDf.MS2ErrorStd .!== NaN, :]
 
+## save df as a spreadsheet ##
 # output csv is a 4272788 x 3+8+2+1+1 df
 savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv"
 CSV.write(savePath, outputDf)
 
+## extract True Positive ##
 inputDf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv", DataFrame)
-
 testIDsDf = CSV.read("F:\\generated_susp.csv", DataFrame)
 testIDsDf = testIDsDf[testIDsDf.ION_MODE .== "POSITIVE", :]
-
+#
 testIDs = Set()
 for i in 1:size(testIDsDf, 1)
     push!(testIDs, testIDsDf[i, "INCHIKEY"])
 end
 distinctTestIDs = sort!(collect(testIDs))
-
+#
 keepIdx = []
 isolateIdx = []
 for i in 1:size(inputDf, 1)
@@ -136,15 +157,17 @@ for i in 1:size(inputDf, 1)
         push!(keepIdx, i)
     end
 end
-
+#
 keepIdx  # 4135721
 isolateIdx  # 137067
 
+## save training df ##
 trainValDf = inputDf[keepIdx, :]
 # save, ouputing testSet df 4135721 x 15
 savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv"
 CSV.write(savePath, trainValDf)
 
+## save testing df ##
 testDf = inputDf[isolateIdx, :]
 # save, ouputing testSet df 137067 x 15
 savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv"

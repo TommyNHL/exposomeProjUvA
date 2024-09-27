@@ -76,6 +76,36 @@
 #### - OUTPUT(S): ***CNL model 95% leverage cut-off = 0.14604417882015916***
 #### - OUTPUT(S): ***CNLLeverageValueDistrution.png***
 
+## IV_model3  (folder)
+## IV_I_prepareSemisynData  (sub-folder)
+### A_DataSplitMatch.jl
+#### - INPUT(S): ***Cand_synth_rr10_1_1000.csv***
+#### - INPUT(S): ***Cand_synth_rr10_1001_2000.csv***
+#### - INPUT(S): ***Cand_synth_rr10_2001_3000.csv***
+#### - INPUT(S): ***Cand_synth_rr10_3001_4000.csv***
+#### - INPUT(S): ***Cand_synth_rr10_4001_5000.csv***
+#### - INPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
+#### - INPUT(S): ***generated_susp.csv***
+#### - OUTPUT(S): ***Cand_synth_rr10_1-5000.csv***
+#### - OUTPUT(S): ***Cand_synth_rr10_1-5000_extractedWithoutDeltaRi.csv***
+#### - OUTPUT(S): ***Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv***
+#### - OUTPUT(S): ***Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv***
+### B_DfCNLdeploy.jl
+#### - INPUT(S): ***Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv or Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv***
+#### - INPUT(S): ***dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv***
+#### - INPUT(S): ***CocamideExtended73_CNLsRi_RFwithStratification.joblib***
+#### - OUTPUT(S): ***TPTN_dfCNLfeaturesStr.csv***
+#### - OUTPUT(S): ***Cand_synth_rr10_1-5000_extractedWithCNLsList.csv or Cand_synth_rr10_1-5000_extractedWithCNLsList_pest.csv***
+#### - OUTPUT(S): ***dfCNLsSum_1.csv - dfCNLsSum_8.csv or dfCNLsSum_pest.csv***
+#### - OUTPUT(S): ***TPTNmassesCNLsDistrution_8.png***
+#### - OUTPUT(S): ***dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv or dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv***
+#### - OUTPUT(S): ***dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi.csv or dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi_pest.csv***
+#### - OUTPUT(S): ***dfCNLsSum_TP.csv or dfCNLsSum_TP_pest.csv***
+#### - OUTPUT(S): ***dfCNLsSum.csv***
+#### - OUTPUT(S): ***TPTNmassesCNLsDistrution.png or TPTNmassesCNLsDistrution_pest.png***
+### C_TPTNmodelCNLleverageCutoff.jl
+#### - INPUT(S): ***dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv - dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv or dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_1.csv - dataframeTPTNModeling_8.csv or dataframeTPTNModeling_pest.csv***
 
 ## 4_MassDomain  (folder)
 ### A_DataSplitMatch.jl

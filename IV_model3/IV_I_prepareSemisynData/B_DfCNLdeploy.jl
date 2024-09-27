@@ -1,6 +1,26 @@
+## INPUT(S)
+# Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv or Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv
+# dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv
+# CocamideExtended73_CNLsRi_RFwithStratification.joblib
+
+## OUTPUT(S)
+# TPTN_dfCNLfeaturesStr.csv
+# Cand_synth_rr10_1-5000_extractedWithCNLsList.csv or Cand_synth_rr10_1-5000_extractedWithCNLsList_pest.csv
+# dfCNLsSum_1.csv - dfCNLsSum_8.csv or dfCNLsSum_pest.csv
+# TPTNmassesCNLsDistrution_1.png - TPTNmassesCNLsDistrution_8.png
+# dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv - dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv or dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv
+# dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi.csv or dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi_pest.csv
+# dfCNLsSum_TP.csv or dfCNLsSum_TP_pest.csv
+# dfCNLsSum.csv
+# TPTNmassesCNLsDistrution.png or TPTNmassesCNLsDistrution_pest.png
+
 VERSION
+## install packages needed ##
 using Pkg
 #Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
+
+## import packages from Julia ##
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
@@ -8,15 +28,13 @@ Pkg.build("PyCall")
 Pkg.status()
 #Pkg.add(PackageSpec(url=""))
 using Random
-using BSON
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-using ProgressBars
 
+## import packages from Python ##
 jl = pyimport("joblib")             # used for loading models
-
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: RandomForestClassifier
@@ -25,13 +43,14 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# inputing 4135721 x 3+8+2+1+1 df
+## input 4135721 x 3+8+2+1+1 df ##
 # columns: ENTRY, SMILES, INCHIKEY, CNLmasses...
 inputTPTNdf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_trainValDf.csv", DataFrame)
 # inputing 137067 x 3+8+2+1+1 df
-inputTPTNdf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv", DataFrame)
+#inputTPTNdf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithoutDeltaRi_isotestDf.csv", DataFrame)
 sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID])
 
+## define a function for data extraction ##
 function getVec(matStr)
     if matStr[1] .== '['
         if contains(matStr, ", ")
@@ -69,39 +88,42 @@ function getVec(matStr)
     end
 end
 
-
-# initialization for 1 more column -> 4135721 x 15+1 or 137067 x 15+1
+## initialize an array for 1 more column ## -> 4135721 x 15+1 or 137067 x 15+1
 inputTPTNdf[!, "CNLmasses"] .= [[]]
 size(inputTPTNdf)
 
-# NLs calculation, filtering CNL-in-interest, storing in Vector{Any}
-        # filtering in CNLs features according to the pre-defined CNLs in CNLs_10mDa.csv
-        # inputing 15961 candidates
-        candidates_df = CSV.read("F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv", DataFrame)
-        CNLfeaturesStr = names(candidates_df)[4:end-2]
+## calculate neutral loss masses (NLs) ##
+## filter in CNL masses-of-interest, and store in Vector{Any} ##
+    ## filter in CNLs feature ##
+    # according to the pre-defined CNLs in CNLs_10mDa.csv
+    # inputing 15961 candidates
+    candidates_df = CSV.read("F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv", DataFrame)
+    CNLfeaturesStr = names(candidates_df)[4:end-2]
 
-        dfCNLfeaturesStr = DataFrame([[]], ["CNLfeaturesStr"])
-        for CNLfeature in CNLfeaturesStr
-            list = [CNLfeature]
-            push!(dfCNLfeaturesStr, list)
-        end
+    ## make string
+    dfCNLfeaturesStr = DataFrame([[]], ["CNLfeaturesStr"])
+    for CNLfeature in CNLfeaturesStr
+        list = [CNLfeature]
+        push!(dfCNLfeaturesStr, list)
+    end
 
-        savePath = "F:\\UvA\\TPTN_dfCNLfeaturesStr.csv"
-        CSV.write(savePath, dfCNLfeaturesStr)
+    ## save features in string ##
+    savePath = "F:\\UvA\\TPTN_dfCNLfeaturesStr.csv"
+    CSV.write(savePath, dfCNLfeaturesStr)
 
-        CNLfeaturesStr = CSV.read("F:\\TPTN_dfCNLfeaturesStr.csv", DataFrame)[:, "CNLfeaturesStr"]
-
-        candidatesList = []
-        for can in CNLfeaturesStr
-            #push!(candidatesList, round(parse(Float64, can), digits = 2))
-            push!(candidatesList, round(can, digits = 2))
-        end
-        CNLfeaturesStr = []
-        for can in candidatesList
-            #push!(candidatesList, round(parse(Float64, can), digits = 2))
-            push!(CNLfeaturesStr, string(can))
-        end
-
+CNLfeaturesStr = CSV.read("F:\\TPTN_dfCNLfeaturesStr.csv", DataFrame)[:, "CNLfeaturesStr"]
+#
+candidatesList = []
+for can in CNLfeaturesStr
+    #push!(candidatesList, round(parse(Float64, can), digits = 2))
+    push!(candidatesList, round(can, digits = 2))
+end
+CNLfeaturesStr = []
+for can in candidatesList
+    #push!(candidatesList, round(parse(Float64, can), digits = 2))
+    push!(CNLfeaturesStr, string(can))
+end
+#
 for i in 1:size(inputTPTNdf, 1)
     println(i)
     fragIons = getVec(inputTPTNdf[i,"FragMZ"])
@@ -116,11 +138,9 @@ for i in 1:size(inputTPTNdf, 1)
     end
     inputTPTNdf[i, "CNLmasses"] = sort!(collect(arrNL))
 end
-
 sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID, :CNLmasses])
 
-
-# Reducing df size (rows)
+## reduce df size (rows) ##
 function getMasses(db, i, arr, arrType = "str")
     massesArr = arr
     if (arrType == "dig")
@@ -133,35 +153,36 @@ function getMasses(db, i, arr, arrType = "str")
     end
     return massesArr
 end
-
-# removing rows that has Frag-ion of interest < 2 (optional)
-retain = []
-for i in 1:size(inputTPTNdf, 1)
-    println(i)
-    arr = []
-    arr = getMasses(inputTPTNdf, i, arr, "dig")#"str")
-    if (size(arr, 1) >= 2)
-        push!(retain, i)
+#
+    ## remove rows that has Frag-ion of interest < 2 (optional)
+    retain = []
+    for i in 1:size(inputTPTNdf, 1)
+        println(i)
+        arr = []
+        arr = getMasses(inputTPTNdf, i, arr, "dig")#"str")
+        if (size(arr, 1) >= 2)
+            push!(retain, i)
+        end
     end
-end
-inputTPTNdf = inputTPTNdf[retain, :]
-
+    inputTPTNdf = inputTPTNdf[retain, :]
+## save ##
 savePath = "F:\\Cand_synth_rr10_1-5000_extractedWithCNLsList.csv"
-savePath = "F:\\UvA\\Cand_synth_rr10_1-5000_extractedWithCNLsList_pest.csv"
+#savePath = "F:\\UvA\\Cand_synth_rr10_1-5000_extractedWithCNLsList_pest.csv"
 CSV.write(savePath, inputTPTNdf)
 
+## read ##
 # 4103848 x 16 df
 inputTPTNdf = CSV.read("F:\\Cand_synth_rr10_1-5000_extractedWithCNLsList.csv", DataFrame)
-
-# creating a table with 13+15961+1 columns features CNLs
+#
+# a table with 13+15961+1 columns features CNLs
 CNLfeaturesStr
 candidatesList
 inputTPTNdf
-
-# storing data in a Matrix
+#
+## store data in a Matrix ##
 X = zeros(512981, 15961)
 #X = zeros(136678, 15961)
-
+#
 for i in (1+512981*0):(512981*1)
 #for i in 1:136678
     println(i)
@@ -177,7 +198,7 @@ for i in (1+512981*0):(512981*1)
         end
     end
 end
-
+#
 # 4103848 - 512981
 dfCNLs = DataFrame(X, CNLfeaturesStr)
 insertcols!(dfCNLs, 1, ("ENTRY"=>collect((1+512981*0):(512981*1))))
@@ -197,7 +218,7 @@ dfCNLs[!, "FPpredictRi"] = inputTPTNdf[(1+512981*7):(512981*8), "predictRi"]
 size(dfCNLs)  # 512981 x (13+15961+1)
 
 # for pesticide dataset, 136678
-dfCNLs = DataFrame(X, CNLfeaturesStr)
+#= dfCNLs = DataFrame(X, CNLfeaturesStr)
 insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:136678)))
 insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[1:136678, "INCHIKEY_ID"]))
 insertcols!(dfCNLs, 3, ("INCHIKEY"=>inputTPTNdf[1:136678, "INCHIKEY"]))
@@ -212,17 +233,13 @@ insertcols!(dfCNLs, 11, ("ReversMatch"=>inputTPTNdf[1:136678, "ReversMatch"]))
 insertcols!(dfCNLs, 12, ("FinalScoreRatio"=>inputTPTNdf[1:136678, "FinalScoreRatio"]))
 insertcols!(dfCNLs, 13, ("MONOISOTOPICMASS"=>((inputTPTNdf[1:136678, "MS1Mass"] .- 1.007276)/1000)))
 dfCNLs[!, "FPpredictRi"] = inputTPTNdf[1:136678, "predictRi"]
-size(dfCNLs)  # 512981 x (13+15961+1)
+size(dfCNLs)  # 512981 x (13+15961+1) =#
 
 #################################################################################
-dfCNLs = CSV.read("F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv", DataFrame)
-dfCNLs[:, 13]
-dfCNLs[:, "MONOISOTOPICMASS"] = dfCNLs[:, "MONOISOTOPICMASS"] ./ 1000
-#################################################################################
-
+## plot histogram ##
 desStat = describe(dfCNLs)  # 15975 x 7
 desStat[14,:]
-
+#
 sumUp = []
 push!(sumUp, 8888888)
 push!(sumUp, "summation")
@@ -249,9 +266,9 @@ push!(dfCNLs, sumUp)
 # 512981 -> 512982 rows
 dfCNLsSum = dfCNLs[end:end, :]
 savePath = "F:\\UvA\\dfCNLsSum_8.csv"
-savePath = "F:\\UvA\\dfCNLsSum_pest.csv"
+#savePath = "F:\\UvA\\dfCNLsSum_pest.csv"
 CSV.write(savePath, dfCNLsSum)
-
+#
 using DataSci4Chem
 massesCNLsDistrution = bar(candidatesList, Vector(dfCNLs[end, 14:end-1]), 
     label = false, 
@@ -263,50 +280,48 @@ massesCNLsDistrution = bar(candidatesList, Vector(dfCNLs[end, 14:end-1]),
     xlabel="Feature CNL mass", xguidefontsize=16, 
     ylabel="Count", yguidefontsize=16, 
     dpi = 300)
-    # Saving
-    savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution_8.png")
+## save figure ##
+savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution_8.png")
 
+
+#################################################################################
+## predict CNL-derived Ri ##
 dfCNLs = dfCNLs[1:end-1, :]
-#load a model
-# requires python 3.11 or 3.12
-modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
-size(modelRF_CNL)
-
+    ## load a model ##
+    # requires python 3.11 or 3.12
+    modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    size(modelRF_CNL)
 CNLpredictedRi = predict(modelRF_CNL, Matrix(dfCNLs[:, 13:end-1]))
 dfCNLs[!, "CNLpredictRi"] = CNLpredictedRi
 dfCNLs[!, "DeltaRi"] = (CNLpredictedRi - dfCNLs[:, "FPpredictRi"]) / 1000
 dfCNLs[!, "LABEL"] = inputTPTNdf[(1+512981*7):(512981*8), "LABEL"]
 dfCNLs[!, "LABEL"] = inputTPTNdf[1:136678, "LABEL"]
-# save, ouputing testSet df 0.3 x (3+15994+1)
+
+## save ##
 savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv"
-savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv"
 CSV.write(savePath, dfCNLs)
 println("done for saving csv")
 
-
-#################################################################################
-describe(dfCNLs[:, end-4:end])
-
-modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
-size(modelRF_CNL)
-
+    modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    size(modelRF_CNL)
 CNLpredictedRi = predict(modelRF_CNL, Matrix(dfCNLs[:, 13:end-4]))
 dfCNLs[:, "CNLpredictRi"] = CNLpredictedRi
 dfCNLs[:, "DeltaRi"] = (CNLpredictedRi - dfCNLs[:, "FPpredictRi"]) / 1000
 describe(dfCNLs[:, end-4:end])
-# save, ouputing testSet df 0.3 x (3+15994+1)
+## save ##
 savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv"
 CSV.write(savePath, dfCNLs)
 println("done for saving csv")
+
+
 #################################################################################
-
-
+## plot histogram ##
 outputDf = (dfCNLs[dfCNLs.LABEL .== 1, :])[:, 1:end-3]
 savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi.csv"
 savePath = "F:\\UvA\\dataframeCNLsRows4TPTNModeling_TPOnlywithCNLRideltaRi_pest.csv"
 CSV.write(savePath, outputDf)
 println("done for saving csv")
-
+#
 sumUp = []
 push!(sumUp, 8888888)
 push!(sumUp, "summation")
@@ -333,11 +348,9 @@ push!(outputDf, sumUp)
 # + 1 rows
 dfCNLsSum = outputDf[end:end, :]
 savePath = "F:\\UvA\\dfCNLsSum_TP.csv"
-savePath = "F:\\UvA\\dfCNLsSum_TP_pest.csv"
+#savePath = "F:\\UvA\\dfCNLsSum_TP_pest.csv"
 CSV.write(savePath, dfCNLsSum)
-
-
-
+#
 dfCNLsSum1 = CSV.read("F:\\UvA\\dfCNLsSum_1.csv", DataFrame)
 dfCNLsSum2 = CSV.read("F:\\UvA\\dfCNLsSum_2.csv", DataFrame)
 dfCNLsSum3 = CSV.read("F:\\UvA\\dfCNLsSum_3.csv", DataFrame)
@@ -348,11 +361,11 @@ dfCNLsSum7 = CSV.read("F:\\UvA\\dfCNLsSum_7.csv", DataFrame)
 dfCNLsSum8 = CSV.read("F:\\UvA\\dfCNLsSum_8.csv", DataFrame)
 dfCNLsSum = vcat(dfCNLsSum1, dfCNLsSum2, dfCNLsSum3, dfCNLsSum4, dfCNLsSum5, dfCNLsSum6, dfCNLsSum7, dfCNLsSum8)
 dfCNLsSumTP = CSV.read("F:\\UvA\\dfCNLsSum_TP.csv", DataFrame)
-
+#
 # for pesticide dataset only
-dfCNLsSum = CSV.read("F:\\UvA\\dfCNLsSum_pest.csv", DataFrame)
-dfCNLsSumTP = CSV.read("F:\\UvA\\dfCNLsSum_TP_pest.csv", DataFrame)
-
+#= dfCNLsSum = CSV.read("F:\\UvA\\dfCNLsSum_pest.csv", DataFrame)
+dfCNLsSumTP = CSV.read("F:\\UvA\\dfCNLsSum_TP_pest.csv", DataFrame) =#
+#
 sumUp = []
 push!(sumUp, 8888888)
 push!(sumUp, "summation")
@@ -380,7 +393,7 @@ push!(dfCNLsSum, sumUp)
 dfCNLsSum = dfCNLsSum[end:end, :]
 savePath = "F:\\UvA\\dfCNLsSum.csv"
 CSV.write(savePath, dfCNLsSum)
-
+#
 using DataSci4Chem
 massesCNLsDistrution = bar(candidatesList, Vector(dfCNLsSum[end, 14:end-1]), 
     label = "True negative CNLs", 
@@ -406,6 +419,6 @@ massesCNLsDistrution = bar(candidatesList, Vector(dfCNLsSum[end, 14:end-1]),
         ylabel="Count", yguidefontsize=16, 
         legendfont = font(12), 
         dpi = 300)
-    # Saving
-    savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution.png")
-    savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution_pest.png")
+## save figure ##
+savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution.png")
+savefig(massesCNLsDistrution, "F:\\UvA\\TPTNmassesCNLsDistrution_pest.png")

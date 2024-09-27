@@ -78,7 +78,7 @@ inputData[!, "CNLmasses"] .= [[]]
 size(inputData)
 
 ## calculate neutral loss masses (NLs) ##
-## filter in CNL masses-in-interest, and store in Vector{Any}
+## filter in CNL masses-of-interest, and store in Vector{Any} ##
     ## filter in CNLs features ##
     # according to the pre-defined CNLs in CNLs_10mDa.csv
     # 16022 candidates
@@ -251,6 +251,8 @@ savePath = "F:\\UvA\\dataframeCNLsRows.csv"
 CSV.write(savePath, dfCNLs)
 println("done for saving csv")
 
+
+#################################################################################
 ## plot histogram ##
 desStat = describe(dfCNLs)  # 15965 x 7
 desStat[5,:]
