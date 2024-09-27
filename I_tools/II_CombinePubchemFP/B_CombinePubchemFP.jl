@@ -1,21 +1,30 @@
+## INPUT(S)
+# dataPubchemFingerprinter.csv
+
+## OUTPUT(S)
+# dataPubchemFingerprinter_converted.csv
+
+## install packages needed ##
 using Pkg
-Pkg.add("BSON")
+#Pkg.add("BSON")
 #Pkg.add(PackageSpec(url=""))
-using BSON
+
+## import packages from Julia ##
 using CSV, DataFrames, PyCall, Conda, LinearAlgebra, Statistics
 Conda.add("pubchempy")
 Conda.add("padelpy")
 Conda.add("joblib")
-## import packages ##
+
+## import packages from Python ##
 pcp = pyimport("pubchempy")
 pd = pyimport("padelpy")
 jl = pyimport("joblib")
 
+## define a function for condensing PubChem FingerPrinter features ##
 function convertPubChemFPs(ACfp::DataFrame, PCfp::DataFrame)
     FP1tr = ACfp
     pubinfo = Matrix(PCfp)
-
-    #ring counts
+    # ring counts
     FP1tr[!,"PCFP-r3"] = pubinfo[:,1]
     FP1tr[!,"PCFP-r3"][pubinfo[:,8] .== 1] .= 2
     FP1tr[!,"PCFP-r4"] = pubinfo[:,15]
@@ -25,7 +34,7 @@ function convertPubChemFPs(ACfp::DataFrame, PCfp::DataFrame)
     FP1tr[!,"PCFP-r5"][pubinfo[:,43] .== 1] .= 3
     FP1tr[!,"PCFP-r5"][pubinfo[:,50] .== 1] .= 4
     FP1tr[!,"PCFP-r5"][pubinfo[:,57] .== 1] .= 5
-
+    # cont.
     FP1tr[!,"PCFP-r6"] = pubinfo[:,64]
     FP1tr[!,"PCFP-r6"][pubinfo[:,71] .== 1] .= 2
     FP1tr[!,"PCFP-r6"][pubinfo[:,78] .== 1] .= 3
@@ -37,8 +46,7 @@ function convertPubChemFPs(ACfp::DataFrame, PCfp::DataFrame)
     FP1tr[!,"PCFP-r8"][pubinfo[:,120] .== 1] .= 2
     FP1tr[!,"PCFP-r9"] = pubinfo[:,127]
     FP1tr[!,"PCFP-r10"] = pubinfo[:,134]
-
-    #minimum number of type of rings
+    # minimum number of type of rings
     arom = zeros(size(pubinfo,1))
     arom[(arom .== 0) .& (pubinfo[:,147] .== 1)] .= 4
     arom[(arom .== 0) .& (pubinfo[:,145] .== 1)] .= 3
@@ -51,21 +59,23 @@ function convertPubChemFPs(ACfp::DataFrame, PCfp::DataFrame)
     het[(het .== 0) .& (pubinfo[:,144] .== 1)] .= 2
     het[(het .== 0) .& (pubinfo[:,142] .== 1)] .= 1
     FP1tr[!,"minHetrCount"] = het
-
+    # cont.
     return FP1tr
 end
 
-
-#load all data
+## load all data ##
 # original input csv has 31402 rows (column header exclusive)
 # 717 compound entries have no SMILES id -> conversion failed
 # 1 compound entry has an invalid SMILES id -> conversion failed
 # so the updated csv input is a 30684 x 150 df, columns include 
         #SMILES, INCHIKEY, and 148 Pubchem FPs, 148 -> 10 columns after operation
 input = CSV.read("F:\\dataPubchemFingerprinter.csv", DataFrame)
+
+## call function to convert PubChem FingerPrinter features ##
 output = convertPubChemFPs(input[:,1:end], input[:,3:end])
+
+## save the output table as a spreadsheet ##
 # output csv is a 30684 x 160 df, columns include 
         #SMILES, INCHIKEY, 148 Pubchem FPs, and 10 newly added columns
-
 savePath = "F:\\UvA\\dataPubchemFingerprinter_converted.csv"
 CSV.write(savePath, output)
