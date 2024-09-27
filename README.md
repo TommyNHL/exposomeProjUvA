@@ -17,45 +17,47 @@
 #### - INPUT(S): ***CocamideExtendedWithStratification.joblib***
 #### - OUTPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
 
-## 1_2_3_WithStratification  (folder)
-### A_ModelDeploy4FPbasedRi.jl  ***(sub-directory folder "1_deployRFmodel")***
-#### - step 01: load the pre-train RF-based model- CocamideExtended.joblib
-#### - step 02: predict the FP-derived Ri values
-####           -> new .csv
-### B_PreProcessInternalDB.jl  ***(sub-directory folder "2_prepareCNLmodel")***
-#### - step 03: filter in positive ionization mode
-#### - step 04: filter in precusor ion with measured m/z
-#### - step 05: bin the m/z domain with bin size 0.01 Da (steps)
-#### - step 06: calculate NLs by m/z(precusor ion) - m/z(fragment ions)
-#### - step 07: match CNLs-of-interest according to the pre-defined CNLs in CNLs_10mDa.csv
-####           -> new .csv
-#### - step 08: filter out rows with <2 CNL features
-#### - step 09: collect Entry-of-interest according to the presence of FPs in .csv DB
-#### - step 10: remove duplicated row spectrum 
-####           -> new .csv
-#### - step 11: include the pre-ion
-#### - step 12: transform table as row(ID copounds) x column(CNLs masses)
-####           -> new .csv
-####           -> new .png
-### C_FPDfPre4Leverage.jl
-#### - step 13: find distinct INCHIKEYs
-####           -> new .csv
-#### - step 14: count frequency for each INCHIKEY
-####           -> new .csv
-#### - step 15: creat a FP df after taking INCHIKEY frequency into account
-####           -> new .csv
-### D_trainTestSplitPre.jl
-#### - step 16: extract column-of-interests for CNL df construction
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-### E_LeverageGetIdx.jl
-#### - step 17: calculate leverage value
-#### - step 18: record leverage value and train/test group information
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
+## III_model2  (folder)
+## I_prepareCNLmodel  (sub-folder)
+### A_PreProcessInternalDB.jl (README_dbColHeaders.md)
+#### - INPUT(S): ***Database_INTERNAL_2022-11-17.csv***
+#### - INPUT(S): ***CNLs_10mDa.csv***
+#### - INPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
+#### - OUTPUT(S): ***CNLs_10mDa_missed.csv***
+#### - OUTPUT(S): ***databaseOfInternal_withNLs.csv***
+#### - OUTPUT(S): ***dataframeCNLsRows.csv***
+#### - OUTPUT(S): ***dfCNLsSumModeling.csv***
+#### - OUTPUT(S): ***massesCNLsDistrution.png***
+### B_FPDfPre4Leverage.jl
+#### - INPUT(S): ***databaseOfInternal_withNLs.csv***
+#### - INPUT(S): ***dataframeCNLsRows.csv***
+#### - INPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
+#### - OUTPUT(S): ***countingRows4Leverage.csv***
+#### - OUTPUT(S): ***countingRowsInFP4Leverage.csv***
+#### - OUTPUT(S): ***dataAllFP_withNewPredictedRiWithStratification_Freq.csv***
+### C_TrainTestSplitPre.jl
+#### - INPUT(S): ***dataframeCNLsRows.csv***
+#### - INPUT(S): ***dataAllFP_withNewPredictedRiWithStratification_Freq.csv***
+#### - OUTPUT(S): ***databaseOfInternal_withNLsOnly.csv***
+#### - OUTPUT(S): ***databaseOfInternal_withEntryInfoOnly.csv***
+#### - OUTPUT(S): ***databaseOfInternal_withINCHIKEYInfoOnly.csv***
+#### - OUTPUT(S): ***databaseOfInternal_withYOnly.csv***
+### D_LeverageGetIdx.jl
+#### - INPUT(S): ***dataAllFP_withNewPredictedRiWithStratification_Freq.csv***
+#### - OUTPUT(S): ***dataframe73_dfTrainSetWithStratification_95index.csv***
+#### - OUTPUT(S): ***dataframe73_dfTestSetWithStratification_95index.csv***
+#### - OUTPUT(S): ***dataframe73_dfWithStratification_95index.csv***
+#### - OUTPUT(S): ***dataAllFP73_withNewPredictedRiWithStratification_FreqAnd95Leverage.csv***
+### E_TrainTestSplit.jl
+#### - INPUT(S): ***databaseOfInternal_withEntryInfoOnly.csv***
+#### - INPUT(S): ***databaseOfInternal_withINCHIKEYInfoOnly.csv***
+#### - INPUT(S): ***databaseOfInternal_withNLsOnly.csv***
+#### - INPUT(S): ***databaseOfInternal_withYOnly.csv***
+#### - INPUT(S): ***dataframe73_dfTrainSetWithStratification_95index.csv***
+#### - INPUT(S): ***dataframe73_dfTestSetWithStratification_95index.csv***
+#### - OUTPUT(S): ***dataframe73_95dfTrainSetWithStratification.csv***
+#### - OUTPUT(S): ***dataframe73_95dfTestSetWithStratification.csv***
+
 ### F_TrainTestSplit.jl
 #### - step 19: perform 5:5 train/test split by index
 #### - step 20: gather and join ID informaiton and FP and FP-Ri
