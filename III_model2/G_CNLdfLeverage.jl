@@ -17,7 +17,7 @@ using CSV, DataFrames, LinearAlgebra, Statistics
 using ProgressBars
 using Plots, DataFrames
 
-## input ##
+## input df ##
 # 485577 x 1+1+1+15961+1 df = 485577 x 15965
 dfOutputCNL = CSV.read("F:\\UvA\\dataframe73_95dfTrainSetWithStratification.csv", DataFrame)
 sort!(dfOutputCNL, [:ENTRY])

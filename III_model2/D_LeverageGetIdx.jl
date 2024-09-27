@@ -108,7 +108,7 @@ sort!(X_IdxDf, [:INDEX])
 savePath = "F:\\UvA\\dataframe73_dfWithStratification_95index.csv"
 CSV.write(savePath, X_IdxDf)
 
-## save CNL df after pplicability Domain filtering
+## save CNL df after applicability Domain filtering
 # output csv is a 693685-4 x 1+790+1+2 df
 dfOutputFP
 dfOutputFP = dfOutputFP[dfOutputFP.Leverage .<= 0.275, :]

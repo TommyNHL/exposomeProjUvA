@@ -106,69 +106,17 @@
 ### C_TPTNmodelCNLleverageCutoff.jl
 #### - INPUT(S): ***dataframeCNLsRows4TPTNModeling_1withCNLRideltaRi.csv - dataframeCNLsRows4TPTNModeling_8withCNLRideltaRi.csv or dataframeCNLsRows4TPTNModeling_PestwithCNLRideltaRi.csv***
 #### - OUTPUT(S): ***dataframeTPTNModeling_1.csv - dataframeTPTNModeling_8.csv or dataframeTPTNModeling_pest.csv***
+### D_TPTNmodelTrainTestSplit_ALL.jl
+#### - INPUT(S): ***dataframeTPTNModeling_1.csv - dataframeTPTNModeling_8.csv and dataframeTPTNModeling_pest.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_withLeverage_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainIndex_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainDFwithhl_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainYesIndex_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainYesDFwithhl_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TestIndex_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TestDFwithhl_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TestYesIndex_all.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TestYesDFwithhl_all.csv***
 
-## 4_MassDomain  (folder)
-### A_DataSplitMatch.jl
-#### - step 01: import results from ULSA
-#### - step 02: extract useful columns including 7+1 features
-#### - step 03: combine different .csv files
-#### - step 04: take ratios
-#### - step 05: add ground-truth labels based on INCHIKEYreal vs. INCHIKEY
-####           -> new .csv
-#### - step 06: match FP-derived Ri by INCHIKEY (measured)
-#### - step 07: isolate dependent dataset
-####           -> new .csv
-####           -> new .csv
-### B_DfCNLdeploy.jl
-#### - step 08: import 15961 CNL features for model deployment
-#### - step 09: prepare CNL df for model deployment
-####           -> new .csv
-#### - step 10: predict CNL-derived Ri values
-#### - step 11: calculate delta Ri
-####           -> new .csv
-#### - step 12: isolate only Label = 1 samples for statistics discussion
-####           -> new .csv
-####           -> new .png
-### C_TPTNmodelTrainValTest.jl
-#### - step 13: extract useful columns
-####           -> new .csv
-#### - step 14: calculate leverage value
-#### - step 15: record leverage value for 8:2 train/test split & the group information
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-#### - step 16: perform 8:2 train/test split
-####           -> new .csv
-####           -> new .csv
-### D_TPTNmodelTrainValTest.jl
-#### - step 17: tune hyper-parameters via CV = 3
-####           -> new .csv
-#### - step 18: train model
-####           -> new .joblib model
-####           -> new .joblib model
-#### - step 19: precdict CNL-based Ri values for the internally split sets
-####           -> new .csv
-####           -> new .csv
-#### - step 20: analyze model predictive power
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-### E_TPTNmodelzTPRTNR.jl
-#### - step 21: calculate statistics for confusion matrix plot
-####           -> new .csv
-####           -> new .csv
-####           -> new .png
-####           -> new .png
-#### - step 22: plot P(1) threshold-to-TPR/FNR curve
-####           -> new .csv
-####           -> new .csv
-####           -> new .png
-#### - step 23: plot P(1) threshold-to-TNR/FPR curve
-####           -> new .csv
-####           -> new .csv
-####           -> new .png
-### F_TPTNmodelzzDiscuss.jl
-#### - step 24: calculate statistics for delta Ri plot
-####           -> new .csv
-####           -> new .png
+
