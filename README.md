@@ -18,7 +18,7 @@
 #### - OUTPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
 
 ## III_model2  (folder)
-## I_prepareCNLmodel  (sub-folder)
+## III_I_prepareCNLmodel  (sub-folder)
 ### A_PreProcessInternalDB.jl (README_dbColHeaders.md)
 #### - INPUT(S): ***Database_INTERNAL_2022-11-17.csv***
 #### - INPUT(S): ***CNLs_10mDa.csv***
@@ -57,6 +57,9 @@
 #### - INPUT(S): ***dataframe73_dfTestSetWithStratification_95index.csv***
 #### - OUTPUT(S): ***dataframe73_95dfTrainSetWithStratification.csv***
 #### - OUTPUT(S): ***dataframe73_95dfTestSetWithStratification.csv***
+## III_II_trainValTestCNLmodel  (sub-folder)
+
+
 
 ### F_TrainTestSplit.jl
 #### - step 19: perform 5:5 train/test split by index

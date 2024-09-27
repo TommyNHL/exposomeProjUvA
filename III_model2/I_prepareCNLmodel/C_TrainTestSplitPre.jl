@@ -8,6 +8,11 @@
 # databaseOfInternal_withINCHIKEYInfoOnly.csv
 # databaseOfInternal_withYOnly.csv
 
+## install packages needed ##
+using Pkg
+#Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
+
 ## import packages from Julia ##
 using CSV, DataFrames
 
