@@ -7,7 +7,7 @@
 
 ## install packages needed ##
 using Pkg
-#Pkg.add("BSON")
+#Pkg.add("PyCall")
 #Pkg.add(PackageSpec(url=""))
 
 ## import packages from Julia ##

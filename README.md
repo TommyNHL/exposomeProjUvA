@@ -3,13 +3,19 @@
 
 ## I_tools  (folder)
 ### A_Installer11.ipynb
-### B_CombinePubchemFP.jl
+
+## II_model1  (folder)
+### A_CombinePubchemFP.jl
 #### - INPUT(S): ***dataPubchemFingerprinter.csv***
 #### - OUTPUT(S): ***dataPubchemFingerprinter_converted.csv***
-### C_MergeApc2dPubchem.jl
+### B_MergeApc2dPubchem.jl
 #### - INPUT(S): ***dataAP2DFingerprinter.csv***
 #### - INPUT(S): ***dataPubchemFingerprinter_converted.csv***
 #### - OUTPUT(S): ***dataAllFingerprinter_4RiPredict.csv***
+### C_ModelDeploy4FPbasedRi.jl
+#### - INPUT(S): ***dataAllFingerprinter_4RiPredict.csv***
+#### - INPUT(S): ***CocamideExtendedWithStratification.joblib***
+#### - OUTPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
 
 ## 1_2_3_WithStratification  (folder)
 ### A_ModelDeploy4FPbasedRi.jl  ***(sub-directory folder "1_deployRFmodel")***
