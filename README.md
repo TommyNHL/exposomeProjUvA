@@ -18,7 +18,6 @@
 #### - OUTPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
 
 ## III_model2  (folder)
-## III_I_prepareCNLmodel  (sub-folder)
 ### A_PreProcessInternalDB.jl (README_dbColHeaders.md)
 #### - INPUT(S): ***Database_INTERNAL_2022-11-17.csv***
 #### - INPUT(S): ***CNLs_10mDa.csv***
@@ -57,30 +56,26 @@
 #### - INPUT(S): ***dataframe73_dfTestSetWithStratification_95index.csv***
 #### - OUTPUT(S): ***dataframe73_95dfTrainSetWithStratification.csv***
 #### - OUTPUT(S): ***dataframe73_95dfTestSetWithStratification.csv***
-## III_II_trainValTestCNLmodel  (sub-folder)
+### F_CNLmodelTrainValTest.jl
+#### - INPUT(S): ***dataframe73_95dfTestSetWithStratification.csv***
+#### - INPUT(S): ***dataframe73_95dfTrainSetWithStratification.csv***
+#### - INPUT(S): ***CocamideExtWithStartification_Fingerprints_train.csv***
+#### - INPUT(S): ***CocamideExtWithStratification_Fingerprints_test.csv***
+#### - INPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
+#### - OUTPUT(S): ***hyperparameterTuning_RFwithStratification10F.csv***
+#### - OUTPUT(S): ***CocamideExtended73_CNLsRi_RFwithStratification.joblib***
+#### - OUTPUT(S): ***dataframe73_dfTrainSetWithStratification_withCNLPredictedRi.csv***
+#### - OUTPUT(S): ***dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv***
+#### - OUTPUT(S): ***dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv***
+#### - OUTPUT(S): ***dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv***
+#### - OUTPUT(S): ***CNLRiPrediction73_RFTrainWithStratification_v3.png***
+#### - OUTPUT(S): ***CNLRiPrediction73_RFTestWithStratification_v3.png***
+### G_CNLdfLeverage.jl
+#### - INPUT(S): ***dataframe73_95dfTrainSetWithStratification.csv***
+#### - INPUT(S): ***dataframe73_dfTrainSetWithStratification_95FPCNLleverage.csv***
+#### - OUTPUT(S): ***CNL model 95% leverage cut-off = 0.14604417882015916***
+#### - OUTPUT(S): ***CNLLeverageValueDistrution.png***
 
-
-
-### F_TrainTestSplit.jl
-#### - step 19: perform 5:5 train/test split by index
-#### - step 20: gather and join ID informaiton and FP and FP-Ri
-####           -> new .csv
-####           -> new .csv
-### G_CNLmodelTrainVal(Test).jl  ***(sub-directory folder "3_trainTestCNLmodel")***
-#### - step 21: split the table for train & test by leverage values
-#### - step 22: tune hyper-parameters via CV = 3
-#### - step 23: train model
-####           -> new .joblib model
-#### - step 24: precdict CNL-based Ri values for the internally split cocamides val set
-#### - step 25: analyze model predictive power
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-####           -> new .csv
-#### - step 26: match SMILES ID to each INCHIKEY ID
-#### - step 27: plot scatter plots for Cocamides & Non-Cocamides via SMILES ID
-####           -> new .png
-####           -> new .png
 
 ## 4_MassDomain  (folder)
 ### A_DataSplitMatch.jl

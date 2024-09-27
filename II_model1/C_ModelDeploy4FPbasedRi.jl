@@ -17,8 +17,6 @@ Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-
-## import packages from Python ##
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 

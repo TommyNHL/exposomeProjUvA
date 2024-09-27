@@ -1,22 +1,41 @@
+## INPUT(S)
+# dataframe73_95dfTestSetWithStratification.csv
+# dataframe73_95dfTrainSetWithStratification.csv
+# CocamideExtWithStartification_Fingerprints_train.csv
+# CocamideExtWithStratification_Fingerprints_test.csv
+# dataAllFP_withNewPredictedRiWithStratification.csv
+
+## OUTPUT(S)
+# hyperparameterTuning_RFwithStratification10F.csv
+# CocamideExtended73_CNLsRi_RFwithStratification.joblib
+# dataframe73_dfTrainSetWithStratification_withCNLPredictedRi.csv
+# dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv
+# dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv
+# dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv
+# CNLRiPrediction73_RFTrainWithStratification_v3.png
+# CNLRiPrediction73_RFTestWithStratification_v3.png
+
 VERSION
+## install packages needed ##
 using Pkg
-Pkg.add("Distributions")
+#Pkg.add("ScikitLearn")
 #Pkg.add(PackageSpec(url=""))
+
+## import packages from Julia ##
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-
 using Random
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
 #Conda.add("joblib")
-## import packages ##
-jl = pyimport("joblib")
 
+## import packages from Python ##
+jl = pyimport("joblib")
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: RandomForestClassifier
@@ -25,21 +44,22 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# 7:3 -> 485579-2: 208106-2
-# inputing 693685*0.5 x 1+1+1+15961+1 df = 346843 x 15965
+## inputing 485577 x 15965 df for training ##
 # columns: ENTRY, INCHIKEY, MONOISOTOPICMASS, CNLs, predictRi
 inputDB_test = CSV.read("F:\\UvA\\dataframe73_95dfTestSetWithStratification.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
-# inputing 693685*0.5 x 1+1+1+15961+1 df = 346842 x 15965
+
+## input 208104 x 15965 df for testing ##
 inputDB = CSV.read("F:\\UvA\\dataframe73_95dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
-# internal train/test split
+## copy ##
 X = deepcopy(inputDB[:, 3:end-1])
 size(X)
 Y = deepcopy(inputDB[:, end])
 size(Y)
 
+## define a function for internal train/test split ##
 function partitionTrainVal(df, ratio = 0.90)
     noOfRow = nrow(df)
     idx = shuffle(1:noOfRow)
@@ -48,10 +68,10 @@ function partitionTrainVal(df, ratio = 0.90)
     df[train_idx,:], df[test_idx,:]
 end
 
-# performace
-## Maximum absolute error
-## mean square error (MSE) calculation
-## Root mean square error (RMSE) calculation
+## define functions for performace evaluation
+# Maximum absolute error
+# mean square error (MSE) calculation
+# Root mean square error (RMSE) calculation
 function errorDetermination(arrRi, predictedRi)
     sumAE = 0
     maxAE = 0
@@ -66,8 +86,8 @@ function errorDetermination(arrRi, predictedRi)
     RMSE = MSE ^ 0.5
     return maxAE, MSE, RMSE
 end
-
-## R-square value
+#
+# R-square value
 function rSquareDetermination(arrRi, predictedRi)
     sumY = 0
     for i = 1:size(predictedRi, 1)
@@ -85,7 +105,7 @@ function rSquareDetermination(arrRi, predictedRi)
     rSquare = 1 - (sumAE / sumRE)
     return rSquare
 end
-
+#
 ## Average accuracy
 function avgAcc(arrAcc, cv)
     sumAcc = 0
@@ -95,7 +115,7 @@ function avgAcc(arrAcc, cv)
     return sumAcc / cv
 end
 
-# modeling, 5 x 8 = 40 times
+## define a function for modeling ##
 function optimRandomForestRegressor(df_train)
     #leaf_r = [collect(4:2:10);15;20]
     #leaf_r = vcat(collect(4:2:8), collect(12:4:20))
@@ -155,12 +175,13 @@ function optimRandomForestRegressor(df_train)
     return z_df_sorted
 end
 
+## perform hyperparameter tuning ##
 optiSearch_df = optimRandomForestRegressor(inputDB)
 
-# save, ouputing 180 x 8 df
+## save result ##
 savePath = "F:\\UvA\\hyperparameterTuning_RFwithStratification10F.csv"
 CSV.write(savePath, optiSearch_df)
-
+# grid search
 #= model = RandomForestRegressor()
 param_dist = Dict(
       "n_estimators" => 50:50:300, 
@@ -175,6 +196,7 @@ gridsearch = GridSearchCV(model, param_dist)
 @time fit!(gridsearch, Matrix(x_train), Vector(y_train))
 println("Best parameters: $(gridsearch.best_params_)") =#
 
+## build model ##
 model = RandomForestRegressor(
       n_estimators = 350, 
       #max_depth = 10, 
@@ -186,64 +208,62 @@ model = RandomForestRegressor(
       )
 fit!(model, Matrix(inputDB[:, 3:end-1]), Vector(inputDB[:, end]))
 
-# saving model
+## save model ##
 modelSavePath = "F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib"
 jl.dump(model, modelSavePath, compress = 5)
 
-# training performace, CNL-predictedRi vs. FP-predictedRi
-model = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
-predictedRi_train = predict(model, Matrix(inputDB[:, 3:end-1]))
-inputDB[!, "CNLpredictRi"] = predictedRi_train
-# save, ouputing trainSet df 0.7 x (3+15994+1)
-savePath = "F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi.csv"
-CSV.write(savePath, inputDB)
 
-maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
-rSquare_train = rSquareDetermination(inputDB[:, end-1], predictedRi_train)
-## accuracy
-acc1_train = score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]))
-#acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 10)
-#avgAcc_train = avgAcc(acc5_train, 10)
+# ==================================================================================================
+## evaluate performacnce ##
+    # training performace, CNL-predictedRi vs. FP-predictedRi
+    model = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    predictedRi_train = predict(model, Matrix(inputDB[:, 3:end-1]))
+    inputDB[!, "CNLpredictRi"] = predictedRi_train
+    # save, ouputing trainSet df 0.7 x (3+15994+1)
+    savePath = "F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi.csv"
+    CSV.write(savePath, inputDB)
+    # call functions
+    maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
+    rSquare_train = rSquareDetermination(inputDB[:, end-1], predictedRi_train)
+    # accuracy
+    acc1_train = score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]))
+    #acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 10)
+    #avgAcc_train = avgAcc(acc5_train, 10)
 
-# model validation
-#load a model
-# requires python 3.11 or 3.12
-modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
-size(modelRF_CNL)
+    # testing performace, CNL-predictedRi vs. FP-predictedRi
+    modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    size(modelRF_CNL)
+    predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]))
+    inputDB_test[!, "CNLpredictRi"] = predictedRi_test
+    # save, ouputing testSet df 0.3 x (3+15994+1)
+    savePath = "F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv"
+    CSV.write(savePath, inputDB_test)
+    # call functions
+    maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
+    rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
+    ## accuracy
+    acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
+    #acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 10)
+    #avgAcc_val = avgAcc(acc5_val, 10)
 
-predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]))
-inputDB_test[!, "CNLpredictRi"] = predictedRi_test
-# save, ouputing testSet df 0.3 x (3+15994+1)
-savePath = "F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv"
-CSV.write(savePath, inputDB_test)
-
-maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
-rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
-## accuracy
-acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
-#acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 10)
-#avgAcc_val = avgAcc(acc5_val, 10)
-
-# plots
-# inputing dfs for separation of the cocamides and non-cocamides datasets
-## 5364 x 931 df 
-inputCocamidesTrain = CSV.read("F:\\CocamideExtWithStartification_Fingerprints_train.csv", DataFrame)
-sort!(inputCocamidesTrain, :SMILES)
-
-## 947 x 931 df
-inputCocamidesTest = CSV.read("F:\\CocamideExtWithStratification_Fingerprints_test.csv", DataFrame)
-sort!(inputCocamidesTest, :SMILES)
-
-# comparing, 30684 x 793 df
-inputAllFPDB = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
-sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
-
+## prepare to plot figures ##
+    ## input dfs ## for separation of the cocamides and non-cocamides datasets
+    # 5364 x 931 df 
+    inputCocamidesTrain = CSV.read("F:\\CocamideExtWithStartification_Fingerprints_train.csv", DataFrame)
+    sort!(inputCocamidesTrain, :SMILES)
+    # 947 x 931 df
+    inputCocamidesTest = CSV.read("F:\\CocamideExtWithStratification_Fingerprints_test.csv", DataFrame)
+    sort!(inputCocamidesTest, :SMILES)
+    # compare, 30684 x 793 df
+    inputAllFPDB = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+    sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
+    #
 function id2id(plotdf, i)
     inchikeyID = plotdf[i, "INCHIKEY"]
     idx = findall(inputAllFPDB.INCHIKEY .== inchikeyID)
     return inputAllFPDB[idx[end:end], "SMILES"][1]
 end
-
+#
 function cocamidesOrNot(plotdf, i)
     if (id2id(plotdf, i) in Array(inputCocamidesTrain[:, "SMILES"]) || id2id(plotdf, i) in Array(inputCocamidesTest[:, "SMILES"]))
         return true
@@ -251,13 +271,13 @@ function cocamidesOrNot(plotdf, i)
         return false
     end
 end
-
+#
 function findDots(plotdf, i)
     if (cocamidesOrNot(plotdf, i) == true)
         return plotdf[i, "predictRi"], plotdf[i, "CNLpredictRi"]
     end
 end
-
+#
 trainCocamide = []
 trainNonCocamide = []
 inputDB[!, "Cocamides"] .= ""
@@ -274,7 +294,7 @@ savePath = "F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi
 CSV.write(savePath, inputDB)
 trainNonCocamide = findall(inputDB[:, "Cocamides"] .== "no")
 trainCocamide = findall(inputDB[:, "Cocamides"] .== "yes")
-
+#
 testCocamide = []
 testNonCocamide = []
 inputDB_test[!, "Cocamides"] .= ""
@@ -292,114 +312,116 @@ CSV.write(savePath, inputDB_test)
 testNonCocamide = findall(inputDB_test[:, "Cocamides"] .== "no")
 testCocamide = findall(inputDB_test[:, "Cocamides"] .== "yes")
 
+## plot figures ##
 # inputing 693685*0.3 x 1+1+1+15961+1+1+1 df = 208106 x 15965
 # columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi, CNLpredictRi, Cocamides
 inputDB_test = CSV.read("F:\\UvA\\F\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
-
 # inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
 inputDB = CSV.read("F:\\UvA\\F\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
-
+#
 inputDB_test[:, end-2:end]
 inputDB[:, end-2:end]
+#
 #Pkg.add("Distributions")
 using Distributions
-tempDfTrain = inputDB[:, end-1]
-layout = @layout [a{0.8w,0.2h}            _
-                  b{0.8w,0.8h} c{0.2w,0.8h}]
-describe(inputDB[:, "CNLpredictRi"])
-default(fillcolor = :lightgrey, grid = false, legend = false)
-outplotTrain = plot(layout = layout, link = :both, legend = :topleft, 
-        size = (600, 600), margin = -2Plots.px, dpi = 300)
-scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1], 
-        subplot = 2, framestyle = :box, 
-        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
-        markershape = :star, 
-        c = :skyblue, 
-        markerstrokewidth = 0, 
-        alpha = 0.50, 
-        label = "Extended", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-scatter!(inputDB[trainCocamide, end-2], inputDB[trainCocamide, end-1], 
-        subplot = 2, framestyle = :box, 
-        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
-        markershape = :star, 
-        c = :green, 
-        markerstrokewidth = 0, 
-        alpha = 0.25, 
-        label = "Pre-Trained", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-plot!(tempDfTrain -> tempDfTrain, c=:red, subplot = 2, 
-        label = "Identity Line", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-histogram!(inputDB[:, end-2], bins = 165, subplot = 1, 
-        xlims = (-150, 1500), 
-        label = false, 
-        orientation = :v, 
-        framestyle = :none, 
-        dpi = 300)
-histogram!(inputDB[:, end-1], bins = 165, subplot = 3, 
-        ylims = (-150, 1500), 
-        label = false, 
-        orientation = :h, 
-        framestyle = :none, 
-        dpi = 300)
-plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
-        # Saving
+    ## plot for training ##
+    tempDfTrain = inputDB[:, end-1]
+    layout = @layout [a{0.8w,0.2h}            _
+                    b{0.8w,0.8h} c{0.2w,0.8h}]
+    describe(inputDB[:, "CNLpredictRi"])
+    default(fillcolor = :lightgrey, grid = false, legend = false)
+    outplotTrain = plot(layout = layout, link = :both, legend = :topleft, 
+            size = (600, 600), margin = -2Plots.px, dpi = 300)
+    scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1], 
+            subplot = 2, framestyle = :box, 
+            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            markershape = :star, 
+            c = :skyblue, 
+            markerstrokewidth = 0, 
+            alpha = 0.50, 
+            label = "Extended", 
+            margin = -2Plots.px, 
+            size = (600,600), 
+            dpi = 300)
+    scatter!(inputDB[trainCocamide, end-2], inputDB[trainCocamide, end-1], 
+            subplot = 2, framestyle = :box, 
+            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            markershape = :star, 
+            c = :green, 
+            markerstrokewidth = 0, 
+            alpha = 0.25, 
+            label = "Pre-Trained", 
+            margin = -2Plots.px, 
+            size = (600,600), 
+            dpi = 300)
+    plot!(tempDfTrain -> tempDfTrain, c=:red, subplot = 2, 
+            label = "Identity Line", 
+            margin = -2Plots.px, 
+            size = (600,600), 
+            dpi = 300)
+    histogram!(inputDB[:, end-2], bins = 165, subplot = 1, 
+            xlims = (-150, 1500), 
+            label = false, 
+            orientation = :v, 
+            framestyle = :none, 
+            dpi = 300)
+    histogram!(inputDB[:, end-1], bins = 165, subplot = 3, 
+            ylims = (-150, 1500), 
+            label = false, 
+            orientation = :h, 
+            framestyle = :none, 
+            dpi = 300)
+    plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
+## save ##
 savefig(outplotTrain, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTrainWithStratification_v3.png")
-
-
-tempDfTest = inputDB_test[:, end-1]
-layout = @layout [a{0.8w,0.2h}            _
-                  b{0.8w,0.8h} c{0.2w,0.8h}]
-describe(inputDB_test[:, "CNLpredictRi"])
-default(fillcolor = :lightgrey, grid = false, legend = false)
-outplotTest = plot(layout = layout, link = :both, legend = :topleft, 
-        size = (600, 600), margin = -2Plots.px, dpi = 300)
-scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end-1], 
-        subplot = 2, framestyle = :box, 
-        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
-        markershape = :star, 
-        c = :skyblue, 
-        markerstrokewidth = 0, 
-        alpha = 0.50, 
-        label = "Extended", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-scatter!(inputDB_test[testCocamide, end-2], inputDB_test[testCocamide, end-1], 
-        subplot = 2, framestyle = :box, 
-        xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
-        markershape = :star, 
-        c = :green, 
-        markerstrokewidth = 0, 
-        alpha = 0.25, 
-        label = "Pre-Trained", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-plot!(tempDfTest -> tempDfTest, c=:red, subplot = 2, 
-        label = "Identity Line", 
-        margin = -2Plots.px, 
-        size = (600,600), 
-        dpi = 300)
-histogram!(inputDB_test[:, end-2], bins = 165, subplot = 1, 
-        xlims = (-150, 1500), 
-        label = false, 
-        orientation = :v, 
-        framestyle = :none, 
-        dpi = 300)
-histogram!(inputDB_test[:, end-1], bins = 165, subplot = 3, 
-        ylims = (-150, 1500), 
-        label = false, 
-        orientation = :h, 
-        framestyle = :none, 
-        dpi = 300)
-plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
-        # Saving
+#
+    ## plot for testing ##
+    tempDfTest = inputDB_test[:, end-1]
+    layout = @layout [a{0.8w,0.2h}            _
+                    b{0.8w,0.8h} c{0.2w,0.8h}]
+    describe(inputDB_test[:, "CNLpredictRi"])
+    default(fillcolor = :lightgrey, grid = false, legend = false)
+    outplotTest = plot(layout = layout, link = :both, legend = :topleft, 
+            size = (600, 600), margin = -2Plots.px, dpi = 300)
+    scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end-1], 
+            subplot = 2, framestyle = :box, 
+            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            markershape = :star, 
+            c = :skyblue, 
+            markerstrokewidth = 0, 
+            alpha = 0.50, 
+            label = "Extended", 
+            margin = -2Plots.px, 
+            size = (600,600), 
+            dpi = 300)
+    scatter!(inputDB_test[testCocamide, end-2], inputDB_test[testCocamide, end-1], 
+            subplot = 2, framestyle = :box, 
+            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            markershape = :star, 
+            c = :green, 
+            markerstrokewidth = 0, 
+            alpha = 0.25, 
+            label = "Pre-Trained", 
+            margin = -2Plots.px, 
+            size = (600,600), 
+            dpi = 300)
+    plot!(tempDfTest -> tempDfTest, c=:red, subplot = 2, 
+            label = "Identity Line", 
+            margin = -2Plots.px, 
+            size = (600,600), 
+            dpi = 300)
+    histogram!(inputDB_test[:, end-2], bins = 165, subplot = 1, 
+            xlims = (-150, 1500), 
+            label = false, 
+            orientation = :v, 
+            framestyle = :none, 
+            dpi = 300)
+    histogram!(inputDB_test[:, end-1], bins = 165, subplot = 3, 
+            ylims = (-150, 1500), 
+            label = false, 
+            orientation = :h, 
+            framestyle = :none, 
+            dpi = 300)
+    plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
+## save ##
 savefig(outplotTest, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTestWithStratification_v3.png")
