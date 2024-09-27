@@ -31,7 +31,7 @@ input_ap2d = CSV.read("F:\\dataAP2DFingerprinter.csv", DataFrame)
 
 ## import csv2 file- PubChem ##
 # input csv2 is a 30684 x 160 df, columns include 
-        #SMILES, INCHIKEY, 148 Pubchem FPs, and 10 newly converted columns
+        # SMILES, INCHIKEY, 148 Pubchem FPs, and 10 newly converted columns
 input_pub = CSV.read("F:\\dataPubchemFingerprinter_converted.csv", 
     DataFrame, select = Symbol.("PubchemFP".*string.(151:160)))
 
@@ -44,7 +44,7 @@ input_pub = input_pub[ind_all .== 0, :]
 
 # merge/join 2 dfs
 # output csv is a 30684 x 790 df, columns include 
-        #SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs
+        # SMILES, INCHIKEY, 780 APC2D FPs, 10 Pubchem converted FPs
 allFPs = hcat(input_ap2d, input_pub)
 
 # save the output table as a spreadsheet ##

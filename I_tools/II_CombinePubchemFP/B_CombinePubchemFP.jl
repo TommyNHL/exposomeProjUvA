@@ -68,7 +68,7 @@ end
 # 717 compound entries have no SMILES id -> conversion failed
 # 1 compound entry has an invalid SMILES id -> conversion failed
 # so the updated csv input is a 30684 x 150 df, columns include 
-        #SMILES, INCHIKEY, and 148 Pubchem FPs, 148 -> 10 columns after operation
+        # SMILES, INCHIKEY, and 148 Pubchem FPs, 148 -> 10 columns after operation
 input = CSV.read("F:\\dataPubchemFingerprinter.csv", DataFrame)
 
 ## call function to convert PubChem FingerPrinter features ##
@@ -76,6 +76,6 @@ output = convertPubChemFPs(input[:,1:end], input[:,3:end])
 
 ## save the output table as a spreadsheet ##
 # output csv is a 30684 x 160 df, columns include 
-        #SMILES, INCHIKEY, 148 Pubchem FPs, and 10 newly added columns
+        # SMILES, INCHIKEY, 148 Pubchem FPs, and 10 newly added columns
 savePath = "F:\\UvA\\dataPubchemFingerprinter_converted.csv"
 CSV.write(savePath, output)
