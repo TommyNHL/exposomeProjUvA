@@ -2,14 +2,11 @@
 # Procedure
 
 ## I_tools  (folder)
-### I_Python_v3_11  (sub-folder)
-#### A_Installer11.ipynb
-### II_CombinePubchemFP  (sub-folder)
-#### B_CombinePubchemFP.jl
+### A_Installer11.ipynb
+### B_CombinePubchemFP.jl
 #### - INPUT(S): ***dataPubchemFingerprinter.csv***
 #### - OUTPUT(S): ***dataPubchemFingerprinter_converted.csv***
-### III_MergeApc2dPubchem  (sub-folder)
-#### C_MergeApc2dPubchem.jl
+### C_MergeApc2dPubchem.jl
 #### - INPUT(S): ***dataAP2DFingerprinter.csv***
 #### - INPUT(S): ***dataPubchemFingerprinter_converted.csv***
 #### - OUTPUT(S): ***dataAllFingerprinter_4RiPredict.csv***
