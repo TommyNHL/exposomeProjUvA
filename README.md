@@ -124,4 +124,16 @@
 #### - OUTPUT(S): ***CNL_Ref_PestMix_1-8.csv***
 #### - OUTPUT(S): ***INCHIKEYs_CNL_Ref_PestMix_1-8.csv***
 #### - OUTPUT(S): ***INCHIKEYs_CNL_Ref_PestMix_1.csv - INCHIKEYs_CNL_Ref_PestMix_8.csv***
+### F_TestTemplate.jl  (for test samples in the foler- PestMix1-8_test_report_comp_IDs)
+#### - INPUT(S): ***INCHIKEYs_CNL_Ref_PestMix_1-8.csv***
+#### - INPUT(S): ***PestMix1-8_test_report_comp_IDs.csv***
+#### - INPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
+#### - INPUT(S): ***TPTN_dfCNLfeaturesStr.csv***
+#### - INPUT(S): ***CocamideExtended73_CNLsRi_RFwithStratification.joblib***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_check.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_checked.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_ready4CNLdf.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_extractedWithCNLsList.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_withCNLRideltaRi.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling.csv***
 
