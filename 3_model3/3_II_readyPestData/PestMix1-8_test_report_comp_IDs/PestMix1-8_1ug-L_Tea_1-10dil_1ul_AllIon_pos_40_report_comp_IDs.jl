@@ -340,7 +340,7 @@ println("done for saving csv")
     # 15962 x 15962
     hipinv = zeros(15962, 15962)
     hipinv[:,:] .= pinv(Xmat'*Xmat)
-    
+    #
     function leverage_dist(X)
         h = zeros(6403,1)
         for i in ProgressBar(1: size(X,1)) #check dimensions

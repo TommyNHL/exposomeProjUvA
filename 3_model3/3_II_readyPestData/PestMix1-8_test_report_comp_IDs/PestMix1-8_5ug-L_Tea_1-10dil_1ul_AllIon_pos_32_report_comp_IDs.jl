@@ -1,59 +1,69 @@
-#download
-    #INCHIKEYs_CNL_Ref_PestMix_1-8.csv
-    #dataAllFP_withNewPredictedRiWithStratification.csv
-    #TPTN_dfCNLfeaturesStr.csv
-    #CocamideExtended73_CNLsRi_RFwithStratification.joblib
-    #modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib
+## INPUT(S)
+# INCHIKEYs_CNL_Ref_PestMix_1-8.csv
+# PestMix1-8_test_report_comp_IDs.csv
+# dataAllFP_withNewPredictedRiWithStratification.csv
+# TPTN_dfCNLfeaturesStr.csv
+# CocamideExtended73_CNLsRi_RFwithStratification.joblib
 
-#import packages
-    VERSION
-    using Pkg
-    #Pkg.add("ScikitLearn")
-    import Conda
-    Conda.PYTHONDIR
-    ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
-    Pkg.build("PyCall")
-    Pkg.status()
-    #Pkg.add(PackageSpec(url=""))
-    using Random
-    using CSV, DataFrames, Conda, LinearAlgebra, Statistics
-    using PyCall
-    using StatsPlots
-    using Plots
-    using ProgressBars
-    
-    jl = pyimport("joblib")             # used for loading models
-    f1_score = pyimport("sklearn.metrics").f1_score
-    matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
-    make_scorer = pyimport("sklearn.metrics").make_scorer
-    f1 = make_scorer(f1_score, pos_label=1, average="binary")
-    
-    using ScikitLearn  #: @sk_import, fit!, predict
-    @sk_import ensemble: RandomForestRegressor
-    @sk_import ensemble: GradientBoostingClassifier
-    @sk_import linear_model: LogisticRegression
-    @sk_import ensemble: RandomForestClassifier
-    @sk_import ensemble: AdaBoostClassifier
-    @sk_import tree: DecisionTreeClassifier
-    @sk_import metrics: recall_score
-    @sk_import neural_network: MLPClassifier
-    @sk_import svm: SVC
-    @sk_import neighbors: KNeighborsClassifier
-    @sk_import inspection: permutation_importance
-    #using ScikitLearn.GridSearch: RandomizedSearchCV
-    using ScikitLearn.CrossValidation: cross_val_score
-    using ScikitLearn.CrossValidation: train_test_split
-    #using ScikitLearn.GridSearch: GridSearchCV
+## OUTPUT(S)
+# PestMix1-8_test_report_comp_IDs_check.csv
+# PestMix1-8_test_report_comp_IDs_checked.csv
+# PestMix1-8_test_report_comp_IDs_ready4CNLdf.csv
+# PestMix1-8_test_report_comp_IDs_extractedWithCNLsList.csv
+# PestMix1-8_test_report_comp_IDs_withCNLRideltaRi.csv
+# PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling.csv
 
-#import groud truth
-    INCHIKEYreal = Array(CSV.read("F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv", DataFrame)[:,1])
+VERSION
+## install packages needed ##
+using Pkg
+#Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
 
-#handle MS/MS data
-    # inputing __ x 20 dfs -> 29914 x 12+4+1 df
-    ## ID, Rt, MS1Mass, Name, Formula, ACCESSION, 
-    ## RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
-    ## DirectMatch, ReversMatch, Probability, FinalScore, 
-    ## SpecType, MatchedFrags, Inchikey, FragMZ, FragInt
+## import packages from Julia ##
+import Conda
+Conda.PYTHONDIR
+ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+Pkg.build("PyCall")
+Pkg.status()
+using Random
+using CSV, DataFrames, Conda, LinearAlgebra, Statistics
+using PyCall
+using StatsPlots
+using Plots
+using ProgressBars
+
+## import packages from Python ##
+jl = pyimport("joblib")             # used for loading models
+f1_score = pyimport("sklearn.metrics").f1_score
+matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
+make_scorer = pyimport("sklearn.metrics").make_scorer
+f1 = make_scorer(f1_score, pos_label=1, average="binary")
+using ScikitLearn  #: @sk_import, fit!, predict
+@sk_import ensemble: RandomForestRegressor
+@sk_import ensemble: GradientBoostingClassifier
+@sk_import linear_model: LogisticRegression
+@sk_import ensemble: RandomForestClassifier
+@sk_import ensemble: AdaBoostClassifier
+@sk_import tree: DecisionTreeClassifier
+@sk_import metrics: recall_score
+@sk_import neural_network: MLPClassifier
+@sk_import svm: SVC
+@sk_import neighbors: KNeighborsClassifier
+@sk_import inspection: permutation_importance
+#using ScikitLearn.GridSearch: RandomizedSearchCV
+using ScikitLearn.CrossValidation: cross_val_score
+using ScikitLearn.CrossValidation: train_test_split
+#using ScikitLearn.GridSearch: GridSearchCV
+
+## import groud truth ##
+INCHIKEYreal = Array(CSV.read("F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv", DataFrame)[:,1])
+
+## handle MS/MS data ##
+    ## input __ x 20 dfs -> 29914 x 12+4+1 df
+    # ID, Rt, MS1Mass, Name, Formula, ACCESSION, 
+    # RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
+    # DirectMatch, ReversMatch, Probability, FinalScore, 
+    # SpecType, MatchedFrags, Inchikey, FragMZ, FragInt
     inputDB1 = CSV.read("F:\\PestMix1-8_5ug-L_Tea_1-10dil_1ul_AllIon_pos_32_report_comp_IDs.csv", DataFrame)
     #inputDB5 = CSV.read("F:\\Cand_synth_rr10_4001_5000.csv", DataFrame)
     #combinedDB = vcat(inputDB1, inputDB2, inputDB3, inputDB4, inputDB5)
