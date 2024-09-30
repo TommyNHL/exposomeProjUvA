@@ -165,7 +165,7 @@ CSV.write(savePath, outputDf)
             outputDf[i, "FPpredictRi"] = float(8888888)
         end
     end
-    ## filte in INCHIKEY_ID with Ri values ##
+    ## filter in INCHIKEY_ID with Ri values ##
     outputDf = outputDf[outputDf.FPpredictRi .!= float(8888888), :]
     sort!(outputDf, [:LABEL, :INCHIKEY_ID])
 ## output csv __ x 15 df ##
