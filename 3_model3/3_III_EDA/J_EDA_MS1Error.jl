@@ -1,14 +1,37 @@
+## INPUT(S)
+# trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+# trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+# trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+# testDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+# testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+# testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+# noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+# noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+# noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+# TeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+# TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+# TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+
+## OUTPUT(S)
+# outplot_TPTNDistrution_FeatureUsrMatchFragRatio_noFilter.png
+
 VERSION
+## install packages needed ##
 using Pkg
+#Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
+
+## import packages from Julia ##
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using ScikitLearn
 using StatsPlots
 using Plots
 
+## import training set ##
 # 1686319/1686319 / 485631/485631 x 21 / 22 / 22 / 22
 trainDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
 trainDEDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
-trainDEFDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
+#trainDEFDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
 trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 # 421381/421381 / 121946/121946 x 21 / 22 / 22 / 22

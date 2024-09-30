@@ -136,4 +136,47 @@
 #### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_extractedWithCNLsList.csv***
 #### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_withCNLRideltaRi.csv***
 #### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling.csv***
+### G_PreEDA.jl
+#### - INPUT(S): ***PestMix1-8_1ug-L_NoTea_test_report_comp_IDs_dataframeTPTNModeling.csv***
+#### - INPUT(S): ***PestMix1-8_1ug-L_Tea_test_report_comp_IDs_dataframeTPTNModeling***
+#### - INPUT(S): ***dataframeTPTNModeling_TrainYesDFwithhl_all.csv***
+#### - INPUT(S): ***dataframeTPTNModeling_TestYesDFwithhl_all.csv***
+#### - OUTPUT(S): ***allRealsampleNoTea_dataframeTPTNModeling.csv***
+#### - OUTPUT(S): ***allRealsampleWithTea_dataframeTPTNModeling.csv***
+#### - OUTPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - OUTPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - OUTPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - OUTPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - OUTPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - OUTPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - OUTPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - OUTPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - OUTPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - OUTPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - OUTPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - OUTPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+### H_EDA_RefMatchFragRatio.jl
+### I_EDA_UsrMatchFragRatio.jl
+### J_EDA_MS1Error.jl
+### K_EDA_MS2Error.jl
+### L_EDA_MS2ErrorStd.jl
+### M_EDA_Match.jl
+### N_EDA_FinalScoreRatio.jl
+### O_EDA_MonoisotopicMass.jl
+### P_EDA_DeltaRI.jl
+#### - INPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - INPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - INPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - INPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - INPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - INPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - INPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv***
+#### - INPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv***
+#### - INPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - OUTPUT(S): ***outplot_TPTNDistrution_FeatureRefMatchFragRatio_noFilter.png***
+#### - OUTPUT(S): ***outplot_TPTNDistrution_FeatureUsrMatchFragRatio_noFilter.png***
+
 
