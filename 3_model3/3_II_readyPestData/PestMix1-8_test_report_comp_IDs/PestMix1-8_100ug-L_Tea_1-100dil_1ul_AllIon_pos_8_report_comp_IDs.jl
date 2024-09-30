@@ -1,59 +1,69 @@
-#download
-    #INCHIKEYs_CNL_Ref_PestMix_1-8.csv
-    #dataAllFP_withNewPredictedRiWithStratification.csv
-    #TPTN_dfCNLfeaturesStr.csv
-    #CocamideExtended73_CNLsRi_RFwithStratification.joblib
-    #modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib
+## INPUT(S)
+# INCHIKEYs_CNL_Ref_PestMix_1-8.csv
+# PestMix1-8_test_report_comp_IDs.csv
+# dataAllFP_withNewPredictedRiWithStratification.csv
+# TPTN_dfCNLfeaturesStr.csv
+# CocamideExtended73_CNLsRi_RFwithStratification.joblib
 
-#import packages
-    VERSION
-    using Pkg
-    #Pkg.add("ScikitLearn")
-    import Conda
-    Conda.PYTHONDIR
-    ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
-    Pkg.build("PyCall")
-    Pkg.status()
-    #Pkg.add(PackageSpec(url=""))
-    using Random
-    using CSV, DataFrames, Conda, LinearAlgebra, Statistics
-    using PyCall
-    using StatsPlots
-    using Plots
-    using ProgressBars
-    
-    jl = pyimport("joblib")             # used for loading models
-    f1_score = pyimport("sklearn.metrics").f1_score
-    matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
-    make_scorer = pyimport("sklearn.metrics").make_scorer
-    f1 = make_scorer(f1_score, pos_label=1, average="binary")
-    
-    using ScikitLearn  #: @sk_import, fit!, predict
-    @sk_import ensemble: RandomForestRegressor
-    @sk_import ensemble: GradientBoostingClassifier
-    @sk_import linear_model: LogisticRegression
-    @sk_import ensemble: RandomForestClassifier
-    @sk_import ensemble: AdaBoostClassifier
-    @sk_import tree: DecisionTreeClassifier
-    @sk_import metrics: recall_score
-    @sk_import neural_network: MLPClassifier
-    @sk_import svm: SVC
-    @sk_import neighbors: KNeighborsClassifier
-    @sk_import inspection: permutation_importance
-    #using ScikitLearn.GridSearch: RandomizedSearchCV
-    using ScikitLearn.CrossValidation: cross_val_score
-    using ScikitLearn.CrossValidation: train_test_split
-    #using ScikitLearn.GridSearch: GridSearchCV
+## OUTPUT(S)
+# PestMix1-8_test_report_comp_IDs_check.csv
+# PestMix1-8_test_report_comp_IDs_checked.csv
+# PestMix1-8_test_report_comp_IDs_ready4CNLdf.csv
+# PestMix1-8_test_report_comp_IDs_extractedWithCNLsList.csv
+# PestMix1-8_test_report_comp_IDs_withCNLRideltaRi.csv
+# PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling.csv
 
-#import groud truth
-    INCHIKEYreal = Array(CSV.read("F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv", DataFrame)[:,1])
+VERSION
+## install packages needed ##
+using Pkg
+#Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
 
-#handle MS/MS data
-    # inputing __ x 20 dfs -> 29914 x 12+4+1 df
-    ## ID, Rt, MS1Mass, Name, Formula, ACCESSION, 
-    ## RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
-    ## DirectMatch, ReversMatch, Probability, FinalScore, 
-    ## SpecType, MatchedFrags, Inchikey, FragMZ, FragInt
+## import packages from Julia ##
+import Conda
+Conda.PYTHONDIR
+ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+Pkg.build("PyCall")
+Pkg.status()
+using Random
+using CSV, DataFrames, Conda, LinearAlgebra, Statistics
+using PyCall
+using StatsPlots
+using Plots
+using ProgressBars
+
+## import packages from Python ##
+jl = pyimport("joblib")             # used for loading models
+f1_score = pyimport("sklearn.metrics").f1_score
+matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
+make_scorer = pyimport("sklearn.metrics").make_scorer
+f1 = make_scorer(f1_score, pos_label=1, average="binary")
+using ScikitLearn  #: @sk_import, fit!, predict
+@sk_import ensemble: RandomForestRegressor
+@sk_import ensemble: GradientBoostingClassifier
+@sk_import linear_model: LogisticRegression
+@sk_import ensemble: RandomForestClassifier
+@sk_import ensemble: AdaBoostClassifier
+@sk_import tree: DecisionTreeClassifier
+@sk_import metrics: recall_score
+@sk_import neural_network: MLPClassifier
+@sk_import svm: SVC
+@sk_import neighbors: KNeighborsClassifier
+@sk_import inspection: permutation_importance
+#using ScikitLearn.GridSearch: RandomizedSearchCV
+using ScikitLearn.CrossValidation: cross_val_score
+using ScikitLearn.CrossValidation: train_test_split
+#using ScikitLearn.GridSearch: GridSearchCV
+
+## import groud truth ##
+INCHIKEYreal = Array(CSV.read("F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv", DataFrame)[:,1])
+
+## handle MS/MS data ##
+    ## input __ x 20 dfs -> 29914 x 12+4+1 df
+    # ID, Rt, MS1Mass, Name, Formula, ACCESSION, 
+    # RefMatchFrag, UsrMatchFrag, MS1Error, MS2Error, MS2ErrorStd, 
+    # DirectMatch, ReversMatch, Probability, FinalScore, 
+    # SpecType, MatchedFrags, Inchikey, FragMZ, FragInt
     inputDB1 = CSV.read("F:\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs.csv", DataFrame)
     #inputDB5 = CSV.read("F:\\Cand_synth_rr10_4001_5000.csv", DataFrame)
     #combinedDB = vcat(inputDB1, inputDB2, inputDB3, inputDB4, inputDB5)
@@ -64,7 +74,6 @@
         "MS1Error", "MS2Error", "MS2ErrorStd", 
         "DirectMatch", "ReversMatch", 
         "FinalScore", "MS1Mass", "FragMZ"]]
-    
     combinedDB = combinedDB[combinedDB.RefMatchFrag .!= "NaN", :]
     combinedDB = combinedDB[combinedDB.RefMatchFrag .!== NaN, :]
     combinedDB = combinedDB[combinedDB.UsrMatchFrag .!= "NaN", :]
@@ -85,7 +94,7 @@
     combinedDB[!, "FinalScoreRatio"] .= float(0)
     combinedDB[!, "INCHIKEY_ID"] .= ""
     
-    #handle 8 features
+## handle 8 features ##
     function takeRatio(str)
         num = ""
         ratio = float(0)
@@ -105,7 +114,7 @@
         ratio = ratio / (parse(Float64, num))
         return ratio
     end
-
+    #
     ratioRef = []
     ratioUsr = []
     ratioScore = []
@@ -122,54 +131,50 @@
             push!(trueOrFalse, 0)
         end
     end
-
+    #
     combinedDB[!, "RefMatchFragRatio"] = ratioRef
     combinedDB[!, "UsrMatchFragRatio"] = ratioUsr
     combinedDB[!, "FinalScoreRatio"] = ratioScore
     combinedDB[!, "LABEL"] = trueOrFalse
-    
     savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_check.csv"
     CSV.write(savePath, combinedDB)
-    
+    #
     outputDf = combinedDB[:, ["INCHIKEY_ID", "Inchikey", "ID", "RefMatchFragRatio", "UsrMatchFragRatio", 
     "MS1Error", "MS2Error", "MS2ErrorStd", "DirectMatch", "ReversMatch", 
     "FinalScoreRatio", "MS1Mass", "FragMZ", "LABEL"]]
-    
-    # output csv is a __ x 14 df
-    savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_checked.csv"
-    CSV.write(savePath, outputDf)
+## output csv ## is a __ x 14 df
+savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_checked.csv"
+CSV.write(savePath, outputDf)
 
-    #handle the delta Ri feature
-        # creating a 68120 x 2+8+2+1+1 df, 
-            ## columns: INCHIKEY_ID, INCHIKEYreal, 8+1 ULSA features, LABEL
-            ##                      FP->Ri, CNL->Ri ^
-        # matching INCHIKEY, 30684 x 793 df
-        inputFP2Ri = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
-        sort!(inputFP2Ri, [:INCHIKEY, :SMILES])
-
-        # FP-derived Ri values
-        outputDf[!, "FPpredictRi"] .= float(0)
-
-        for i in 1:size(outputDf, 1)
-            println(i)
-            if outputDf[i, "Inchikey"] in Array(inputFP2Ri[:, "INCHIKEY"])
-                rowNo = findall(inputFP2Ri.INCHIKEY .== outputDf[i, "Inchikey"])
-                outputDf[i, "FPpredictRi"] = inputFP2Ri[rowNo[end:end], "predictRi"][1]
-            else
-                outputDf[i, "FPpredictRi"] = float(8888888)
-            end
+## handle the delta Ri feature ##
+    ## create a __ x 2+8+2+1+1 df ##
+        # columns: INCHIKEY_ID, INCHIKEYreal, 8+1 ULSA features, LABEL
+        #                      FP->Ri, CNL->Ri ^
+    ## find FP-derived Ri values ##
+    ## match INCHIKEY ##, 30684 x 793 df
+    inputFP2Ri = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+    sort!(inputFP2Ri, [:INCHIKEY, :SMILES])
+    #
+    outputDf[!, "FPpredictRi"] .= float(0)
+    for i in 1:size(outputDf, 1)
+        println(i)
+        if outputDf[i, "Inchikey"] in Array(inputFP2Ri[:, "INCHIKEY"])
+            rowNo = findall(inputFP2Ri.INCHIKEY .== outputDf[i, "Inchikey"])
+            outputDf[i, "FPpredictRi"] = inputFP2Ri[rowNo[end:end], "predictRi"][1]
+        else
+            outputDf[i, "FPpredictRi"] = float(8888888)
         end
-        # filtering in INCHIKEY_ID with Ri values
-        outputDf = outputDf[outputDf.FPpredictRi .!= float(8888888), :]
-        sort!(outputDf, [:LABEL, :INCHIKEY_ID])
+    end
+    ## filter in INCHIKEY_ID with Ri values ##
+    outputDf = outputDf[outputDf.FPpredictRi .!= float(8888888), :]
+    sort!(outputDf, [:LABEL, :INCHIKEY_ID])
+## output csv __ x 15 df ##
+savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_ready4CNLdf.csv"
+CSV.write(savePath, outputDf)
 
-#output csv __ x 15 df
-    savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_ready4CNLdf.csv"
-    CSV.write(savePath, outputDf)
-
-    inputTPTNdf = CSV.read("F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_ready4CNLdf.csv", DataFrame)
-
-#create CNL df
+## create CNL df ##
+inputTPTNdf = CSV.read("F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_ready4CNLdf.csv", DataFrame)
+    ## define a function for data extraction ##
     function getVec(matStr)
         if matStr[1] .== '['
             if contains(matStr, ", ")
@@ -207,13 +212,13 @@
         end
     end
 
-    # initialization for 1 more column -> __ x 15+1
+    ## initialize an aray for 1 more column ## -> __ x 15+1
     inputTPTNdf[!, "CNLmasses"] .= [[]]
     size(inputTPTNdf)
 
-    # import pre-defined 15961 CNL features
+    ## import pre-defined 15961 CNL features ##
     CNLfeaturesStr = CSV.read("F:\\TPTN_dfCNLfeaturesStr.csv", DataFrame)[:, "CNLfeaturesStr"]
-
+        #
         candidatesList = []
         for can in CNLfeaturesStr
             #push!(candidatesList, round(parse(Float64, can), digits = 2))
@@ -225,7 +230,7 @@
             push!(CNLfeaturesStr, string(can))
         end
 
-    # CNL extraction
+    ## extract CNL ##
     for i in 1:size(inputTPTNdf, 1)
         println(i)
         fragIons = getVec(inputTPTNdf[i,"FragMZ"])
@@ -242,7 +247,7 @@
     end
     sort!(inputTPTNdf, [:LABEL, :INCHIKEY_ID, :CNLmasses])
     
-    # Reducing df size (rows)
+    ## reduce df size (rows) ##
     function getMasses(db, i, arr, arrType = "dig")
         massesArr = arr
         if (arrType == "dig")
@@ -256,7 +261,7 @@
         return massesArr
     end
 
-    # removing rows that has Frag-ion of interest < 2 (optional)
+    ## remove rows that has Frag-ion of interest < 2 (optional) ##
     retain = []
     for i in 1:size(inputTPTNdf, 1)
         println(i)
@@ -270,11 +275,10 @@
     savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_extractedWithCNLsList.csv"
     CSV.write(savePath, inputTPTNdf)
 
+    ## store data in a Matrix ##
     inputTPTNdf = CSV.read("F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_extractedWithCNLsList.csv", DataFrame)
-
-    # storing data in a Matrix
     X = zeros(8066, 15961)
-
+    #
     for i in 1:8066
         println(i)
         arr = []
@@ -290,7 +294,7 @@
         end
     end
 
-    # creating df with 11 + 1(monoisotopic mass) + 15961(CNLs)
+    ## create df ## with 11 + 1(monoisotopic mass) + 15961(CNLs)
     dfCNLs = DataFrame(X, CNLfeaturesStr)
         insertcols!(dfCNLs, 1, ("ENTRY"=>collect(1:8066)))
         insertcols!(dfCNLs, 2, ("INCHIKEY_ID"=>inputTPTNdf[:, "INCHIKEY_ID"]))
@@ -308,39 +312,35 @@
     dfCNLs[!, "FPpredictRi"] = inputTPTNdf[:,"FPpredictRi"]
     size(dfCNLs)  # __ x (13+15961+1)
 
-    # checking
-    desStat = describe(dfCNLs)[12:end-1, :]
+    ## Load a pre-trained CNL-to-Ri model ##
+    # requires python 3.11 or 3.12
+    modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    size(modelRF_CNL)
     
-    #load a pre-trained CNL-to-Ri model
-        # requires python 3.11 or 3.12
-        modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
-        size(modelRF_CNL)
-    
-    # predict CNL-derived Ri
+    ## predict CNL-derived Ri ##
     CNLpredictedRi = predict(modelRF_CNL, Matrix(dfCNLs[:, 13:end-1]))
     dfCNLs[!, "CNLpredictRi"] = CNLpredictedRi
     dfCNLs[!, "DeltaRi"] = (CNLpredictedRi - dfCNLs[:, "FPpredictRi"]) / 1000
     dfCNLs[!, "LABEL"] = inputTPTNdf[:, "LABEL"]
-        
-    # saving csv
-    savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withCNLRideltaRi.csv"
-        CSV.write(savePath, dfCNLs)
-        println("done for saving csv")
+## save csv ##
+savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withCNLRideltaRi.csv"
+CSV.write(savePath, dfCNLs)
+println("done for saving csv")
 
-    dfOutput = CSV.read("F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withCNLRideltaRi.csv", DataFrame)
-
-#leverage
+## apply leverage filter ##
+dfOutput = CSV.read("F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withCNLRideltaRi.csv", DataFrame)
+    #
     describe(dfOutput)[end-4:end-2, :]
     X = deepcopy(dfOutput[:, 13:end-4])  # __ x 15962 df
     size(X)
     Y = deepcopy(dfOutput[:, end-2])
     size(Y)
     Xmat = Matrix(X)
-    
+    #
     # 15962 x 15962
     hipinv = zeros(15962, 15962)
     hipinv[:,:] .= pinv(Xmat'*Xmat)
-    
+    #
     function leverage_dist(X)
         h = zeros(8066,1)
         for i in ProgressBar(1: size(X,1)) #check dimensions
@@ -352,193 +352,11 @@
         end
         return h
     end
-    
+    #
     h = leverage_dist(Matrix(X))
     ht = Vector(transpose(h)[1,:])
-    
     dfOutput[!, "Leverage"] .= ht
     dfOutput = dfOutput[:, vcat(collect(1:13), end-4, end-3, end-2, end-1, end)]
-
-    # saving csv
-    savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_dataframeTPTNModeling.csv"
-    CSV.write(savePath, dfOutput)
-
-#TP/TN prediction
-    inputDB_test = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_dataframeTPTNModeling.csv", DataFrame)
-    sort!(inputDB_test, [:ENTRY])
-    insertcols!(inputDB_test, 10, ("MatchDiff"=>float(0)))
-    inputDB_test = inputDB_test[inputDB_test.FinalScoreRatio .>= float(0.5), :]
-    inputDB_test = inputDB_test[inputDB_test.Leverage .<= 0.14604417882015916, :]
-    #describe(inputDB_test[inputDB_test.LABEL .== 0, :])
-    #describe(inputDB_test[inputDB_test.LABEL .== 1, :])
-    #inputDB_test = inputDB_test[inputDB_test.MS1Error .>= float(-0.061), :]
-    #inputDB_test = inputDB_test[inputDB_test.MS1Error .<= float(0.058), :]
-    for i = 1:size(inputDB_test, 1)
-        inputDB_test[i, "RefMatchFragRatio"] = log10(inputDB_test[i, "RefMatchFragRatio"])
-        inputDB_test[i, "UsrMatchFragRatio"] = log10(inputDB_test[i, "UsrMatchFragRatio"])
-        inputDB_test[i, "FinalScoreRatio"] = log10(inputDB_test[i, "FinalScoreRatio"])
-        inputDB_test[i, "MatchDiff"] = inputDB_test[i, "DirectMatch"] - inputDB_test[i, "ReversMatch"]
-        inputDB_test[i, "MONOISOTOPICMASS"] = log10(inputDB_test[i, "MONOISOTOPICMASS"])
-        if inputDB_test[i, "DeltaRi"] !== float(0)
-            inputDB_test[i, "DeltaRi"] = inputDB_test[i, "DeltaRi"] * float(-1)
-        end
-    end
-    describe(inputDB_test[:, 5:14])
-    for f = 5:14
-        avg = float(mean(inputDB_test[:, f]))
-        top = float(maximum(inputDB_test[:, f]))
-        down = float(minimum(inputDB_test[:, f]))
-        for i = 1:size(inputDB_test, 1)
-            inputDB_test[i, f] = (inputDB_test[i, f] - avg) / (top - down)
-        end
-    end
-    # save, ouputing 2103 x 18+1 df, 0:1314; 1:789 = 
-    savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
-    CSV.write(savePath, inputDB_test)
-    inputDB_test[inputDB_test.LABEL .== 1, :]
-
-    # performace
-        ## Maximum absolute error
-        ## mean square error (MSE) calculation
-        ## Root mean square error (RMSE) calculation
-        function errorDetermination(arrRi, predictedRi)
-            sumAE = 0
-            maxAE = 0
-            for i = 1:size(predictedRi, 1)
-                AE = abs(arrRi[i] - predictedRi[i])
-                if (AE > maxAE)
-                    maxAE = AE
-                end
-                sumAE += (AE ^ 2)
-            end
-            MSE = sumAE / size(predictedRi, 1)
-            RMSE = MSE ^ 0.5
-            return maxAE, MSE, RMSE
-        end
-
-    ## R-square value
-        function rSquareDetermination(arrRi, predictedRi)
-            sumY = 0
-            for i = 1:size(predictedRi, 1)
-                sumY += predictedRi[i]
-            end
-            meanY = sumY / size(predictedRi, 1)
-            sumAE = 0
-            sumRE = 0
-            for i = 1:size(predictedRi, 1)
-                AE = abs(arrRi[i] - predictedRi[i])
-                RE = abs(arrRi[i] - meanY)
-                sumAE += (AE ^ 2)
-                sumRE += (RE ^ 2)
-            end
-            rSquare = 1 - (sumAE / sumRE)
-            return rSquare
-        end
-
-    ## Average accuracy
-        function avgScore(arrAcc, cv)
-            sumAcc = 0
-            for acc in arrAcc
-                sumAcc += acc
-            end
-            return sumAcc / cv
-        end
-
-        describe((inputDB_test))[vcat(5, 7,9, 13,14, 17), :]
-        # load the pre-trained TP/TN model
-        # requires python 3.11 or 3.12
-        model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
-
-        # predict TP/TN
-        predictedTPTN_test = predict(model, Matrix(inputDB_test[:, vcat(5, 7,9, 13,14, 17)]))
-        inputDB_test[!, "withDeltaRIpredictTPTN"] = predictedTPTN_test
-        # save, ouputing testSet df 2103 x 19+1 df
-        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv"
-        CSV.write(savePath, inputDB_test)
-
-    #show prediction performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
-        describe((inputTestDB_withDeltaRiTPTN))[end-5:end, :]
-
-        # 1, 0.3252496433666191, 0.5703066222363362
-        maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
-        # -0.36719125728768187
-        rSquare_val = rSquareDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
-
-        # 2103 × 2 Matrix
-        pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)]))
-        # 0.6451204055766794
-        recall_test = recall_score(Vector(inputTestDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)])))
-
-        inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
-        inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
-        # save, ouputing trainSet df 2103 x 19+1+2 df
-        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
-        CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
-
-        describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
-
-    #count individual sample performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
-        sort!(inputTestDB_withDeltaRiTPTN, [:INCHIKEYreal, :INCHIKEY])
-
-        function checkID(inID, refID)
-            if (inID == refID)
-                return true
-            else
-                return false
-            end
-        end
-
-        function countID(count, inID, refID)
-            acc = count
-            if (checkID(inID, refID) == true)
-                acc += 1
-                return acc
-            else
-                return 1
-            end
-        end
-
-        function countP(pro, accPro, inID, refID)
-            acc = accPro
-            if (checkID(inID, refID) == true)
-                acc += pro
-                return acc
-            else
-                return pro
-            end
-        end
-
-        count = 1
-        colCount = [1]
-        accP0 = inputTestDB_withDeltaRiTPTN[1, "p(0)"]
-        colP0 = [accP0]
-        accP1 = inputTestDB_withDeltaRiTPTN[1, "p(1)"]
-        colP1 = [accP1]
-        colIDSummary = []
-        for id in 1:size(inputTestDB_withDeltaRiTPTN[:, "INCHIKEY"], 1) - 1
-            count = countID(count, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
-            accP0 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(0)"], accP0, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
-            accP1 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(1)"], accP1, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
-            push!(colCount, count)
-            push!(colP0, accP0)
-            push!(colP1, accP1)
-            if (colCount[id] >= colCount[id+1])
-                push!(colIDSummary, 1)
-            else
-                push!(colIDSummary, 0)
-            end
-        end
-        push!(colIDSummary, 1)
-
-        inputTestDB_withDeltaRiTPTN[!, "countID"] = colCount
-        inputTestDB_withDeltaRiTPTN[!, "countP(0)"] = colP0 ./ colCount
-        inputTestDB_withDeltaRiTPTN[!, "countP(1)"] = colP1 ./ colCount
-        inputTestDB_withDeltaRiTPTN[!, "colIDSummary"] = colIDSummary
-
-        inputTestDB_withDeltaRiTPTN = inputTestDB_withDeltaRiTPTN[inputTestDB_withDeltaRiTPTN."colIDSummary" .== 1, :]
-
-        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN_ind.csv"
-        CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
-    
+## save csv ##
+savePath = "F:\\UvA\\app\\PestMix1-8_100ug-L_Tea_1-100dil_1ul_AllIon_pos_8_report_comp_IDs_dataframeTPTNModeling.csv"
+CSV.write(savePath, dfOutput)
