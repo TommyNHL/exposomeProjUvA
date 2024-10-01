@@ -213,10 +213,28 @@
 #### - OUTPUT(S): ***updatedPestRecall_8paraVS7para.jpg***
 ## 3_V_modelEvaluation  (sub-folder)
 ### U_ModelEvaluation.jl
-#### - INPUT(S): ***hyperparameterTuning_modelSelection_LR_noFilterSummary.xlsx***
-#### - INPUT(S): ***hyperparameterTuning_modelSelection_DT_noFilterSummary.xlsx***
-#### - INPUT(S): ***hyperparameterTuning_modelSelection_RF_noFilterSummary.xlsx***
-#### - INPUT(S): ***hyperparameterTuning_modelSelection_KNN_noFilterSummary.xlsx***
-#### - OUTPUT(S): ***
+#### - INPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - OUTPUT(S): ***modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib***
+#### - OUTPUT(S): ***modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_ValDF_withOutDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_ValDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_PestDF_withOutDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_PestDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_Pest2DF_withOutDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframeTPTNModeling_Pest2DF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv***
 ### V_TPTNmodelCutOff.jl
+
 
