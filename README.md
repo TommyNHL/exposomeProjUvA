@@ -136,6 +136,7 @@
 #### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_extractedWithCNLsList.csv***
 #### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_withCNLRideltaRi.csv***
 #### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling.csv***
+## 3_III_EDA  (sub-folder)
 ### G_PreEDA.jl
 #### - INPUT(S): ***PestMix1-8_1ug-L_NoTea_test_report_comp_IDs_dataframeTPTNModeling.csv***
 #### - INPUT(S): ***PestMix1-8_1ug-L_Tea_test_report_comp_IDs_dataframeTPTNModeling***
@@ -185,3 +186,37 @@
 #### - OUTPUT(S): ***outplot_TPTNDistrution_FeatureFinalScoreRatio_noFilter.png***
 #### - OUTPUT(S): ***outplot_TPTNDistrution_FeatureMonoisotopicMass_noFilter.png***
 #### - OUTPUT(S): ***outplot_TPTNDistrution_FeatureDeltaRi_noFilter.png***
+## 3_IV_featureModelSelection  (sub-folder)
+### Q_FeatureSelection.ipynb
+#### - INPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - OUTPUT(S): ***sns_heatmap(  )***
+### R_FeatureModelSelection.jl
+#### - INPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - INPUT(S): ***TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
+#### - OUTPUT(S): ***hyperparameterTuning_modelSelection_RF(n)_noFilter_noLog(UsrFragMatchRatio).csv***
+#### - OUTPUT(S): ***hyperparameterTuning_modelSelection_DT(n)_noFilter_noLog(UsrFragMatchRatio).csv***
+#### - OUTPUT(S): ***hyperparameterTuning_modelSelection_KNN(n)_noLog(UsrFragMatchRatio)_noMatchDiff.csv***
+#### - OUTPUT(S): ***hyperparameterTuning_modelSelection_KNN(n)_noLog(UsrFragMatchRatio)_noMatchDiff_noDeltaRI.csv***
+#### - OUTPUT(S): ***hyperparameterTuning_modelSelection_LR(n)_noFilter_noLog(UsrFragMatchRatio).csv"***
+### T_Plot4ModelFeatureSelection.ipynb
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_LR_noFilterSummary.xlsx***
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_DT_noFilterSummary.xlsx***
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_RF_noFilterSummary.xlsx***
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_KNN_noFilterSummary.xlsx***
+#### - OUTPUT(S): ***updated4pestNoTea_8paraVS7para.jpg***
+#### - OUTPUT(S): ***updated4pest_8paraVS7para.jpg***
+#### - OUTPUT(S): ***updatedPestRecall_8paraVS7para.jpg***
+## 3_V_modelEvaluation  (sub-folder)
+### U_ModelEvaluation.jl
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_LR_noFilterSummary.xlsx***
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_DT_noFilterSummary.xlsx***
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_RF_noFilterSummary.xlsx***
+#### - INPUT(S): ***hyperparameterTuning_modelSelection_KNN_noFilterSummary.xlsx***
+#### - OUTPUT(S): ***
+### V_TPTNmodelCutOff.jl
+

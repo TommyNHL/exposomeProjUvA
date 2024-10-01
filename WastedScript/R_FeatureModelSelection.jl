@@ -1,92 +1,30 @@
+## INPUT(S)
+# trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+# testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+# noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+# TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+
+## OUTPUT(S)
+
+
+
 VERSION
+## install packages needed ##
 using Pkg
 #Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
+
+## import packages from Julia ##
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-#Pkg.add(PackageSpec(url=""))
 using Random
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-
-jl = pyimport("joblib")             # used for loading models
-f1_score = pyimport("sklearn.metrics").f1_score
-matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
-make_scorer = pyimport("sklearn.metrics").make_scorer
-f1 = make_scorer(f1_score, pos_label=1, average="binary")
-
-# inputing 1686319 x 22 df
-# 0: 1535009; 1: 151310 = 0.5493; 5.5724
-trainDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-trainDEFSDf[trainDEFSDf.LABEL .== 1, :]
-describe(trainDEFSDf)
-
-Yy_train = deepcopy(trainDEFSDf[:, end-4])  # 0.5493; 5.5724
-sampleW = []
-for w in Vector(Yy_train)
-    if w == 0
-        push!(sampleW, 0.5493)
-    elseif w == 1
-        push!(sampleW, 5.5724)
-    end
-end 
-
-# inputing 421381 x 22 df
-# 0: 383416; 1: 37965 = 0.5495; 5.5496
-testDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-testDEFSDf[testDEFSDf.LABEL .== 1, :]
-
-Yy_val = deepcopy(testDEFSDf[:, end-4])  # 0.5495; 5.5496
-sampletestW = []
-for w in Vector(Yy_val)
-    if w == 0
-        push!(sampletestW, 0.5495)
-    elseif w == 1
-        push!(sampletestW, 5.5496)
-    end
-end 
-
-# 2107700 x 22 df; 
-# 1686319+421381= 2107700, 0:1918425; 1:189275 = 
-wholeDEFSDf = vcat(trainDEFSDf, testDEFSDf)
-sort!(wholeDEFSDf, [:ENTRY])
-wholeDEFSDf[wholeDEFSDf.LABEL .== 1, :]
-
-
-# 10908 x 19 df
-# 0: 7173; 1: 3735 = 0.7604; 1.4602
-noTeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-noTeaDEFSDf[noTeaDEFSDf.LABEL .== 1, :]
-
-Yy_test = deepcopy(noTeaDEFSDf[:, end-1])  # 0.7604; 1.4602
-samplepestW = []
-for w in Vector(Yy_test)
-    if w == 0
-        push!(samplepestW, 0.7604)
-    elseif w == 1
-        push!(samplepestW, 1.4602)
-    end
-end 
-
-# 29599 x 19 df
-# 1: 8187
-TeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-TeaDEFSDf = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
-
-Yy_test2 = deepcopy(TeaDEFSDf[:, end-1])
-samplepest2W = []
-for w in Vector(Yy_test2)
-    if w == 0
-        push!(samplepest2W, 0)
-    elseif w == 1
-        push!(samplepest2W, 0.5)
-    end
-end 
-
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: GradientBoostingClassifier
@@ -104,62 +42,114 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# performace
-## Maximum absolute error
-## mean square error (MSE) calculation
-## Root mean square error (RMSE) calculation
-function errorDetermination(arrRi, predictedRi)
-    sumAE = 0
-    maxAE = 0
-    for i = 1:size(predictedRi, 1)
-        AE = abs(arrRi[i] - predictedRi[i])
-        if (AE > maxAE)
-            maxAE = AE
+## import packages from Python ##
+jl = pyimport("joblib")             # used for loading models
+f1_score = pyimport("sklearn.metrics").f1_score
+matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
+make_scorer = pyimport("sklearn.metrics").make_scorer
+f1 = make_scorer(f1_score, pos_label=1, average="binary")
+
+## input training set ## 1686319 x 22 df
+# 0: 1535009; 1: 151310 = 0.5493; 5.5724
+trainDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+trainDEFSDf[trainDEFSDf.LABEL .== 1, :]
+describe(trainDEFSDf)
+    ## calculate weight ##
+    Yy_train = deepcopy(trainDEFSDf[:, end-4])  # 0.5493; 5.5724
+    sampleW = []
+    for w in Vector(Yy_train)
+        if w == 0
+            push!(sampleW, 0.5493)
+        elseif w == 1
+            push!(sampleW, 5.5724)
         end
-        sumAE += (AE ^ 2)
-    end
-    MSE = sumAE / size(predictedRi, 1)
-    RMSE = MSE ^ 0.5
-    return maxAE, MSE, RMSE
-end
+    end 
 
-## R-square value
-function rSquareDetermination(arrRi, predictedRi)
-    sumY = 0
-    for i = 1:size(predictedRi, 1)
-        sumY += predictedRi[i]
-    end
-    meanY = sumY / size(predictedRi, 1)
-    sumAE = 0
-    sumRE = 0
-    for i = 1:size(predictedRi, 1)
-        AE = abs(arrRi[i] - predictedRi[i])
-        RE = abs(arrRi[i] - meanY)
-        sumAE += (AE ^ 2)
-        sumRE += (RE ^ 2)
-    end
-    rSquare = 1 - (sumAE / sumRE)
-    return rSquare
-end
+## input testing set ## 421381 x 22 df
+# 0: 383416; 1: 37965 = 0.5495; 5.5496
+testDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+testDEFSDf[testDEFSDf.LABEL .== 1, :]
+    ## calculate weight ##
+    Yy_val = deepcopy(testDEFSDf[:, end-4])  # 0.5495; 5.5496
+    sampletestW = []
+    for w in Vector(Yy_val)
+        if w == 0
+            push!(sampletestW, 0.5495)
+        elseif w == 1
+            push!(sampletestW, 5.5496)
+        end
+    end 
 
-## Average score
-function avgScore(arrAcc, cv)
-    sumAcc = 0
-    for acc in arrAcc
-        sumAcc += acc
+## reconstruct a whole set ## spike blank (No Tea)
+# 2107700 x 22 df; 
+# 1686319+421381= 2107700, 0:1918425; 1:189275 = 
+wholeDEFSDf = vcat(trainDEFSDf, testDEFSDf)
+sort!(wholeDEFSDf, [:ENTRY])
+wholeDEFSDf[wholeDEFSDf.LABEL .== 1, :]
+
+## input validation set ##
+# 10908 x 19 df
+# 0: 7173; 1: 3735 = 0.7604; 1.4602
+noTeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+noTeaDEFSDf[noTeaDEFSDf.LABEL .== 1, :]
+    ## calculate weight ##
+    Yy_test = deepcopy(noTeaDEFSDf[:, end-1])  # 0.7604; 1.4602
+    samplepestW = []
+    for w in Vector(Yy_test)
+        if w == 0
+            push!(samplepestW, 0.7604)
+        elseif w == 1
+            push!(samplepestW, 1.4602)
+        end
+    end 
+
+## input real sample set ## with Tea
+# 29599 x 19 df
+# 1: 8187
+TeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+TeaDEFSDf = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
+    ## calculate weight ##
+    Yy_test2 = deepcopy(TeaDEFSDf[:, end-1])
+    samplepest2W = []
+    for w in Vector(Yy_test2)
+        if w == 0
+            push!(samplepest2W, 0)
+        elseif w == 1
+            push!(samplepest2W, 0.5)
+        end
+    end 
+
+## define functions for performace evaluation ##
+    # Maximum absolute error
+    # mean square error (MSE) calculation
+    # Root mean square error (RMSE) calculation
+    function errorDetermination(arrRi, predictedRi)
+        sumAE = 0
+        maxAE = 0
+        for i = 1:size(predictedRi, 1)
+            AE = abs(arrRi[i] - predictedRi[i])
+            if (AE > maxAE)
+                maxAE = AE
+            end
+            sumAE += (AE ^ 2)
+        end
+        MSE = sumAE / size(predictedRi, 1)
+        RMSE = MSE ^ 0.5
+        return maxAE, MSE, RMSE
     end
-    return sumAcc / cv
-end
+    #
+    # Average score
+    function avgScore(arrAcc, cv)
+        sumAcc = 0
+        for acc in arrAcc
+            sumAcc += acc
+        end
+        return sumAcc / cv
+    end
 
-# modeling, 5 x 4 x 5 x 9 = 225 times
-describe((trainDEFSDf))[vcat(5,6,7,9,10,13,14, 17), :]
-describe((testDEFSDf))[vcat(5,6,9,10,13,14, end-5), :]
-describe((noTeaDEFSDf))[vcat(5,6,9,10,13,14, end-2), :]
-describe((TeaDEFSDf))[vcat(5,6,9,10,13,14, end-2), :]
-describe((TeaDEFSDf))
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
 
+# ==================================================================================================
+## define a function for Random Forest ##
 function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pest2)
     leaf_r = 2  # 1
     depth_r = vcat(collect(2:1:7))  # 6
@@ -269,9 +259,10 @@ function optimRandomForestClass(inputDB, inputDB_test, inputDB_pest, inputDB_pes
     return z_df_sorted
 end
 
+## call Random Forest ##
 optiSearch_df = optimRandomForestClass(trainDEFSDf, testDEFSDf, noTeaDEFSDf, TeaDEFSDf)
 
-# save, ouputing 180 x 8 df
+## save ##
 savePath = "F:\\UvA\\app\\hyperparameterTuning_modelSelection_RF6_noFilterLog(UsrFragMatchRatio).csv"
 CSV.write(savePath, optiSearch_df)
 

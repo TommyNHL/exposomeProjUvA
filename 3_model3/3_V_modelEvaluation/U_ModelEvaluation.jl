@@ -1,92 +1,34 @@
+## INPUT(S)
+# trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+# testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+# noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+# TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv
+
+## OUTPUT(S)
+# modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib
+# modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib
+# dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv
+# dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTN_KNN.csv
+# dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv
+# dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv
+
 VERSION
+## install packages needed ##
 using Pkg
 #Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
+
+## import packages from Julia ##
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-#Pkg.add(PackageSpec(url=""))
 using Random
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-
-jl = pyimport("joblib")             # used for loading models
-f1_score = pyimport("sklearn.metrics").f1_score
-matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
-make_scorer = pyimport("sklearn.metrics").make_scorer
-f1 = make_scorer(f1_score, pos_label=1, average="binary")
-
-# inputing 1686319 x 22 df
-# 0: 1535009; 1: 151310 = 0.5493; 5.5724
-trainDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-trainDEFSDf[trainDEFSDf.LABEL .== 1, :]
-describe(trainDEFSDf)
-
-Yy_train = deepcopy(trainDEFSDf[:, end-4])  # 0.5493; 5.5724
-sampleW = []
-for w in Vector(Yy_train)
-    if w == 0
-        push!(sampleW, 0.5493)
-    elseif w == 1
-        push!(sampleW, 5.5724)
-    end
-end
-
-# inputing 421381 x 22 df
-# 0: 383416; 1: 37965 = 0.5495; 5.5496
-testDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-testDEFSDf[testDEFSDf.LABEL .== 1, :]
-
-Yy_val = deepcopy(testDEFSDf[:, end-4])  # 0.5495; 5.5496
-sampletestW = []
-for w in Vector(Yy_val)
-    if w == 0
-        push!(sampletestW, 0.5495)
-    elseif w == 1
-        push!(sampletestW, 5.5496)
-    end
-end
-
-# 2107700 x 22 df; 
-# 1686319+421381= 2107700, 0:1918425; 1:189275 = 
-wholeDEFSDf = vcat(trainDEFSDf, testDEFSDf)
-sort!(wholeDEFSDf, [:ENTRY])
-wholeDEFSDf[wholeDEFSDf.LABEL .== 1, :]
-
-
-# 10908 x 19 df
-# 0: 7173; 1: 3735 = 0.7604; 1.4602
-noTeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-noTeaDEFSDf[noTeaDEFSDf.LABEL .== 1, :]
-
-Yy_test = deepcopy(noTeaDEFSDf[:, end-1])  # 0.7604; 1.4602
-samplepestW = []
-for w in Vector(Yy_test)
-    if w == 0
-        push!(samplepestW, 0.7604)
-    elseif w == 1
-        push!(samplepestW, 1.4602)
-    end
-end
-
-# 29599 x 19 df
-# 1: 8187
-TeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
-TeaDEFSDf = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
-
-Yy_test2 = deepcopy(TeaDEFSDf[:, end-1])
-samplepest2W = []
-for w in Vector(Yy_test2)
-    if w == 0
-        push!(samplepest2W, 0)
-    elseif w == 1
-        push!(samplepest2W, 0.5)
-    end
-end
-
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: GradientBoostingClassifier
@@ -104,62 +46,113 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
-# performace
-## Maximum absolute error
-## mean square error (MSE) calculation
-## Root mean square error (RMSE) calculation
-function errorDetermination(arrRi, predictedRi)
-    sumAE = 0
-    maxAE = 0
-    for i = 1:size(predictedRi, 1)
-        AE = abs(arrRi[i] - predictedRi[i])
-        if (AE > maxAE)
-            maxAE = AE
+## import packages from Python ##
+jl = pyimport("joblib")             # used for loading models
+f1_score = pyimport("sklearn.metrics").f1_score
+matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
+make_scorer = pyimport("sklearn.metrics").make_scorer
+f1 = make_scorer(f1_score, pos_label=1, average="binary")
+
+## input training set ##, 1686319 x 22 df
+# 0: 1535009; 1: 151310 = 0.5493; 5.5724
+trainDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+trainDEFSDf[trainDEFSDf.LABEL .== 1, :]
+    ## calculate weight ##
+    Yy_train = deepcopy(trainDEFSDf[:, end-4])  # 0.5493; 5.5724
+    sampleW = []
+    for w in Vector(Yy_train)
+        if w == 0
+            push!(sampleW, 0.5493)
+        elseif w == 1
+            push!(sampleW, 5.5724)
         end
-        sumAE += (AE ^ 2)
     end
-    MSE = sumAE / size(predictedRi, 1)
-    RMSE = MSE ^ 0.5
-    return maxAE, MSE, RMSE
-end
 
-## R-square value
-function rSquareDetermination(arrRi, predictedRi)
-    sumY = 0
-    for i = 1:size(predictedRi, 1)
-        sumY += predictedRi[i]
+## input testing set ## 421381 x 22 df
+# 0: 383416; 1: 37965 = 0.5495; 5.5496
+testDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+testDEFSDf[testDEFSDf.LABEL .== 1, :]
+    ## calculate weight ##
+    Yy_val = deepcopy(testDEFSDf[:, end-4])  # 0.5495; 5.5496
+    sampletestW = []
+    for w in Vector(Yy_val)
+        if w == 0
+            push!(sampletestW, 0.5495)
+        elseif w == 1
+            push!(sampletestW, 5.5496)
+        end
     end
-    meanY = sumY / size(predictedRi, 1)
-    sumAE = 0
-    sumRE = 0
-    for i = 1:size(predictedRi, 1)
-        AE = abs(arrRi[i] - predictedRi[i])
-        RE = abs(arrRi[i] - meanY)
-        sumAE += (AE ^ 2)
-        sumRE += (RE ^ 2)
+
+## reconstruct a whole set ## spike blank (No Tea)
+# 2107700 x 22 df; 
+# 1686319+421381= 2107700, 0:1918425; 1:189275 = 
+wholeDEFSDf = vcat(trainDEFSDf, testDEFSDf)
+sort!(wholeDEFSDf, [:ENTRY])
+wholeDEFSDf[wholeDEFSDf.LABEL .== 1, :]
+
+## input validation set ##
+# 10908 x 19 df
+# 0: 7173; 1: 3735 = 0.7604; 1.4602
+noTeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+noTeaDEFSDf[noTeaDEFSDf.LABEL .== 1, :]
+    ## calculate weight ##
+    Yy_test = deepcopy(noTeaDEFSDf[:, end-1])  # 0.7604; 1.4602
+    samplepestW = []
+    for w in Vector(Yy_test)
+        if w == 0
+            push!(samplepestW, 0.7604)
+        elseif w == 1
+            push!(samplepestW, 1.4602)
+        end
     end
-    rSquare = 1 - (sumAE / sumRE)
-    return rSquare
-end
 
-## Average score
-function avgScore(arrAcc, cv)
-    sumAcc = 0
-    for acc in arrAcc
-        sumAcc += acc
+## input real sample set ## with Tea
+# 29599 x 19 df
+# 1: 8187
+TeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+TeaDEFSDf = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
+    ## calculate weight ##
+    Yy_test2 = deepcopy(TeaDEFSDf[:, end-1])
+    samplepest2W = []
+    for w in Vector(Yy_test2)
+        if w == 0
+            push!(samplepest2W, 0)
+        elseif w == 1
+            push!(samplepest2W, 0.5)
+        end
     end
-    return sumAcc / cv
-end
 
-# modeling, 5 x 4 x 5 x 9 = 225 times
-describe((trainDEFSDf))[vcat(5,6,7,9,10,13,14, 17), :]
-describe((testDEFSDf))[vcat(5,6,9,10,13,14, end-5), :]
-describe((noTeaDEFSDf))[vcat(5,6,9,10,13,14, end-2), :]
-describe((TeaDEFSDf))[vcat(5,6,9,10,13,14, end-2), :]
-describe((TeaDEFSDf))
+## define functions for performace evaluation ##
+    # Maximum absolute error
+    # mean square error (MSE) calculation
+    # Root mean square error (RMSE) calculation
+    function errorDetermination(arrRi, predictedRi)
+        sumAE = 0
+        maxAE = 0
+        for i = 1:size(predictedRi, 1)
+            AE = abs(arrRi[i] - predictedRi[i])
+            if (AE > maxAE)
+                maxAE = AE
+            end
+            sumAE += (AE ^ 2)
+        end
+        MSE = sumAE / size(predictedRi, 1)
+        RMSE = MSE ^ 0.5
+        return maxAE, MSE, RMSE
+    end
+    #
+    # Average score
+    function avgScore(arrAcc, cv)
+        sumAcc = 0
+        for acc in arrAcc
+            sumAcc += acc
+        end
+        return sumAcc / cv
+    end
 
-#===============================================================================#
 
+# ==================================================================================================
+## train a k-Nearest Neighbors model ##, with DeltaRi
 model = KNeighborsClassifier(
       n_neighbors = 379, 
       weights = "uniform", 
@@ -167,18 +160,23 @@ model = KNeighborsClassifier(
       p = 2, 
       metric = "minkowski"
       )
-
-rank = vcat(5, 7,9, 13,14, 17)
+    #
+    ## select features ##
+    rank = vcat(5, 7,9, 13,14, 17)
+    #
+    ## balance samples ##
     N_train = trainDEFSDf
     M_train = vcat(trainDEFSDf, trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
-            trainDEFSDf[trainDEFSDf.LABEL .== 1, :])
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :], 
+        trainDEFSDf[trainDEFSDf.LABEL .== 1, :])
+    #
+    ## ready materials ##
     M_val = testDEFSDf
     M_pest = noTeaDEFSDf
     M_pest2 = TeaDEFSDf
@@ -187,24 +185,25 @@ rank = vcat(5, 7,9, 13,14, 17)
     Xx_val = deepcopy(M_val[:, rank])
     Xx_test = deepcopy(M_pest[:, rank])
     Xx_test2 = deepcopy(M_pest2[:, rank])
-    #
     Yy_train = deepcopy(M_train[:, end-4])
     mm_train = deepcopy(N_train[:, end-4])
     Yy_val = deepcopy(M_val[:, end-4])
     Yy_test = deepcopy(M_pest[:, end-1])
     Yy_test2 = deepcopy(M_pest2[:, end-1])
-## fit ##
+    #
+    ## fit ##
     fit!(model, Matrix(Xx_train), Vector(Yy_train))
     importances = permutation_importance(model, Matrix(Xx_test), Vector(Yy_test), n_repeats=10, random_state=42)
     print(importances["importances_mean"])
-    #"importances_std"  => [0.00365488, 0.0042455, 0.000954662, 0.00135283, 0.00220259, 0.00230624]
-    #"importances_mean" => [0.00671984, 0.107105, 0.00196186, 0.000385039, 0.0118812, -0.00462963]
-
-# saving model
+        #"importances_std"  => [0.00365488, 0.0042455, 0.000954662, 0.00135283, 0.00220259, 0.00230624]
+        #"importances_mean" => [0.00671984, 0.107105, 0.00196186, 0.000385039, 0.0118812, -0.00462963]
+## save model ##
 modelSavePath = "F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib"
 jl.dump(model, modelSavePath, compress = 5)
-# --------------------------------------------------------------------------------------------------
 
+
+# ==================================================================================================
+## train a k-Nearest Neighbors model without retention index error ##
 model_noRI = KNeighborsClassifier(
       n_neighbors = 379, 
       weights = "uniform", 
@@ -212,105 +211,103 @@ model_noRI = KNeighborsClassifier(
       p = 2, 
       metric = "minkowski"
       )
-
-rank2 = vcat(5, 7,9, 13,14)
+    #
+    ## select features ##
+    rank2 = vcat(5, 7,9, 13,14)
+    #
+    ## ready materials ##
     Xx_train_noRI = deepcopy(M_train[:, rank2])
     nn_train_noRI = deepcopy(N_train[:, rank2])
     Xx_val_noRI = deepcopy(M_val[:, rank2])
     Xx_test_noRI = deepcopy(M_pest[:, rank2])
     Xx_test2_noRI = deepcopy(M_pest2[:, rank2])
-## fit ##
+    #
+    ## fit ##
     fit!(model_noRI, Matrix(Xx_train_noRI), Vector(Yy_train))
     importances2 = permutation_importance(model_noRI, Matrix(Xx_test_noRI), Vector(Yy_test), n_repeats=10, random_state=42)
     print(importances2["importances_mean"])
-    #"importances_std"  => [0.0038459, 0.00517923, 0.0017152, 0.00203555, 0.00159498, 0.00266296]
-    #"importances_mean" => [0.0126421, 0.0797488, 0.00553722, -0.00176934, 0.00484965, 0.00163183]
-
-# saving model
+        #"importances_std"  => [0.0038459, 0.00517923, 0.0017152, 0.00203555, 0.00159498, 0.00266296]
+        #"importances_mean" => [0.0126421, 0.0797488, 0.00553722, -0.00176934, 0.00484965, 0.00163183]
+## save model ##
 modelSavePath = "F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib"
 jl.dump(model_noRI, modelSavePath, compress = 5)
-# --------------------------------------------------------------------------------------------------
 
-describe((TeaDEFSDf))[vcat(collect(5:14), 17, end-1), :]
-
-#load a model
-# requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
-# training performace, withDeltaRi vs. withoutDeltaRi
-predictedTPTN_train = predict(model, Matrix(trainDEFSDf[:, rank]))
-train_withRI = deepcopy(trainDEFSDf)
-train_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
-# save, ouputing trainSet df 1686319 x 23 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv"
-CSV.write(savePath, train_withRI)
-# --------------------------------------------------------------------------------------------------
-#load a model
-# requires python 3.11 or 3.12
-model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib")
-predictedTPTN_train = predict(model_noRI, Matrix(trainDEFSDf[:, rank2]))
-train_withoutRI = deepcopy(trainDEFSDf)
-train_withoutRI[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
-# save, ouputing trainSet df 1686319 x 23 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTN_KNN.csv"
-CSV.write(savePath, train_withoutRI)
 
 # ==================================================================================================
+## deploy models for training set ##
+    ## load a model ##, with DeltaRi
+    # requires python 3.11 or 3.12
+    model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+        #
+        ## deploy model ##
+        predictedTPTN_train = predict(model, Matrix(trainDEFSDf[:, rank]))
+        train_withRI = deepcopy(trainDEFSDf)
+        train_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
+        #
+    ## save ##, ouputing trainSet df 1686319 x 23 df
+    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv"
+    CSV.write(savePath, train_withRI)
+    #
+    ## load a model ##, without DeltaRi
+    # requires python 3.11 or 3.12
+    model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib")
+        #
+        ## deploy model ##
+        predictedTPTN_train = predict(model_noRI, Matrix(trainDEFSDf[:, rank2]))
+        train_withoutRI = deepcopy(trainDEFSDf)
+        train_withoutRI[!, "withoutDeltaRipredictTPTN"] = predictedTPTN_train
+        #
+    ## save ##, ouputing trainSet df 1686319 x 23 df
+    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTN_KNN.csv"
+    CSV.write(savePath, train_withoutRI)
+
+
+# ==================================================================================================
+## evaluate predictive performance of the model with DeltaRi ##
 inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
-# 1, 0.21323664146581994, 0.46177553147153644
-maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])
-# -0.6894203790038584
-rSquare_train = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])
+    #
+    maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])  # 1, 0.21323664146581994, 0.46177553147153644
+    rSquare_train = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])  # -0.6894203790038584
+    pTP_train = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))  # 1686319 × 2 Matrix
+    f1_train = f1_score(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)  # 0.8895717113929443
+    mcc_train = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)  # 0.7738684612060831
+    inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
+    inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
+    #
+    ## save ##, ouputing trainSet df 1686319 x (23+2)
+    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
+    CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
-# 1686319 × 2 Matrix
-pTP_train = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))
-# 0.8895717113929443
-f1_train = f1_score(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)
-# 0.7738684612060831
-mcc_train = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)
-
-inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
-inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
-# save, ouputing trainSet df 1686319 x (23+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
-CSV.write(savePath, inputDB_withDeltaRiTPTN)
-
-describe((inputDB_withDeltaRiTPTN))[end-5:end, :]
-# --------------------------------------------------------------------------------------------------
+## evaluate predictive performance of the model without DeltaRi ##
 inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
-# 1, 0.2081682054225802, 0.45625454016653927
-maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])
-# -0.6695318478337433
-rSquare_train = rSquareDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])
+    #
+    maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])  # 1, 0.2081682054225802, 0.45625454016653927
+    rSquare_train = rSquareDetermination(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end])  # -0.6695318478337433
+    pTP_train = predict_proba(model_noRI, Matrix(inputDB_withoutDeltaRiTPTN[:, rank2]))  # 1686319 × 2 Matrix
+    f1_train = f1_score(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampleW)  # 0.895403648988781
+    mcc_train = matthews_corrcoef(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampleW)  # 0.7873822419345989
+    inputDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
+    inputDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
+    #
+    ## save ##, ouputing trainSet df 1686319 x (23+2)
+    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv"
+    CSV.write(savePath, inputDB_withoutDeltaRiTPTN)
 
-# 1686319 × 2 Matrix
-pTP_train = predict_proba(model_noRI, Matrix(inputDB_withoutDeltaRiTPTN[:, rank2]))
-# 0.895403648988781
-f1_train = f1_score(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampleW)
-# 0.7873822419345989
-mcc_train = matthews_corrcoef(inputDB_withoutDeltaRiTPTN[:, end-5], inputDB_withoutDeltaRiTPTN[:, end], sample_weight=sampleW)
-
-inputDB_withoutDeltaRiTPTN[!, "p(0)"] = pTP_train[:, 1]
-inputDB_withoutDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
-# save, ouputing trainSet df 1686319 x (23+2)
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv"
-CSV.write(savePath, inputDB_withoutDeltaRiTPTN)
-
-describe((inputDB_withoutDeltaRiTPTN))[end-5:end, :]
 
 # ==================================================================================================
+## deploy models for testing set ##
+    ## load a model ##, with DeltaRi
+    # requires python 3.11 or 3.12
+    model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+    #
+    # validation performace, withDeltaRi vs. withoutDeltaRi
+    predictedTPTN_val = predict(model, Matrix(testDEFSDf[:, rank]))
+    val_withRI = deepcopy(testDEFSDf)
+    val_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_val
+    # save, ouputing valSet df 421381 x 23 df
+    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv"
+    CSV.write(savePath, val_withRI)
 
-# model validation
-#load a model
-# requires python 3.11 or 3.12
-model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
-# validation performace, withDeltaRi vs. withoutDeltaRi
-predictedTPTN_val = predict(model, Matrix(testDEFSDf[:, rank]))
-val_withRI = deepcopy(testDEFSDf)
-val_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_val
-# save, ouputing valSet df 421381 x 23 df
-savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv"
-CSV.write(savePath, val_withRI)
-# --------------------------------------------------------------------------------------------------
 #load a model
 # requires python 3.11 or 3.12
 model_noRI = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithOutDeltaRI.joblib")
