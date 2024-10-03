@@ -236,5 +236,24 @@
 #### - OUTPUT(S): ***dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
 #### - OUTPUT(S): ***dataframeTPTNModeling_Pest2DF_withOutDeltaRIandPredictedTPTNandpTP_KNN.csv***
 ### V_TPTNmodelCutOff.jl
+#### - INPUT(S): ***dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - INPUT(S): ***dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - INPUT(S): ***dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - INPUT(S): ***dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict_TrainALLWithDeltaRI_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict_TestALLWithDeltaRI_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict_PestNoTeaWithDeltaRI_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict_Pest2WithTeaWithDeltaRI_KNN.csv***
+#### - OUTPUT(S): ***TPTNPrediction_KNNtrainTestCM.png***
+#### - OUTPUT(S): ***TPTNPrediction_KNNpestPest2CM.png***
+#### - OUTPUT(S): ***dataframePostPredict_TPRFNRFDR_newTrainALL_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict_TPRFNRFDR_newTestALL_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict_TPRFNRFDR_newPestNoTea_KNN.csv***
+#### - OUTPUT(S): ***TPTNPrediction_P1threshold2TPRFNRFDR_newTrainALLylims_KNN.png***
+#### - OUTPUT(S): ***dataframePostPredict10FDR_TrainALLWithDeltaRI_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict10FDR_TestALLWithDeltaRI_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict10FDR_PestNoTeaWithDeltaRI_KNN.csv***
+#### - OUTPUT(S): ***dataframePostPredict10FDR_Pest2WithTeaWithDeltaRI_KNN.csv***
+
 
 
