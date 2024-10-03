@@ -11,6 +11,7 @@
 # dataframePostPredict_Pest2WithTeaWithDeltaRI_KNN.csv
 # TPTNPrediction_KNNtrainTestCM.png
 # TPTNPrediction_KNNpestPest2CM.png
+# dataframePostPredict_TPRFNRFDR_newTrainALL_KNN.csv
 
 
 VERSION
@@ -283,97 +284,97 @@ savefig(PestOutplotCM, "F:\\UvA\\F\\UvA\\app\\TPTNPrediction_KNNpestPest2CM.png"
 
 
 # ==================================================================================================
-## prepare plotting P(TP)threshold-to-TPR curve ##
+## prepare to plot P(TP)threshold-to-TPR curve ## training set
     ##  1686319 x 26 df
     inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TrainALLWithDeltaRI_KNN.csv", DataFrame)
         sort!(inputDB_TrainWithDeltaRi, [:"p(1)"], rev = true)
         for i in 1:size(inputDB_TrainWithDeltaRi, 1)
             inputDB_TrainWithDeltaRi[i, "p(1)"] = round(float(inputDB_TrainWithDeltaRi[i, "p(1)"]), digits = 2)
         end
-
+        #
     # 421381 x 26 df
     inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TestALLWithDeltaRI_KNN.csv", DataFrame)
         sort!(inputDB_TestWithDeltaRi, [:"p(1)"], rev = true)
         for i in 1:size(inputDB_TestWithDeltaRi, 1)
             inputDB_TestWithDeltaRi[i, "p(1)"] = round(float(inputDB_TestWithDeltaRi[i, "p(1)"]), digits = 2)
         end
-
+        #
     # 10908 x 23 df
     inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_PestNoTeaWithDeltaRI_KNN.csv", DataFrame)
         sort!(inputDB_PestWithDeltaRi, [:"p(1)"], rev = true)
         for i in 1:size(inputDB_PestWithDeltaRi, 1)
             inputDB_PestWithDeltaRi[i, "p(1)"] = round(float(inputDB_PestWithDeltaRi[i, "p(1)"]), digits = 2)
         end
-
+        #
     # 8187 x 23 df
     inputDB_Pest2WithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_Pest2WithTeaWithDeltaRI_KNN.csv", DataFrame)
         sort!(inputDB_Pest2WithDeltaRi, [:"p(1)"], rev = true)
         for i in 1:size(inputDB_Pest2WithDeltaRi, 1)
             inputDB_Pest2WithDeltaRi[i, "p(1)"] = round(float(inputDB_Pest2WithDeltaRi[i, "p(1)"]), digits = 2)
     end
-
-
-function get1rate(df, thd)
-    TP = 0  # 
-    FN = 0  # 
-    TN = 0  # 
-    FP = 0  # 
-    for i in 1:size(df , 1)
-        if (df[i, "LABEL"] == 1 && df[i, "p(1)"] >= thd)
-            TP += (1 * 5.5724)
-        elseif (df[i, "LABEL"] == 1 && df[i, "p(1)"] < thd)
-            FN += (1 * 5.5724)
-        elseif (df[i, "LABEL"] == 0 && df[i, "p(1)"] >= thd)
-            FP += (1 * 0.5493)
-        elseif (df[i, "LABEL"] == 0 && df[i, "p(1)"] < thd)
-            TN += (1 * 0.5493)
+    #
+    ## define a function for Confusion Matrix ##
+    function get1rate(df, thd)
+        TP = 0  # 
+        FN = 0  # 
+        TN = 0  # 
+        FP = 0  # 
+        for i in 1:size(df , 1)
+            if (df[i, "LABEL"] == 1 && df[i, "p(1)"] >= thd)
+                TP += (1 * 5.5724)
+            elseif (df[i, "LABEL"] == 1 && df[i, "p(1)"] < thd)
+                FN += (1 * 5.5724)
+            elseif (df[i, "LABEL"] == 0 && df[i, "p(1)"] >= thd)
+                FP += (1 * 0.5493)
+            elseif (df[i, "LABEL"] == 0 && df[i, "p(1)"] < thd)
+                TN += (1 * 0.5493)
+            end
+        end
+        return (TP / (TP + FN)), (FN / (TP + FN)), (FP / (FP + TP)), (FP / (FP + TN)), (TN / (TN + FP))
+    end
+    #
+    ## call function and insert arrays as columns ##
+    TrainWithDeltaRi_TPR = []
+    TrainWithDeltaRi_FNR = []
+    TrainWithDeltaRi_FDR = []
+    TrainWithDeltaRi_FPR = []
+    TrainWithDeltaRi_TNR = []
+    prob = -1
+    TPR = 0
+    FNR = 0
+    FDR = 0
+    FPR = 0
+    TNR = 0
+    for temp in Array(inputDB_TrainWithDeltaRi[:, "p(1)"])
+        if (temp != prob)
+            println(temp)
+            prob = temp
+            TPR, FNR, FDR, FPR, TNR = get1rate(inputDB_TrainWithDeltaRi, prob)
+            push!(TrainWithDeltaRi_TPR, TPR)
+            push!(TrainWithDeltaRi_FNR, FNR)
+            push!(TrainWithDeltaRi_FDR, FDR)
+            push!(TrainWithDeltaRi_FPR, FPR)
+            push!(TrainWithDeltaRi_TNR, TNR)
+        else
+            push!(TrainWithDeltaRi_TPR, TPR)
+            push!(TrainWithDeltaRi_FNR, FNR)
+            push!(TrainWithDeltaRi_FDR, FDR)
+            push!(TrainWithDeltaRi_FPR, FPR)
+            push!(TrainWithDeltaRi_TNR, TNR)
         end
     end
-    return (TP / (TP + FN)), (FN / (TP + FN)), (FP / (FP + TP)), (FP / (FP + TN)), (TN / (TN + FP))
-end
+    inputDB_TrainWithDeltaRi[!, "TPR"] = TrainWithDeltaRi_TPR
+    inputDB_TrainWithDeltaRi[!, "FNR"] = TrainWithDeltaRi_FNR
+    inputDB_TrainWithDeltaRi[!, "FDR"] = TrainWithDeltaRi_FDR
+    inputDB_TrainWithDeltaRi[!, "FPR"] = TrainWithDeltaRi_FPR
+    inputDB_TrainWithDeltaRi[!, "TNR"] = TrainWithDeltaRi_TNR
 
-# --------------------------------------------------------------------------------------------------
-TrainWithDeltaRi_TPR = []
-TrainWithDeltaRi_FNR = []
-TrainWithDeltaRi_FDR = []
-TrainWithDeltaRi_FPR = []
-TrainWithDeltaRi_TNR = []
-prob = -1
-TPR = 0
-FNR = 0
-FDR = 0
-FPR = 0
-TNR = 0
-for temp in Array(inputDB_TrainWithDeltaRi[:, "p(1)"])
-    if (temp != prob)
-        println(temp)
-        prob = temp
-        TPR, FNR, FDR, FPR, TNR = get1rate(inputDB_TrainWithDeltaRi, prob)
-        push!(TrainWithDeltaRi_TPR, TPR)
-        push!(TrainWithDeltaRi_FNR, FNR)
-        push!(TrainWithDeltaRi_FDR, FDR)
-        push!(TrainWithDeltaRi_FPR, FPR)
-        push!(TrainWithDeltaRi_TNR, TNR)
-    else
-        push!(TrainWithDeltaRi_TPR, TPR)
-        push!(TrainWithDeltaRi_FNR, FNR)
-        push!(TrainWithDeltaRi_FDR, FDR)
-        push!(TrainWithDeltaRi_FPR, FPR)
-        push!(TrainWithDeltaRi_TNR, TNR)
-    end
-end
-
-inputDB_TrainWithDeltaRi[!, "TPR"] = TrainWithDeltaRi_TPR
-inputDB_TrainWithDeltaRi[!, "FNR"] = TrainWithDeltaRi_FNR
-inputDB_TrainWithDeltaRi[!, "FDR"] = TrainWithDeltaRi_FDR
-inputDB_TrainWithDeltaRi[!, "FPR"] = TrainWithDeltaRi_FPR
-inputDB_TrainWithDeltaRi[!, "TNR"] = TrainWithDeltaRi_TNR
-
-# save, ouputing df 1686319 x 26+5 df 
+## save ##, ouputing df 1686319 x 26+5 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TPRFNRFDR_newTrainALL_KNN.csv"
 CSV.write(savePath, inputDB_TrainWithDeltaRi)
 
-# --------------------------------------------------------------------------------------------------
+# ==================================================================================================
+## prepare to plot P(TP)threshold-to-TPR curve ## testing set
 TestWithDeltaRi_TPR = []
 TestWithDeltaRi_FNR = []
 TestWithDeltaRi_FDR = []
