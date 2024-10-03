@@ -1,25 +1,35 @@
+## INPUT(S)
+# dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv
+# dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv
+# dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv
+# dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv
+
+## OUTPUT(S)
+# dataframePostPredict_TrainALLWithDeltaRI_KNN.csv
+# dataframePostPredict_TestALLWithDeltaRI_KNN.csv
+# dataframePostPredict_PestNoTeaWithDeltaRI_KNN.csv
+# dataframePostPredict_Pest2WithTeaWithDeltaRI_KNN.csv
+# TPTNPrediction_KNNtrainTestCM.png
+# TPTNPrediction_KNNpestPest2CM.png
+
+
 VERSION
+## install packages needed ##
 using Pkg
 #Pkg.add("ScikitLearn")
+#Pkg.add(PackageSpec(url=""))
+
+## import packages from Julia ##
 import Conda
 Conda.PYTHONDIR
 ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
-#Pkg.add(PackageSpec(url=""))
 using Random
 using CSV, DataFrames, Conda, LinearAlgebra, Statistics
 using PyCall
 using StatsPlots
 using Plots
-
-## import packages ##
-jl = pyimport("joblib")             # used for loading models
-f1_score = pyimport("sklearn.metrics").f1_score
-matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
-make_scorer = pyimport("sklearn.metrics").make_scorer
-f1 = make_scorer(f1_score, pos_label=1, average="binary")
-
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: GradientBoostingClassifier
@@ -37,161 +47,159 @@ using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
 
+## import packages from Python ##
+jl = pyimport("joblib")             # used for loading models
+f1_score = pyimport("sklearn.metrics").f1_score
+matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
+make_scorer = pyimport("sklearn.metrics").make_scorer
+f1 = make_scorer(f1_score, pos_label=1, average="binary")
+
+## input ## 1686319 x 25 df; 421381 x 25 df; 10908 x 22 df; 8187 x 22 df
 # columns: ENTRY, ID, INCHIKEY, INCHIKEYreal, 8 para, ISOTOPICMASS, 2 Ris, Delta Ri, LABEL, GROUP, Leverage, withDeltaRipredictTPTN, p0, p1
-# --------------------------------------------------------------------------------------------------
-# inputing 485631 x 25 df; 121946 x 25 df; 4757 x 22 df
 inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
-
 inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
-
 inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
-
 inputDB_Pest2WithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
 
+
 # ==================================================================================================
-# prepare plotting confusion matrix
-# --------------------------------------------------------------------------------------------------
+## prepare to plot confusion matrix for training set ##
 inputDB_TrainWithDeltaRi[!, "CM"] .= String("")
-inputDB_TrainWithDeltaRi_TP = 0
-inputDB_TrainWithDeltaRi_FP = 0
-inputDB_TrainWithDeltaRi_TN = 0
-inputDB_TrainWithDeltaRi_FN = 0
-for i in 1:size(inputDB_TrainWithDeltaRi , 1)
-    if (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_TrainWithDeltaRi[i, "CM"] = "TP"
-        inputDB_TrainWithDeltaRi_TP += 1
-    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_TrainWithDeltaRi[i, "CM"] = "FP"
-        inputDB_TrainWithDeltaRi_FP += 1
-    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_TrainWithDeltaRi[i, "CM"] = "TN"
-        inputDB_TrainWithDeltaRi_TN += 1
-    elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_TrainWithDeltaRi[i, "CM"] = "FN"
-        inputDB_TrainWithDeltaRi_FN += 1
+    inputDB_TrainWithDeltaRi_TP = 0
+    inputDB_TrainWithDeltaRi_FP = 0
+    inputDB_TrainWithDeltaRi_TN = 0
+    inputDB_TrainWithDeltaRi_FN = 0
+    for i in 1:size(inputDB_TrainWithDeltaRi , 1)
+        if (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_TrainWithDeltaRi[i, "CM"] = "TP"
+            inputDB_TrainWithDeltaRi_TP += 1
+        elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_TrainWithDeltaRi[i, "CM"] = "FP"
+            inputDB_TrainWithDeltaRi_FP += 1
+        elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 0 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_TrainWithDeltaRi[i, "CM"] = "TN"
+            inputDB_TrainWithDeltaRi_TN += 1
+        elseif (inputDB_TrainWithDeltaRi[i, "LABEL"] == 1 && inputDB_TrainWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_TrainWithDeltaRi[i, "CM"] = "FN"
+            inputDB_TrainWithDeltaRi_FN += 1
+        end
     end
-end
-describe(inputDB_TrainWithDeltaRi)[end-5:end, :]
+    #
+    CM_TrainWith = zeros(2, 2)
+    CM_TrainWith[2, 1] = inputDB_TrainWithDeltaRi_TP
+    CM_TrainWith[2, 2] = inputDB_TrainWithDeltaRi_FP
+    CM_TrainWith[1, 2] = inputDB_TrainWithDeltaRi_TN
+    CM_TrainWith[1, 1] = inputDB_TrainWithDeltaRi_FN
 
-CM_TrainWith = zeros(2, 2)
-CM_TrainWith[2, 1] = inputDB_TrainWithDeltaRi_TP
-CM_TrainWith[2, 2] = inputDB_TrainWithDeltaRi_FP
-CM_TrainWith[1, 2] = inputDB_TrainWithDeltaRi_TN
-CM_TrainWith[1, 1] = inputDB_TrainWithDeltaRi_FN
-
-# save, ouputing df 1686319 x 25+1 df 
+## save ##, ouputing df 1686319 x 25+1 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TrainALLWithDeltaRI_KNN.csv"
 CSV.write(savePath, inputDB_TrainWithDeltaRi)
 
 
-# --------------------------------------------------------------------------------------------------
-# --------------------------------------------------------------------------------------------------
+# ==================================================================================================
+## prepare to plot confusion matrix for testing set ##
 inputDB_TestWithDeltaRi[!, "CM"] .= String("")
-inputDB_TestWithDeltaRi_TP = 0
-inputDB_TestWithDeltaRi_FP = 0
-inputDB_TestWithDeltaRi_TN = 0
-inputDB_TestWithDeltaRi_FN = 0
-for i in 1:size(inputDB_TestWithDeltaRi , 1)
-    if (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_TestWithDeltaRi[i, "CM"] = "TP"
-        inputDB_TestWithDeltaRi_TP += 1
-    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_TestWithDeltaRi[i, "CM"] = "FP"
-        inputDB_TestWithDeltaRi_FP += 1
-    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_TestWithDeltaRi[i, "CM"] = "TN"
-        inputDB_TestWithDeltaRi_TN += 1
-    elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_TestWithDeltaRi[i, "CM"] = "FN"
-        inputDB_TestWithDeltaRi_FN += 1
+    inputDB_TestWithDeltaRi_TP = 0
+    inputDB_TestWithDeltaRi_FP = 0
+    inputDB_TestWithDeltaRi_TN = 0
+    inputDB_TestWithDeltaRi_FN = 0
+    for i in 1:size(inputDB_TestWithDeltaRi , 1)
+        if (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_TestWithDeltaRi[i, "CM"] = "TP"
+            inputDB_TestWithDeltaRi_TP += 1
+        elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_TestWithDeltaRi[i, "CM"] = "FP"
+            inputDB_TestWithDeltaRi_FP += 1
+        elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 0 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_TestWithDeltaRi[i, "CM"] = "TN"
+            inputDB_TestWithDeltaRi_TN += 1
+        elseif (inputDB_TestWithDeltaRi[i, "LABEL"] == 1 && inputDB_TestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_TestWithDeltaRi[i, "CM"] = "FN"
+            inputDB_TestWithDeltaRi_FN += 1
+        end
     end
-end
-describe(inputDB_TestWithDeltaRi)[end-5:end, :]
+    #
+    CM_TestWith = zeros(2, 2)
+    CM_TestWith[2, 1] = inputDB_TestWithDeltaRi_TP
+    CM_TestWith[2, 2] = inputDB_TestWithDeltaRi_FP
+    CM_TestWith[1, 2] = inputDB_TestWithDeltaRi_TN
+    CM_TestWith[1, 1] = inputDB_TestWithDeltaRi_FN
 
-CM_TestWith = zeros(2, 2)
-CM_TestWith[2, 1] = inputDB_TestWithDeltaRi_TP
-CM_TestWith[2, 2] = inputDB_TestWithDeltaRi_FP
-CM_TestWith[1, 2] = inputDB_TestWithDeltaRi_TN
-CM_TestWith[1, 1] = inputDB_TestWithDeltaRi_FN
-
-# save, ouputing df 421381 x 25+1 df 
+## save ##, ouputing df 421381 x 25+1 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TestALLWithDeltaRI_KNN.csv"
 CSV.write(savePath, inputDB_TestWithDeltaRi)
 
 
-# --------------------------------------------------------------------------------------------------
-# --------------------------------------------------------------------------------------------------
+# ==================================================================================================
+## prepare to plot confusion matrix for validation set ##, No Tea spike blank
 inputDB_PestWithDeltaRi[!, "CM"] .= String("")
-inputDB_PestWithDeltaRi_TP = 0
-inputDB_PestWithDeltaRi_FP = 0
-inputDB_PestWithDeltaRi_TN = 0
-inputDB_PestWithDeltaRi_FN = 0
-for i in 1:size(inputDB_PestWithDeltaRi , 1)
-    if (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_PestWithDeltaRi[i, "CM"] = "TP"
-        inputDB_PestWithDeltaRi_TP += 1
-    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_PestWithDeltaRi[i, "CM"] = "FP"
-        inputDB_PestWithDeltaRi_FP += 1
-    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_PestWithDeltaRi[i, "CM"] = "TN"
-        inputDB_PestWithDeltaRi_TN += 1
-    elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_PestWithDeltaRi[i, "CM"] = "FN"
-        inputDB_PestWithDeltaRi_FN += 1
+    inputDB_PestWithDeltaRi_TP = 0
+    inputDB_PestWithDeltaRi_FP = 0
+    inputDB_PestWithDeltaRi_TN = 0
+    inputDB_PestWithDeltaRi_FN = 0
+    for i in 1:size(inputDB_PestWithDeltaRi , 1)
+        if (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_PestWithDeltaRi[i, "CM"] = "TP"
+            inputDB_PestWithDeltaRi_TP += 1
+        elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_PestWithDeltaRi[i, "CM"] = "FP"
+            inputDB_PestWithDeltaRi_FP += 1
+        elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 0 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_PestWithDeltaRi[i, "CM"] = "TN"
+            inputDB_PestWithDeltaRi_TN += 1
+        elseif (inputDB_PestWithDeltaRi[i, "LABEL"] == 1 && inputDB_PestWithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_PestWithDeltaRi[i, "CM"] = "FN"
+            inputDB_PestWithDeltaRi_FN += 1
+        end
     end
-end
-describe(inputDB_PestWithDeltaRi)[end-5:end, :]
+    #
+    CM_PestWith = zeros(2, 2)
+    CM_PestWith[2, 1] = inputDB_PestWithDeltaRi_TP
+    CM_PestWith[2, 2] = inputDB_PestWithDeltaRi_FP
+    CM_PestWith[1, 2] = inputDB_PestWithDeltaRi_TN
+    CM_PestWith[1, 1] = inputDB_PestWithDeltaRi_FN
 
-CM_PestWith = zeros(2, 2)
-CM_PestWith[2, 1] = inputDB_PestWithDeltaRi_TP
-CM_PestWith[2, 2] = inputDB_PestWithDeltaRi_FP
-CM_PestWith[1, 2] = inputDB_PestWithDeltaRi_TN
-CM_PestWith[1, 1] = inputDB_PestWithDeltaRi_FN
-
-# save, ouputing df 10908 x 22+1 df 
+## save ##, ouputing df 10908 x 22+1 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_PestNoTeaWithDeltaRI_KNN.csv"
 CSV.write(savePath, inputDB_PestWithDeltaRi)
 
 
 # ==================================================================================================
-# ==================================================================================================
+## prepare to plot confusion matrix for real sample set ##, With Tea
 inputDB_Pest2WithDeltaRi[!, "CM"] .= String("")
-inputDB_Pest2WithDeltaRi_TP = 0
-inputDB_Pest2WithDeltaRi_FP = 0
-inputDB_Pest2WithDeltaRi_TN = 0
-inputDB_Pest2WithDeltaRi_FN = 0
-for i in 1:size(inputDB_Pest2WithDeltaRi , 1)
-    if (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 1 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_Pest2WithDeltaRi[i, "CM"] = "TP"
-        inputDB_Pest2WithDeltaRi_TP += 1
-    elseif (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 0 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
-        inputDB_Pest2WithDeltaRi[i, "CM"] = "FP"
-        inputDB_Pest2WithDeltaRi_FP += 1
-    elseif (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 0 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_Pest2WithDeltaRi[i, "CM"] = "TN"
-        inputDB_Pest2WithDeltaRi_TN += 1
-    elseif (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 1 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
-        inputDB_Pest2WithDeltaRi[i, "CM"] = "FN"
-        inputDB_Pest2WithDeltaRi_FN += 1
+    inputDB_Pest2WithDeltaRi_TP = 0
+    inputDB_Pest2WithDeltaRi_FP = 0
+    inputDB_Pest2WithDeltaRi_TN = 0
+    inputDB_Pest2WithDeltaRi_FN = 0
+    for i in 1:size(inputDB_Pest2WithDeltaRi , 1)
+        if (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 1 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_Pest2WithDeltaRi[i, "CM"] = "TP"
+            inputDB_Pest2WithDeltaRi_TP += 1
+        elseif (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 0 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 1)
+            inputDB_Pest2WithDeltaRi[i, "CM"] = "FP"
+            inputDB_Pest2WithDeltaRi_FP += 1
+        elseif (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 0 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_Pest2WithDeltaRi[i, "CM"] = "TN"
+            inputDB_Pest2WithDeltaRi_TN += 1
+        elseif (inputDB_Pest2WithDeltaRi[i, "LABEL"] == 1 && inputDB_Pest2WithDeltaRi[i, "withDeltaRipredictTPTN"] == 0)
+            inputDB_Pest2WithDeltaRi[i, "CM"] = "FN"
+            inputDB_Pest2WithDeltaRi_FN += 1
+        end
     end
-end
-describe(inputDB_Pest2WithDeltaRi)[end-5:end, :]
+    #
+    CM_Pest2With = zeros(2, 2)
+    CM_Pest2With[2, 1] = inputDB_Pest2WithDeltaRi_TP
+    CM_Pest2With[2, 2] = inputDB_Pest2WithDeltaRi_FP
+    CM_Pest2With[1, 2] = inputDB_Pest2WithDeltaRi_TN
+    CM_Pest2With[1, 1] = inputDB_Pest2WithDeltaRi_FN
 
-CM_Pest2With = zeros(2, 2)
-CM_Pest2With[2, 1] = inputDB_Pest2WithDeltaRi_TP
-CM_Pest2With[2, 2] = inputDB_Pest2WithDeltaRi_FP
-CM_Pest2With[1, 2] = inputDB_Pest2WithDeltaRi_TN
-CM_Pest2With[1, 1] = inputDB_Pest2WithDeltaRi_FN
-
-# save, ouputing df 10908 x 22+1 df 
+## save ##, ouputing df 8187 x 22+1 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_Pest2WithTeaWithDeltaRI_KNN.csv"
 CSV.write(savePath, inputDB_Pest2WithDeltaRi)
 
 
 # ==================================================================================================
-# ==================================================================================================
-# plot confusion matrix
+## plot confusion matrix for training & testing sets ##
 layout = @layout [a{0.50w,1.0h} b{0.50w,1.0h}]
 default(grid = false, legend = false)
 gr()
@@ -231,9 +239,9 @@ heatmap!(["1", "0"], ["0", "1"], CM_TestWith, cmap = :viridis, cbar = :true,
         annotate!(["0"], ["0"], ["TN\n293,212"], subplot = 2)
 savefig(TrainOutplotCM, "F:\\UvA\\F\\UvA\\app\\TPTNPrediction_KNNtrainTestCM.png")
 
-# --------------------------------------------------------------------------------------------------
 
-# plot confusion matrix
+# ==================================================================================================
+## plot confusion matrix for validation (No Tea Spike Blank) & real sample sets ##
 layout = @layout [a{0.50w,1.0h} b{0.50w,1.0h}]
 default(grid = false, legend = false)
 gr()
@@ -275,35 +283,34 @@ savefig(PestOutplotCM, "F:\\UvA\\F\\UvA\\app\\TPTNPrediction_KNNpestPest2CM.png"
 
 
 # ==================================================================================================
+## prepare plotting P(TP)threshold-to-TPR curve ##
+    ##  1686319 x 26 df
+    inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TrainALLWithDeltaRI_KNN.csv", DataFrame)
+        sort!(inputDB_TrainWithDeltaRi, [:"p(1)"], rev = true)
+        for i in 1:size(inputDB_TrainWithDeltaRi, 1)
+            inputDB_TrainWithDeltaRi[i, "p(1)"] = round(float(inputDB_TrainWithDeltaRi[i, "p(1)"]), digits = 2)
+        end
 
-# prepare plotting P(TP)threshold-to-TPR curve
-# 1686319 x 26 df
-inputDB_TrainWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TrainALLWithDeltaRI_KNN.csv", DataFrame)
-sort!(inputDB_TrainWithDeltaRi, [:"p(1)"], rev = true)
-for i in 1:size(inputDB_TrainWithDeltaRi, 1)
-    inputDB_TrainWithDeltaRi[i, "p(1)"] = round(float(inputDB_TrainWithDeltaRi[i, "p(1)"]), digits = 2)
-end
+    # 421381 x 26 df
+    inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TestALLWithDeltaRI_KNN.csv", DataFrame)
+        sort!(inputDB_TestWithDeltaRi, [:"p(1)"], rev = true)
+        for i in 1:size(inputDB_TestWithDeltaRi, 1)
+            inputDB_TestWithDeltaRi[i, "p(1)"] = round(float(inputDB_TestWithDeltaRi[i, "p(1)"]), digits = 2)
+        end
 
-# 421381 x 26 df
-inputDB_TestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TestALLWithDeltaRI_KNN.csv", DataFrame)
-sort!(inputDB_TestWithDeltaRi, [:"p(1)"], rev = true)
-for i in 1:size(inputDB_TestWithDeltaRi, 1)
-    inputDB_TestWithDeltaRi[i, "p(1)"] = round(float(inputDB_TestWithDeltaRi[i, "p(1)"]), digits = 2)
-end
+    # 10908 x 23 df
+    inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_PestNoTeaWithDeltaRI_KNN.csv", DataFrame)
+        sort!(inputDB_PestWithDeltaRi, [:"p(1)"], rev = true)
+        for i in 1:size(inputDB_PestWithDeltaRi, 1)
+            inputDB_PestWithDeltaRi[i, "p(1)"] = round(float(inputDB_PestWithDeltaRi[i, "p(1)"]), digits = 2)
+        end
 
-# 10908 x 23 df
-inputDB_PestWithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_PestNoTeaWithDeltaRI_KNN.csv", DataFrame)
-sort!(inputDB_PestWithDeltaRi, [:"p(1)"], rev = true)
-for i in 1:size(inputDB_PestWithDeltaRi, 1)
-    inputDB_PestWithDeltaRi[i, "p(1)"] = round(float(inputDB_PestWithDeltaRi[i, "p(1)"]), digits = 2)
-end
-
-# 8187 x 23 df
-inputDB_Pest2WithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_Pest2WithTeaWithDeltaRI_KNN.csv", DataFrame)
-sort!(inputDB_Pest2WithDeltaRi, [:"p(1)"], rev = true)
-for i in 1:size(inputDB_Pest2WithDeltaRi, 1)
-    inputDB_Pest2WithDeltaRi[i, "p(1)"] = round(float(inputDB_Pest2WithDeltaRi[i, "p(1)"]), digits = 2)
-end
+    # 8187 x 23 df
+    inputDB_Pest2WithDeltaRi = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframePostPredict_Pest2WithTeaWithDeltaRI_KNN.csv", DataFrame)
+        sort!(inputDB_Pest2WithDeltaRi, [:"p(1)"], rev = true)
+        for i in 1:size(inputDB_Pest2WithDeltaRi, 1)
+            inputDB_Pest2WithDeltaRi[i, "p(1)"] = round(float(inputDB_Pest2WithDeltaRi[i, "p(1)"]), digits = 2)
+    end
 
 
 function get1rate(df, thd)
