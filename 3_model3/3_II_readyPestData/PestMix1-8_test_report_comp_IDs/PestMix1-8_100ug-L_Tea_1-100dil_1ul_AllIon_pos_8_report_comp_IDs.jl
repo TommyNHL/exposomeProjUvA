@@ -31,13 +31,6 @@ using PyCall
 using StatsPlots
 using Plots
 using ProgressBars
-
-## import packages from Python ##
-jl = pyimport("joblib")             # used for loading models
-f1_score = pyimport("sklearn.metrics").f1_score
-matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
-make_scorer = pyimport("sklearn.metrics").make_scorer
-f1 = make_scorer(f1_score, pos_label=1, average="binary")
 using ScikitLearn  #: @sk_import, fit!, predict
 @sk_import ensemble: RandomForestRegressor
 @sk_import ensemble: GradientBoostingClassifier
@@ -54,6 +47,13 @@ using ScikitLearn  #: @sk_import, fit!, predict
 using ScikitLearn.CrossValidation: cross_val_score
 using ScikitLearn.CrossValidation: train_test_split
 #using ScikitLearn.GridSearch: GridSearchCV
+
+## import packages from Python ##
+jl = pyimport("joblib")             # used for loading models
+f1_score = pyimport("sklearn.metrics").f1_score
+matthews_corrcoef = pyimport("sklearn.metrics").matthews_corrcoef
+make_scorer = pyimport("sklearn.metrics").make_scorer
+f1 = make_scorer(f1_score, pos_label=1, average="binary")
 
 ## import groud truth ##
 INCHIKEYreal = Array(CSV.read("F:\\UvA\\INCHIKEYs_CNL_Ref_PestMix_1-8.csv", DataFrame)[:,1])
