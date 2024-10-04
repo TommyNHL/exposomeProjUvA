@@ -74,152 +74,132 @@ inputDB_test = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul
             inputDB_test[i, f] = (inputDB_test[i, f] - avg) / (top - down)
         end
     end
-    # save, ouputing 1436 x 18+1 df, 0:1121; 1:315 = 
-    savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
-    CSV.write(savePath, inputDB_test)
-    inputDB_test[inputDB_test.LABEL .== 1, :]
 
-    # performace
-        ## Maximum absolute error
-        ## mean square error (MSE) calculation
-        ## Root mean square error (RMSE) calculation
-        function errorDetermination(arrRi, predictedRi)
-            sumAE = 0
-            maxAE = 0
-            for i = 1:size(predictedRi, 1)
-                AE = abs(arrRi[i] - predictedRi[i])
-                if (AE > maxAE)
-                    maxAE = AE
-                end
-                sumAE += (AE ^ 2)
+## save ##, ouputing 1436 x 18+1 df, 0:1121; 1:315 = 
+savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv"
+CSV.write(savePath, inputDB_test)
+inputDB_test[inputDB_test.LABEL .== 1, :]
+
+
+# ==================================================================================================
+## define functions for performace evaluation ##
+    # Maximum absolute error
+    # mean square error (MSE) calculation
+    # Root mean square error (RMSE) calculation
+    function errorDetermination(arrRi, predictedRi)
+        sumAE = 0
+        maxAE = 0
+        for i = 1:size(predictedRi, 1)
+            AE = abs(arrRi[i] - predictedRi[i])
+            if (AE > maxAE)
+                maxAE = AE
             end
-            MSE = sumAE / size(predictedRi, 1)
-            RMSE = MSE ^ 0.5
-            return maxAE, MSE, RMSE
+            sumAE += (AE ^ 2)
         end
-
-    ## R-square value
-        function rSquareDetermination(arrRi, predictedRi)
-            sumY = 0
-            for i = 1:size(predictedRi, 1)
-                sumY += predictedRi[i]
-            end
-            meanY = sumY / size(predictedRi, 1)
-            sumAE = 0
-            sumRE = 0
-            for i = 1:size(predictedRi, 1)
-                AE = abs(arrRi[i] - predictedRi[i])
-                RE = abs(arrRi[i] - meanY)
-                sumAE += (AE ^ 2)
-                sumRE += (RE ^ 2)
-            end
-            rSquare = 1 - (sumAE / sumRE)
-            return rSquare
+        MSE = sumAE / size(predictedRi, 1)
+        RMSE = MSE ^ 0.5
+        return maxAE, MSE, RMSE
+    end
+    #
+    # Average score
+    function avgScore(arrAcc, cv)
+        sumAcc = 0
+        for acc in arrAcc
+            sumAcc += acc
         end
+        return sumAcc / cv
+    end
 
-    ## Average accuracy
-        function avgScore(arrAcc, cv)
-            sumAcc = 0
-            for acc in arrAcc
-                sumAcc += acc
-            end
-            return sumAcc / cv
+
+# ==================================================================================================
+## deploy models for training set ##
+    ## load a model ##, with DeltaRi
+    # requires python 3.11 or 3.12
+    model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+    #
+    ## deploy model ##
+    predictedTPTN_test = predict(model, Matrix(inputDB_test[:, vcat(5, 7,9, 13,14, 17)]))
+    inputDB_test[!, "withDeltaRIpredictTPTN"] = predictedTPTN_test
+    #
+## save ##, ouputing testSet df 1436 x 19+1 df
+savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv"
+CSV.write(savePath, inputDB_test)
+
+## evaluate predictive performance of the model with DeltaRi ##
+inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+    #
+    maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])  # 1, 0.4477715877437326, 0.6691573714334563
+    pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)]))  # 1436 × 2 Matrix
+    recall_test = recall_score(Vector(inputTestDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)])))  # 0.28253968253968254
+    inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
+    inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
+    #
+## save ##, ouputing trainSet df 1436 x 19+1+2 df
+savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
+CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
+
+
+# ==================================================================================================
+## count individual sample performance ##
+inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
+sort!(inputTestDB_withDeltaRiTPTN, [:INCHIKEYreal, :INCHIKEY])
+    ## define functions for computing weighted P(TP) ##
+    function checkID(inID, refID)
+        if (inID == refID)
+            return true
+        else
+            return false
         end
-
-        describe((inputDB_test))[vcat(5, 7,9, 13,14, 17), :]
-        # load the pre-trained TP/TN model
-        # requires python 3.11 or 3.12
-        model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
-
-        # predict TP/TN
-        predictedTPTN_test = predict(model, Matrix(inputDB_test[:, vcat(5, 7,9, 13,14, 17)]))
-        inputDB_test[!, "withDeltaRIpredictTPTN"] = predictedTPTN_test
-        # save, ouputing testSet df 1436 x 19+1 df
-        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv"
-        CSV.write(savePath, inputDB_test)
-
-    #show prediction performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
-        describe((inputTestDB_withDeltaRiTPTN))[end-5:end, :]
-
-        # 1, 0.4477715877437326, 0.6691573714334563
-        maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
-        # -1.370014065852843
-        rSquare_val = rSquareDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])
-
-        # 1436 × 2 Matrix
-        pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)]))
-        # 0.28253968253968254
-        recall_test = recall_score(Vector(inputTestDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)])))
-
-        inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
-        inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
-        # save, ouputing trainSet df 1436 x 19+1+2 df
-        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
-        CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
-
-        describe((inputTestDB_withDeltaRiTPTN))[end-4:end, :]
-
-    #count individual sample performance
-        inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv", DataFrame)
-        sort!(inputTestDB_withDeltaRiTPTN, [:INCHIKEYreal, :INCHIKEY])
-
-        function checkID(inID, refID)
-            if (inID == refID)
-                return true
-            else
-                return false
-            end
+    end
+    #
+    function countID(count, inID, refID)
+        acc = count
+        if (checkID(inID, refID) == true)
+            acc += 1
+            return acc
+        else
+            return 1
         end
-
-        function countID(count, inID, refID)
-            acc = count
-            if (checkID(inID, refID) == true)
-                acc += 1
-                return acc
-            else
-                return 1
-            end
+    end
+    #
+    function countP(pro, accPro, inID, refID)
+        acc = accPro
+        if (checkID(inID, refID) == true)
+            acc += pro
+            return acc
+        else
+            return pro
         end
-
-        function countP(pro, accPro, inID, refID)
-            acc = accPro
-            if (checkID(inID, refID) == true)
-                acc += pro
-                return acc
-            else
-                return pro
-            end
+    end
+    #
+    ## calculate weighted P(TP) for individual sample MS/MS spectrum ##
+    count = 1
+    colCount = [1]
+    accP0 = inputTestDB_withDeltaRiTPTN[1, "p(0)"]
+    colP0 = [accP0]
+    accP1 = inputTestDB_withDeltaRiTPTN[1, "p(1)"]
+    colP1 = [accP1]
+    colIDSummary = []
+    for id in 1:size(inputTestDB_withDeltaRiTPTN[:, "INCHIKEY"], 1) - 1
+        count = countID(count, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
+        accP0 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(0)"], accP0, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
+        accP1 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(1)"], accP1, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
+        push!(colCount, count)
+        push!(colP0, accP0)
+        push!(colP1, accP1)
+        if (colCount[id] >= colCount[id+1])
+            push!(colIDSummary, 1)
+        else
+            push!(colIDSummary, 0)
         end
+    end
+    push!(colIDSummary, 1)
+    inputTestDB_withDeltaRiTPTN[!, "countID"] = colCount
+    inputTestDB_withDeltaRiTPTN[!, "countP(0)"] = colP0 ./ colCount
+    inputTestDB_withDeltaRiTPTN[!, "countP(1)"] = colP1 ./ colCount
+    inputTestDB_withDeltaRiTPTN[!, "colIDSummary"] = colIDSummary
+    inputTestDB_withDeltaRiTPTN = inputTestDB_withDeltaRiTPTN[inputTestDB_withDeltaRiTPTN."colIDSummary" .== 1, :]
 
-        count = 1
-        colCount = [1]
-        accP0 = inputTestDB_withDeltaRiTPTN[1, "p(0)"]
-        colP0 = [accP0]
-        accP1 = inputTestDB_withDeltaRiTPTN[1, "p(1)"]
-        colP1 = [accP1]
-        colIDSummary = []
-        for id in 1:size(inputTestDB_withDeltaRiTPTN[:, "INCHIKEY"], 1) - 1
-            count = countID(count, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
-            accP0 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(0)"], accP0, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
-            accP1 = countP(inputTestDB_withDeltaRiTPTN[id+1, "p(1)"], accP1, inputTestDB_withDeltaRiTPTN[id+1, "INCHIKEY"], inputTestDB_withDeltaRiTPTN[id, "INCHIKEY"])
-            push!(colCount, count)
-            push!(colP0, accP0)
-            push!(colP1, accP1)
-            if (colCount[id] >= colCount[id+1])
-                push!(colIDSummary, 1)
-            else
-                push!(colIDSummary, 0)
-            end
-        end
-        push!(colIDSummary, 1)
-
-        inputTestDB_withDeltaRiTPTN[!, "countID"] = colCount
-        inputTestDB_withDeltaRiTPTN[!, "countP(0)"] = colP0 ./ colCount
-        inputTestDB_withDeltaRiTPTN[!, "countP(1)"] = colP1 ./ colCount
-        inputTestDB_withDeltaRiTPTN[!, "colIDSummary"] = colIDSummary
-
-        inputTestDB_withDeltaRiTPTN = inputTestDB_withDeltaRiTPTN[inputTestDB_withDeltaRiTPTN."colIDSummary" .== 1, :]
-
-        savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN_ind.csv"
-        CSV.write(savePath, inputTestDB_withDeltaRiTPTN)
+## save ##
+savePath = "F:\\UvA\\F\\UvA\\app\\PestMix1-8_10ug-L_Tea_1-10dil_1ul_AllIon_pos_46_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN_ind.csv"
+CSV.write(savePath, inputTestDB_withDeltaRiTPTN)

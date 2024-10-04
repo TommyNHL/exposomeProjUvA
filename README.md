@@ -254,6 +254,11 @@
 #### - OUTPUT(S): ***dataframePostPredict10FDR_TestALLWithDeltaRI_KNN.csv***
 #### - OUTPUT(S): ***dataframePostPredict10FDR_PestNoTeaWithDeltaRI_KNN.csv***
 #### - OUTPUT(S): ***dataframePostPredict10FDR_Pest2WithTeaWithDeltaRI_KNN.csv***
-
-
-
+## 4_application  (folder)
+### A_TestTemplate_ALL.jl
+#### - INPUT(S): ***PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling.csv***
+#### - INPUT(S): ***modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling_0d5FinalScoreRatioDEFilterSTD.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN.csv***
+#### - OUTPUT(S): ***PestMix1-8_test_report_comp_IDs_withDeltaRIandPredictedTPTNandpTP_KNN_ind.csv***

@@ -101,7 +101,7 @@ inputDB_test[inputDB_test.LABEL .== 1, :]
         return maxAE, MSE, RMSE
     end
     #
-    ## Average score
+    # Average score
     function avgScore(arrAcc, cv)
         sumAcc = 0
         for acc in arrAcc
