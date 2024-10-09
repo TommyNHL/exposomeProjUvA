@@ -129,7 +129,7 @@ CSV.write(savePath, inputDB_test)
 inputTestDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\PestMix1-8_1000ug-L_NoTea_1ul_AllIon_pos_52_report_comp_IDs_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
     #
     maxAE_val, MSE_val, RMSE_val = errorDetermination(inputTestDB_withDeltaRiTPTN[:, end-2], inputTestDB_withDeltaRiTPTN[:, end])  # 1, 0.3392586169520919, 0.5824591118285403
-    pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)]))  # 2103 × 2 Matrix
+    pTP_test = predict_proba(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)]))  # 4613 × 2 Matrix
     recall_test = recall_score(Vector(inputTestDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputTestDB_withDeltaRiTPTN[:, vcat(5, 7,9, 13,14, 17)])))  # 0.6594672426205903
     inputTestDB_withDeltaRiTPTN[!, "p(0)"] = pTP_test[:, 1]
     inputTestDB_withDeltaRiTPTN[!, "p(1)"] = pTP_test[:, 2]
