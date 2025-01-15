@@ -417,6 +417,10 @@ savefig(PestOutplotCM, "F:\\UvA\\F\\UvA\\app\\TPTNPrediction_KNNpestPest2CM.png"
     TNR = 0
     Precision = 0
     Recall = 0
+    FPR_ = 0
+    auroc = 0
+    Recall_ = 0
+    auprc = 0
     for temp in Array(inputDB_TrainWithDeltaRi[:, "p(1)"])
         if (temp != prob)
             println(temp)
@@ -429,6 +433,10 @@ savefig(PestOutplotCM, "F:\\UvA\\F\\UvA\\app\\TPTNPrediction_KNNpestPest2CM.png"
             push!(TrainWithDeltaRi_TNR, TNR)
             push!(TrainWithDeltaRi_Precision, Precision)
             push!(TrainWithDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         else
             push!(TrainWithDeltaRi_TPR, TPR)
             push!(TrainWithDeltaRi_FNR, FNR)
@@ -437,6 +445,10 @@ savefig(PestOutplotCM, "F:\\UvA\\F\\UvA\\app\\TPTNPrediction_KNNpestPest2CM.png"
             push!(TrainWithDeltaRi_TNR, TNR)
             push!(TrainWithDeltaRi_Precision, Precision)
             push!(TrainWithDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         end
     end
     inputDB_TrainWithDeltaRi[!, "TPR"] = TrainWithDeltaRi_TPR
@@ -446,6 +458,7 @@ savefig(PestOutplotCM, "F:\\UvA\\F\\UvA\\app\\TPTNPrediction_KNNpestPest2CM.png"
     inputDB_TrainWithDeltaRi[!, "TNR"] = TrainWithDeltaRi_TNR
     inputDB_TrainWithDeltaRi[!, "Precision"] = TrainWithDeltaRi_Precision
     inputDB_TrainWithDeltaRi[!, "Recall"] = TrainWithDeltaRi_Recall
+    print(auroc, " ", auprc)  #0.9485, 0.9322
 
 ## save ##, ouputing df 1686319 x 26+5 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TPRFNRFDR_newTrainALL_KNN.csv"
@@ -470,6 +483,10 @@ CSV.write(savePath, inputDB_TrainWithDeltaRi)
     TNR = 0
     Precision = 0
     Recall = 0
+    FPR_ = 0
+    auroc = 0
+    Recall_ = 0
+    auprc = 0
     for temp in Array(inputDB_TestWithDeltaRi[:, "p(1)"])
         if (temp != prob)
             println(temp)
@@ -482,6 +499,10 @@ CSV.write(savePath, inputDB_TrainWithDeltaRi)
             push!(TestWithDeltaRi_TNR, TNR)
             push!(TestWithDeltaRi_Precision, Precision)
             push!(TestWithDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         else
             push!(TestWithDeltaRi_TPR, TPR)
             push!(TestWithDeltaRi_FNR, FNR)
@@ -490,6 +511,10 @@ CSV.write(savePath, inputDB_TrainWithDeltaRi)
             push!(TestWithDeltaRi_TNR, TNR)
             push!(TestWithDeltaRi_Precision, Precision)
             push!(TestWithDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         end
     end
     inputDB_TestWithDeltaRi[!, "TPR"] = TestWithDeltaRi_TPR
@@ -499,6 +524,7 @@ CSV.write(savePath, inputDB_TrainWithDeltaRi)
     inputDB_TestWithDeltaRi[!, "TNR"] = TestWithDeltaRi_TNR
     inputDB_TestWithDeltaRi[!, "Precision"] = TestWithDeltaRi_Precision
     inputDB_TestWithDeltaRi[!, "Recall"] = TestWithDeltaRi_Recall
+    print(auroc, " ", auprc)  #0.9461, 0.9289
 
 ## save ##, ouputing df 421381 x 26+5 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TPRFNRFDR_newTestALL_KNN.csv"
@@ -523,6 +549,10 @@ CSV.write(savePath, inputDB_TestWithDeltaRi)
     TNR = 0
     Precision = 0
     Recall = 0
+    FPR_ = 0
+    auroc = 0
+    Recall_ = 0
+    auprc = 0
     for temp in Array(inputDB_PestWithDeltaRi[:, "p(1)"])
         if (temp != prob)
             println(temp)
@@ -535,6 +565,10 @@ CSV.write(savePath, inputDB_TestWithDeltaRi)
             push!(PestWithDeltaRi_TNR, TNR)
             push!(PestWithDeltaRi_Precision, Precision)
             push!(PestWithDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         else
             push!(PestWithDeltaRi_TPR, TPR)
             push!(PestWithDeltaRi_FNR, FNR)
@@ -543,6 +577,10 @@ CSV.write(savePath, inputDB_TestWithDeltaRi)
             push!(PestWithDeltaRi_TNR, TNR)
             push!(PestWithDeltaRi_Precision, Precision)
             push!(PestWithDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         end
     end
     inputDB_PestWithDeltaRi[!, "TPR"] = PestWithDeltaRi_TPR
@@ -552,6 +590,7 @@ CSV.write(savePath, inputDB_TestWithDeltaRi)
     inputDB_PestWithDeltaRi[!, "TNR"] = PestWithDeltaRi_TNR
     inputDB_PestWithDeltaRi[!, "Precision"] = PestWithDeltaRi_Precision
     inputDB_PestWithDeltaRi[!, "Recall"] = PestWithDeltaRi_Recall
+    print(auroc, " ", auprc)  # 0.7328, 0.6301
 
 ## save ##, ouputing df 10908 x 23+5 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TPRFNRFDR_newPestNoTea_KNN.csv"
@@ -746,6 +785,10 @@ CSV.write(savePath, inputDB_Pest2WithOutDeltaRi)
     TNR = 0
     Precision = 0
     Recall = 0
+    FPR_ = 0
+    auroc = 0
+    Recall_ = 0
+    auprc = 0
     for temp in Array(inputDB_TrainWithOutDeltaRi[:, "p(1)"])
         if (temp != prob)
             println(temp)
@@ -758,6 +801,10 @@ CSV.write(savePath, inputDB_Pest2WithOutDeltaRi)
             push!(TrainWithOutDeltaRi_TNR, TNR)
             push!(TrainWithOutDeltaRi_Precision, Precision)
             push!(TrainWithOutDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         else
             push!(TrainWithOutDeltaRi_TPR, TPR)
             push!(TrainWithOutDeltaRi_FNR, FNR)
@@ -766,6 +813,10 @@ CSV.write(savePath, inputDB_Pest2WithOutDeltaRi)
             push!(TrainWithOutDeltaRi_TNR, TNR)
             push!(TrainWithOutDeltaRi_Precision, Precision)
             push!(TrainWithOutDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         end
     end
     inputDB_TrainWithOutDeltaRi[!, "TPR"] = TrainWithOutDeltaRi_TPR
@@ -775,6 +826,7 @@ CSV.write(savePath, inputDB_Pest2WithOutDeltaRi)
     inputDB_TrainWithOutDeltaRi[!, "TNR"] = TrainWithOutDeltaRi_TNR
     inputDB_TrainWithOutDeltaRi[!, "Precision"] = TrainWithOutDeltaRi_Precision
     inputDB_TrainWithOutDeltaRi[!, "Recall"] = TrainWithOutDeltaRi_Recall
+    print(auroc, " ", auprc)  #0.9414, 0.9171
 
 ## save ##, ouputing df 1686319 x 26+5 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TPRFNRFDR_newTrainALLwithOut_KNN.csv"
@@ -799,6 +851,10 @@ CSV.write(savePath, inputDB_TrainWithOutDeltaRi)
     TNR = 0
     Precision = 0
     Recall = 0
+    FPR_ = 0
+    auroc = 0
+    Recall_ = 0
+    auprc = 0
     for temp in Array(inputDB_TestWithOutDeltaRi[:, "p(1)"])
         if (temp != prob)
             println(temp)
@@ -811,6 +867,10 @@ CSV.write(savePath, inputDB_TrainWithOutDeltaRi)
             push!(TestWithOutDeltaRi_TNR, TNR)
             push!(TestWithOutDeltaRi_Precision, Precision)
             push!(TestWithOutDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         else
             push!(TestWithOutDeltaRi_TPR, TPR)
             push!(TestWithOutDeltaRi_FNR, FNR)
@@ -819,6 +879,10 @@ CSV.write(savePath, inputDB_TrainWithOutDeltaRi)
             push!(TestWithOutDeltaRi_TNR, TNR)
             push!(TestWithOutDeltaRi_Precision, Precision)
             push!(TestWithOutDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         end
     end
     inputDB_TestWithOutDeltaRi[!, "TPR"] = TestWithOutDeltaRi_TPR
@@ -828,6 +892,7 @@ CSV.write(savePath, inputDB_TrainWithOutDeltaRi)
     inputDB_TestWithOutDeltaRi[!, "TNR"] = TestWithOutDeltaRi_TNR
     inputDB_TestWithOutDeltaRi[!, "Precision"] = TestWithOutDeltaRi_Precision
     inputDB_TestWithOutDeltaRi[!, "Recall"] = TestWithOutDeltaRi_Recall
+    print(auroc, " ", auprc)  #0.9381, 0.9118
 
 ## save ##, ouputing df 421381 x 26+5 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TPRFNRFDR_newTestALLwithOut_KNN.csv"
@@ -852,6 +917,10 @@ CSV.write(savePath, inputDB_TestWithOutDeltaRi)
     TNR = 0
     Precision = 0
     Recall = 0
+    FPR_ = 0
+    auroc = 0
+    Recall_ = 0
+    auprc = 0
     for temp in Array(inputDB_PestWithOutDeltaRi[:, "p(1)"])
         if (temp != prob)
             println(temp)
@@ -864,6 +933,10 @@ CSV.write(savePath, inputDB_TestWithOutDeltaRi)
             push!(PestWithOutDeltaRi_TNR, TNR)
             push!(PestWithOutDeltaRi_Precision, Precision)
             push!(PestWithOutDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         else
             push!(PestWithOutDeltaRi_TPR, TPR)
             push!(PestWithOutDeltaRi_FNR, FNR)
@@ -872,6 +945,10 @@ CSV.write(savePath, inputDB_TestWithOutDeltaRi)
             push!(PestWithOutDeltaRi_TNR, TNR)
             push!(PestWithOutDeltaRi_Precision, Precision)
             push!(PestWithOutDeltaRi_Recall, Recall)
+            auroc += (TPR*(FPR-FPR_))
+            FPR_ = FPR
+            auprc += (Precision*(Recall-Recall_))
+            Recall_ = Recall
         end
     end
     inputDB_PestWithOutDeltaRi[!, "TPR"] = PestWithOutDeltaRi_TPR
@@ -881,6 +958,7 @@ CSV.write(savePath, inputDB_TestWithOutDeltaRi)
     inputDB_PestWithOutDeltaRi[!, "TNR"] = PestWithOutDeltaRi_TNR
     inputDB_PestWithOutDeltaRi[!, "Precision"] = PestWithOutDeltaRi_Precision
     inputDB_PestWithOutDeltaRi[!, "Recall"] = PestWithOutDeltaRi_Recall
+    print(auroc, " ", auprc)  #0.7577, 0.6557
 
 ## save ##, ouputing df 10908 x 23+5 df 
 savePath = "F:\\UvA\\F\\UvA\\app\\dataframePostPredict_TPRFNRFDR_newPestNoTeaWithOut_KNN.csv"
