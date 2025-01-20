@@ -249,13 +249,13 @@ jl.dump(model, modelSavePath, compress = 5)
 ## prepare to plot figures ##
     ## input dfs ## for separation of the cocamides and non-cocamides datasets
     # 5364 x 931 df 
-    inputCocamidesTrain = CSV.read("F:\\CocamideExtWithStartification_Fingerprints_train.csv", DataFrame)
+    inputCocamidesTrain = CSV.read("G:\\Temp\\CocamideExtWithStartification_Fingerprints_train.csv", DataFrame)
     sort!(inputCocamidesTrain, :SMILES)
     # 947 x 931 df
-    inputCocamidesTest = CSV.read("F:\\CocamideExtWithStratification_Fingerprints_test.csv", DataFrame)
+    inputCocamidesTest = CSV.read("G:\\Temp\\CocamideExtWithStratification_Fingerprints_test.csv", DataFrame)
     sort!(inputCocamidesTest, :SMILES)
     # compare, 30684 x 793 df
-    inputAllFPDB = CSV.read("F:\\UvA\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
+    inputAllFPDB = CSV.read("G:\\Temp\\dataAllFP_withNewPredictedRiWithStratification.csv", DataFrame)
     sort!(inputAllFPDB, [:INCHIKEY, :SMILES])
     #
 function id2id(plotdf, i)
@@ -373,7 +373,7 @@ using Distributions
             dpi = 300)
     plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
 ## save ##
-savefig(outplotTrain, "G:\Temp\\CNLRiPrediction73_RFTrainWithStratification_v4.png")
+savefig(outplotTrain, "G:\\Temp\\CNLRiPrediction73_RFTrainWithStratification_v4.png")
 #
     ## plot for testing ##
     tempDfTest = inputDB_test[:, end-1]
