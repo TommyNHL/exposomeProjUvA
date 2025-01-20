@@ -315,9 +315,9 @@ testCocamide = findall(inputDB_test[:, "Cocamides"] .== "yes")
 ## plot figures ##
 # inputing 693685*0.3 x 1+1+1+15961+1+1+1 df = 208106 x 15965
 # columns: ENTRY, INCHIKEY, ISOTOPICMASS, CNLs, predictRi, CNLpredictRi, Cocamides
-inputDB_test = CSV.read("F:\\UvA\\F\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+inputDB_test = CSV.read("G:\\Temp\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
 # inputing 693685*0.7 x 1+1+1+15961+1 df = 485579 x 15965
-inputDB = CSV.read("F:\\UvA\\F\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
+inputDB = CSV.read("G:\\Temp\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi_withCocamides.csv", DataFrame)
 #
 inputDB_test[:, end-2:end]
 inputDB[:, end-2:end]
@@ -334,7 +334,7 @@ using Distributions
             size = (600, 600), margin = -2Plots.px, dpi = 300)
     scatter!(inputDB[trainNonCocamide, end-2], inputDB[trainNonCocamide, end-1], 
             subplot = 2, framestyle = :box, 
-            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            xlabel = "MF-derived RTI values", ylabel = "CNL-derived RTI values", 
             markershape = :star, 
             c = :skyblue, 
             markerstrokewidth = 0, 
@@ -345,12 +345,12 @@ using Distributions
             dpi = 300)
     scatter!(inputDB[trainCocamide, end-2], inputDB[trainCocamide, end-1], 
             subplot = 2, framestyle = :box, 
-            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            xlabel = "MF-derived RTI values", ylabel = "CNL-derived RTI values", 
             markershape = :star, 
             c = :green, 
             markerstrokewidth = 0, 
             alpha = 0.25, 
-            label = "Pre-Trained", 
+            label = "Compound Calibrants", 
             margin = -2Plots.px, 
             size = (600,600), 
             dpi = 300)
@@ -373,7 +373,7 @@ using Distributions
             dpi = 300)
     plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
 ## save ##
-savefig(outplotTrain, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTrainWithStratification_v3.png")
+savefig(outplotTrain, "G:\Temp\\CNLRiPrediction73_RFTrainWithStratification_v4.png")
 #
     ## plot for testing ##
     tempDfTest = inputDB_test[:, end-1]
@@ -385,7 +385,7 @@ savefig(outplotTrain, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTrainWithStratificat
             size = (600, 600), margin = -2Plots.px, dpi = 300)
     scatter!(inputDB_test[testNonCocamide, end-2], inputDB_test[testNonCocamide, end-1], 
             subplot = 2, framestyle = :box, 
-            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            xlabel = "MF-derived RTI values", ylabel = "CNL-derived RTI values", 
             markershape = :star, 
             c = :skyblue, 
             markerstrokewidth = 0, 
@@ -396,12 +396,12 @@ savefig(outplotTrain, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTrainWithStratificat
             dpi = 300)
     scatter!(inputDB_test[testCocamide, end-2], inputDB_test[testCocamide, end-1], 
             subplot = 2, framestyle = :box, 
-            xlabel = "MF-derived RI values", ylabel = "CNL-derived RI values", 
+            xlabel = "MF-derived RTI values", ylabel = "CNL-derived RTI values", 
             markershape = :star, 
             c = :green, 
             markerstrokewidth = 0, 
             alpha = 0.25, 
-            label = "Pre-Trained", 
+            label = "Compound Calibrants", 
             margin = -2Plots.px, 
             size = (600,600), 
             dpi = 300)
@@ -424,4 +424,4 @@ savefig(outplotTrain, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTrainWithStratificat
             dpi = 300)
     plot!(xlims = (-150, 1500), ylims = (-150, 1500), subplot = 2)
 ## save ##
-savefig(outplotTest, "F:\\UvA\\F\\UvA\\CNLRiPrediction73_RFTestWithStratification_v3.png")
+savefig(outplotTest, "G:\\Temp\\CNLRiPrediction73_RFTestWithStratification_v4.png")
