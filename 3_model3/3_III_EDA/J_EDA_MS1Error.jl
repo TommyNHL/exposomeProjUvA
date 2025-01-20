@@ -29,31 +29,31 @@ using Plots
 
 ## import training set ##
 # 1686319/1686319 / 485631/485631 x 21 / 22 / 22 / 22
-trainDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
-trainDEDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
+trainDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
+trainDEDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 #trainDEFDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-trainDEFSDf = CSV.read("F:\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+trainDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 ## import testing set ##
 # 421381/421381 / 121946/121946 x 21 / 22 / 22 / 22
-testDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
-testDEDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
+testDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
+testDEDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 #testDEFDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-testDEFSDf = CSV.read("F:\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+testDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 ## import validation set ##, spike blank (No Tea)
 # 10908/10908 / 10868/10868 x 18 / 19 / 19 / 19
-noTeaDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
-noTeaDEDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
+noTeaDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
+noTeaDEDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 #noTeaDEFDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-noTeaDEFSDf = CSV.read("F:\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+noTeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 ## import real sample set ## (With Tea)
 # 29599/29599 / 29397/29397 x 18 / 19 / 19 / 19
-TeaDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
-TeaDEDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
+TeaDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatio.csv", DataFrame)
+TeaDEDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDE.csv", DataFrame)
 #TeaDEFDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEFilter.csv", DataFrame)
-TeaDEFSDf = CSV.read("F:\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+TeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 
 
 # ==================================================================================================
@@ -363,7 +363,7 @@ histogram!(trainDEFSDf_0[:, "MS1Error"], bins = 150,
     subplot = 3, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    xlabel = "Normalized MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -374,14 +374,14 @@ histogram!(trainDEFSDf_0[:, "MS1Error"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Standardized\nTraining Dataset", 
+    title = "Normalized\nTraining Dataset", 
     titlefont = font(12), 
     dpi = 300)
     histogram!(trainDEFSDf_1[:, "MS1Error"], bins = 150, 
     subplot = 3, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    xlabel = "Normalized MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -392,14 +392,14 @@ histogram!(trainDEFSDf_0[:, "MS1Error"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Standardized\nTraining Dataset", 
+    title = "Normalized\nTraining Dataset", 
     titlefont = font(12), 
     dpi = 300)
 histogram!(testDEFSDf_0[:, "MS1Error"], bins = 150, 
     subplot = 6, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    xlabel = "Normalized MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -410,14 +410,14 @@ histogram!(testDEFSDf_0[:, "MS1Error"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Standardized\nTesting Dataset", 
+    title = "Normalized\nTesting Dataset", 
     titlefont = font(12), 
     dpi = 300)
     histogram!(testDEFSDf_1[:, "MS1Error"], bins = 150, 
     subplot = 6, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    xlabel = "Normalized MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -428,14 +428,14 @@ histogram!(testDEFSDf_0[:, "MS1Error"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Standardized\nTesting Dataset", 
+    title = "Normalized\nTesting Dataset", 
     titlefont = font(12), 
     dpi = 300)
 histogram!(noTeaDEFSDf_0[:, "MS1Error"], bins = 150, 
     subplot = 9, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    xlabel = "Normalized MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 0", 
     fc = "pink", 
@@ -446,14 +446,14 @@ histogram!(noTeaDEFSDf_0[:, "MS1Error"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Standardized\nValidation Dataset", 
+    title = "Normalized\nValidation Dataset", 
     titlefont = font(12), 
     dpi = 300)
     histogram!(noTeaDEFSDf_1[:, "MS1Error"], bins = 150, 
     subplot = 9, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    xlabel = "Normalized MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -464,14 +464,14 @@ histogram!(noTeaDEFSDf_0[:, "MS1Error"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Standardized\nValidation Dataset", 
+    title = "Normalized\nValidation Dataset", 
     titlefont = font(12), 
     dpi = 300)
 histogram!(TeaDEFSDf_1[:, "MS1Error"], bins = 150, 
     subplot = 12, 
     framestyle = :box, 
     seriestype=:stephist, 
-    xlabel = "z-score of MS1Error", xguidefontsize=10, 
+    xlabel = "Normalized MS1Error", xguidefontsize=10, 
     ylabel = "Count", yguidefontsize=10, 
     label = "LABEL 1", 
     fc = "skyblue", 
@@ -482,9 +482,9 @@ histogram!(TeaDEFSDf_1[:, "MS1Error"], bins = 150,
     ytickfontsize= 8, 
     legend = :topright, 
     legendfont = font(8), 
-    title = "Standardized\nReal Sample Dataset", 
+    title = "Normalized\nReal Sample Dataset", 
     titlefont = font(12), 
     dpi = 300)
 
 ## save ##
-savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\app\\outplot_TPTNDistrution_FeatureMS1Error_noFilter.png")
+savefig(outplotTPTNdetaRiDistrution, "F:\\UvA\\F\\UvA\\app\\outplot_TPTNDistrution_FeatureMS1Error_noFilter.png")
