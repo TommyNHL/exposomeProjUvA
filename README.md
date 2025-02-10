@@ -1,4 +1,13 @@
 # exposomeProjUvA
+This GitHub repository shares the scripts in Julia and Python programming languages that are used for models' development for the work entitled "Machine Learning for Enhanced Identification in RPLC/HRMS Non-Targeted Workflows".
+### The 3 machine learning models that are developed in this project "exposomeProjUvA" are available at ###
+https://bitbucket.org/hiulokngan/modelsExposomeProjUvA/
+
+### Published: 29 January 2025, Version 2
+### DOI: 10.26434/chemrxiv-2024-mdl4q
+***Hiu-Lok Ngan, Viktoriia Turkina, Denice van Herwerden, Hong Yan, Zongwei Cai, Saer Samanipour. Machine Learning for Enhanced Identification in RPLC/HRMS Non-Targeted Workflows. ChemRxiv. 2025; doi:10.26434/chemrxiv-2024-mdl4q-v2  This content is a preprint and has not been peer-reviewed.***
+
+
 # Procedure
 
 ## 0_tools  (folder)
@@ -16,6 +25,7 @@
 #### - INPUT(S): ***dataAllFingerprinter_4RiPredict.csv***
 #### - INPUT(S): ***CocamideExtendedWithStratification.joblib***
 #### - OUTPUT(S): ***dataAllFP_withNewPredictedRiWithStratification.csv***
+### D_FeatureCorrelation.ipynb
 
 ## 2_model2  (folder)
 ### A_PreProcessInternalDB.jl (README_dbColHeaders.md)
@@ -75,6 +85,9 @@
 #### - INPUT(S): ***dataframe73_dfTrainSetWithStratification_95FPCNLleverage.csv***
 #### - OUTPUT(S): ***CNL model 95% leverage cut-off = 0.14604417882015916***
 #### - OUTPUT(S): ***CNLLeverageValueDistrution.png***
+### H_Results.jl
+### I_EDA_Results.jl
+### J_FeatureCorrelation.ipynb
 
 ## 3_model3  (folder)
 ## 3_I_prepareSemisynData  (sub-folder)
@@ -211,6 +224,7 @@
 #### - OUTPUT(S): ***updated4pestNoTea_8paraVS7para.jpg***
 #### - OUTPUT(S): ***updated4pest_8paraVS7para.jpg***
 #### - OUTPUT(S): ***updatedPestRecall_8paraVS7para.jpg***
+### U_FeatureImportance.ipynb
 ## 3_V_modelEvaluation  (sub-folder)
 ### U_ModelEvaluation.jl
 #### - INPUT(S): ***trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv***
@@ -254,6 +268,7 @@
 #### - OUTPUT(S): ***dataframePostPredict10FDR_TestALLWithDeltaRI_KNN.csv***
 #### - OUTPUT(S): ***dataframePostPredict10FDR_PestNoTeaWithDeltaRI_KNN.csv***
 #### - OUTPUT(S): ***dataframePostPredict10FDR_Pest2WithTeaWithDeltaRI_KNN.csv***
+### W_FDRcontrolledResults.ipynb
 ## 4_application  (folder)
 ### A_TestTemplate_ALL.jl
 #### - INPUT(S): ***PestMix1-8_test_report_comp_IDs_dataframeTPTNModeling.csv***
