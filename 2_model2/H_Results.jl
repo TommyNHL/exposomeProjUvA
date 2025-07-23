@@ -99,35 +99,38 @@ end
     inputCocamidesTrain[!, "dataset"] .= "train"
     inputCocamidesTrain[!, "Error"] .= float(0)
     inputCocamidesTrain[!, "AbsError"] .= float(0)
+    inputCocamidesTrain[!, "RelativeError[%]"] .= float(0)
     for i in 1:size(inputCocamidesTrain, 1)
         inputCocamidesTrain[i, "Error"] = inputCocamidesTrain[i, "predictRi"] - inputCocamidesTrain[i, "RI"]
         inputCocamidesTrain[i, "AbsError"] = abs(inputCocamidesTrain[i, "Error"])
+        inputCocamidesTrain[i, "RelativeError[%]"] = (inputCocamidesTrain[i, "AbsError"] / inputCocamidesTrain[i, "RI"]) * 100
     end
     sort!(inputCocamidesTrain, [:AbsError])
     print(inputCocamidesTrain[1, "AbsError"])  # 0.06, 0.05652
     print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.25), "AbsError"])  # 30.34
-    print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.5), "AbsError"])  # 65.89
+    print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.5), "AbsError"])  # 65.86/65.89
     print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.75), "AbsError"])  # 121.36
     print(inputCocamidesTrain[size(inputCocamidesTrain, 1)*1, "AbsError"])  # 1274.32
     describe(inputCocamidesTrain)
     # avgAbsError = 89.52
+    # avgRelativeError = 16.23%
 
     sort!(inputCocamidesTrain, [:Error])
     print(inputCocamidesTrain[1, "Error"])  # -1274.32
     print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.25), "Error"])  # -61.21
-    print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.5), "Error"])  # 11.16
+    print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.5), "Error"])  # 11.12/11.16
     print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.75), "Error"])  # 68.63
     print(inputCocamidesTrain[size(inputCocamidesTrain, 1)*1, "Error"])  # 569.29
     describe(inputCocamidesTrain)
     # avgError = 0.20
 
     ## save the output table as a spreadsheet ##
-    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_train_predict_err.csv"
+    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_train_predict_err_withRelativeErr.csv"
     CSV.write(savePath, inputCocamidesTrain)
 
 ## predict Model 1 testing set
     ## import csv ##
-    # 5048 x 932 df 
+    # 1263 x 932 df 
     inputCocamidesTest = CSV.read("G:\\Temp\\CocamideExtWithStratification_Fingerprints_test.csv", DataFrame)
 
     # call function to convert PubChem FingerPrinter features ##
@@ -155,30 +158,33 @@ end
     inputCocamidesTest[!, "dataset"] .= "test"
     inputCocamidesTest[!, "Error"] .= float(0)
     inputCocamidesTest[!, "AbsError"] .= float(0)
+    inputCocamidesTest[!, "RelativeError[%]"] .= float(0)
     for i in 1:size(inputCocamidesTest, 1)
         inputCocamidesTest[i, "Error"] = inputCocamidesTest[i, "predictRi"] - inputCocamidesTest[i, "RI"]
         inputCocamidesTest[i, "AbsError"] = abs(inputCocamidesTest[i, "Error"])
+        inputCocamidesTest[i, "RelativeError[%]"] = (inputCocamidesTest[i, "AbsError"] / inputCocamidesTest[i, "RI"]) * 100
     end
     sort!(inputCocamidesTest, [:AbsError])
     print(inputCocamidesTest[1, "AbsError"])  # 0.01, 0.007127
     print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.25), "AbsError"])  # 38.57
-    print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.5), "AbsError"])  # 82.94
+    print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.5), "AbsError"])  # 82.71/82.94
     print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.75), "AbsError"])  # 154.15
     print(inputCocamidesTest[size(inputCocamidesTest, 1)*1, "AbsError"])  # 953.91
     describe(inputCocamidesTest)
     # avgAbsError = 111.15
+    # avgRelativeError = 27.53%
 
     sort!(inputCocamidesTest, [:Error])
     print(inputCocamidesTest[1, "Error"])  # -953.91
     print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.25), "Error"])  # -81.94
-    print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.5), "Error"])  # 6.47
+    print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.5), "Error"])  # 6.43/6.47
     print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.75), "Error"])  # 83.17
     print(inputCocamidesTest[size(inputCocamidesTest, 1)*1, "Error"])  # 599.52
     describe(inputCocamidesTest)
     # avgError = -1.54
 
     ## save the output table as a spreadsheet ##
-    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_test_predict_err.csv"
+    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_test_predict_err_withRelativeErr.csv"
     CSV.write(savePath, inputCocamidesTest)
 
 
@@ -226,17 +232,21 @@ end
     inputCocamidesTrain[!, "CNLpredictRI"] .= float(0)
     inputCocamidesTrain[!, "MFError"] .= float(0)
     inputCocamidesTrain[!, "MFAbsError"] .= float(0)
+    inputCocamidesTrain[!, "MFRelativeError[%]"] .= float(0)
     inputCocamidesTrain[!, "CNLError"] .= float(0)
     inputCocamidesTrain[!, "CNLAbsError"] .= float(0)
+    inputCocamidesTrain[!, "CNLRelativeError[%]"] .= float(0)
     for i in 1:size(inputCocamidesTrain, 1)
         inputCocamidesTrain[i, "MFpredictRI"] = smilesid2RI(inputCocamidesTrain, i)
         inputCocamidesTrain[i, "MFError"] = inputCocamidesTrain[i, "MFpredictRI"] - inputCocamidesTrain[i, "RI"]
         inputCocamidesTrain[i, "MFAbsError"] = abs(inputCocamidesTrain[i, "MFError"])
+        inputCocamidesTrain[i, "MFRelativeError[%]"] = (inputCocamidesTrain[i, "MFAbsError"] / inputCocamidesTrain[i, "RI"]) * 100
         arr = findall(inputDB.INCHIKEY .== smilesid2pubchemid(inputCocamidesTrain, i))
         if size(arr, 1) > 0
             inputCocamidesTrain[i, "CNLpredictRI"] = inputDB[arr[end:end], "CNLpredictRi"][1]
             inputCocamidesTrain[i, "CNLError"] = inputCocamidesTrain[i, "CNLpredictRI"] - inputCocamidesTrain[i, "RI"]
             inputCocamidesTrain[i, "CNLAbsError"] = abs(inputCocamidesTrain[i, "CNLError"])
+            inputCocamidesTrain[i, "CNLRelativeError[%]"] = (inputCocamidesTrain[i, "CNLAbsError"] / inputCocamidesTrain[i, "RI"]) * 100
         end
     end
     inputCocamidesTrain = inputCocamidesTrain[inputCocamidesTrain.MFpredictRI .!= float(0), :]
@@ -249,6 +259,7 @@ end
     print(inputCocamidesTrain[size(inputCocamidesTrain, 1)*1, "MFAbsError"])  # 723.20
     describe(inputCocamidesTrain)
     # avgAbsError = 103.06
+    # avgRelativeError = 18.53%
     sort!(inputCocamidesTrain, [:MFError])
     print(inputCocamidesTrain[1, "MFError"])  # -723.20
     print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.25), "MFError"])  # -81.11
@@ -265,6 +276,7 @@ end
     print(inputCocamidesTrain[size(inputCocamidesTrain, 1)*1, "CNLAbsError"])  # 818.03
     describe(inputCocamidesTrain)
     # avgAbsError = 137.65
+    # avgRelativeError = 28.01%
     sort!(inputCocamidesTrain, [:CNLError])
     print(inputCocamidesTrain[1, "CNLError"])  # -818.03
     print(inputCocamidesTrain[floor(Int, size(inputCocamidesTrain, 1)*0.25), "CNLError"])  # -85.83
@@ -275,7 +287,7 @@ end
     # avg = 12.67
 
     ## save the output table as a spreadsheet ##
-    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_train_predict_err2.csv"
+    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_train_predict_err2_withRelativeErr.csv"
     CSV.write(savePath, inputCocamidesTrain)
 
 
@@ -289,17 +301,21 @@ end
     inputCocamidesTest[!, "CNLpredictRI"] .= float(0)
     inputCocamidesTest[!, "MFError"] .= float(0)
     inputCocamidesTest[!, "MFAbsError"] .= float(0)
+    inputCocamidesTest[!, "MFRelativeError[%]"] .= float(0)
     inputCocamidesTest[!, "CNLError"] .= float(0)
     inputCocamidesTest[!, "CNLAbsError"] .= float(0)
+    inputCocamidesTest[!, "CNLRelativeError[%]"] .= float(0)
     for i in 1:size(inputCocamidesTest, 1)
         inputCocamidesTest[i, "MFpredictRI"] = smilesid2RI(inputCocamidesTest, i)
         inputCocamidesTest[i, "MFError"] = inputCocamidesTest[i, "MFpredictRI"] - inputCocamidesTest[i, "RI"]
         inputCocamidesTest[i, "MFAbsError"] = abs(inputCocamidesTest[i, "MFError"])
+        inputCocamidesTest[i, "MFRelativeError[%]"] = (inputCocamidesTest[i, "MFAbsError"] / inputCocamidesTest[i, "RI"]) * 100
         arr = findall(inputDB.INCHIKEY .== smilesid2pubchemid(inputCocamidesTest, i))
         if size(arr, 1) > 0
             inputCocamidesTest[i, "CNLpredictRI"] = inputDB[arr[end:end], "CNLpredictRi"][1]
             inputCocamidesTest[i, "CNLError"] = inputCocamidesTest[i, "CNLpredictRI"] - inputCocamidesTest[i, "RI"]
             inputCocamidesTest[i, "CNLAbsError"] = abs(inputCocamidesTest[i, "CNLError"])
+            inputCocamidesTest[i, "CNLRelativeError[%]"] = (inputCocamidesTest[i, "CNLAbsError"] / inputCocamidesTest[i, "RI"]) * 100
         end
     end
     inputCocamidesTest = inputCocamidesTest[inputCocamidesTest.MFpredictRI .!= float(0), :]
@@ -312,6 +328,7 @@ end
     print(inputCocamidesTest[size(inputCocamidesTest, 1)*1, "MFAbsError"])  # 741.76
     describe(inputCocamidesTest)
     # avgAbsError = 120.82
+    # avgRelativeError = 18.98%
     sort!(inputCocamidesTest, [:MFError])
     print(inputCocamidesTest[1, "MFError"])  # -741.76
     print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.25), "MFError"])  # -99.72
@@ -328,6 +345,7 @@ end
     print(inputCocamidesTest[size(inputCocamidesTest, 1)*1, "CNLAbsError"])  # 668.82
     describe(inputCocamidesTest)
     # avgAbsError = 142.39
+    # avgRelativeError = 22.82%
     sort!(inputCocamidesTest, [:CNLError])
     print(inputCocamidesTest[1, "CNLError"])  # -650.75
     print(inputCocamidesTest[floor(Int, size(inputCocamidesTest, 1)*0.25), "CNLError"])  # -72.40
@@ -338,6 +356,6 @@ end
     # avg = 9.00
 
     ## save the output table as a spreadsheet ##
-    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_test_predict_err2.csv"
+    savePath = "G:\\Temp\\CocamideExtWithStartification_Fingerprints_test_predict_err2_withRelativeErr.csv"
     CSV.write(savePath, inputCocamidesTest)
     
