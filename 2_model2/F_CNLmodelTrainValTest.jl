@@ -24,7 +24,8 @@ using Pkg
 ## import packages from Julia ##
 import Conda
 Conda.PYTHONDIR
-ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+#ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
 using Random
@@ -46,11 +47,13 @@ using ScikitLearn.CrossValidation: train_test_split
 
 ## inputing 485577 x 15965 df for training ##
 # columns: ENTRY, INCHIKEY, MONOISOTOPICMASS, CNLs, predictRi
-inputDB_test = CSV.read("F:\\UvA\\dataframe73_95dfTestSetWithStratification.csv", DataFrame)
+#inputDB_test = CSV.read("F:\\UvA\\dataframe73_95dfTestSetWithStratification.csv", DataFrame)
+inputDB_test = CSV.read("G:\\Temp\\dataframe73_95dfTestSetWithStratification.csv", DataFrame)
 sort!(inputDB_test, [:ENTRY])
 
 ## input 208104 x 15965 df for testing ##
-inputDB = CSV.read("F:\\UvA\\dataframe73_95dfTrainSetWithStratification.csv", DataFrame)
+#inputDB = CSV.read("F:\\UvA\\dataframe73_95dfTrainSetWithStratification.csv", DataFrame)
+inputDB = CSV.read("G:\\Temp\\dataframe73_95dfTrainSetWithStratification.csv", DataFrame)
 sort!(inputDB, [:ENTRY])
 
 ## copy ##
@@ -74,17 +77,21 @@ end
 # Root mean square error (RMSE) calculation
 function errorDetermination(arrRi, predictedRi)
     sumAE = 0
+    sumRE = 0
     maxAE = 0
     for i = 1:size(predictedRi, 1)
         AE = abs(arrRi[i] - predictedRi[i])
+        RE = (AE / predictedRi[i]) * 100
         if (AE > maxAE)
             maxAE = AE
         end
         sumAE += (AE ^ 2)
+        sumRE += RE
     end
     MSE = sumAE / size(predictedRi, 1)
     RMSE = MSE ^ 0.5
-    return maxAE, MSE, RMSE
+    MRE = sumRE / size(predictedRi, 1)
+    return maxAE, MSE, RMSE, MRE
 end
 #
 # R-square value
@@ -216,22 +223,27 @@ jl.dump(model, modelSavePath, compress = 5)
 # ==================================================================================================
 ## evaluate performacnce ##
     # training performace, CNL-predictedRi vs. FP-predictedRi
-    model = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    #model = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    model = jl.load("G:\\Temp\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
     predictedRi_train = predict(model, Matrix(inputDB[:, 3:end-1]))
     inputDB[!, "CNLpredictRi"] = predictedRi_train
     # save, ouputing trainSet df 0.7 x (3+15994+1)
     savePath = "F:\\UvA\\dataframe73_dfTrainSetWithStratification_withCNLPredictedRi.csv"
     CSV.write(savePath, inputDB)
     # call functions
-    maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
+    maxAE_train, MSE_train, RMSE_train, MRE_train = errorDetermination(inputDB[:, end-1], predictedRi_train)
+    # 714.509, 2679.473, 51.764, 6.899%
     rSquare_train = rSquareDetermination(inputDB[:, end-1], predictedRi_train)
+    # 0.9634
     # accuracy
     acc1_train = score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]))
+    # 0.9634
     #acc5_train = cross_val_score(model, Matrix(inputDB[:, 3:end-2]), Vector(inputDB[:, end-1]); cv = 10)
     #avgAcc_train = avgAcc(acc5_train, 10)
 
     # testing performace, CNL-predictedRi vs. FP-predictedRi
-    modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    #modelRF_CNL = jl.load("F:\\UvA\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
+    modelRF_CNL = jl.load("G:\\Temp\\CocamideExtended73_CNLsRi_RFwithStratification.joblib")
     size(modelRF_CNL)
     predictedRi_test = predict(modelRF_CNL, Matrix(inputDB_test[:, 3:end-1]))
     inputDB_test[!, "CNLpredictRi"] = predictedRi_test
@@ -239,10 +251,13 @@ jl.dump(model, modelSavePath, compress = 5)
     savePath = "F:\\UvA\\dataframe73_dfTestSetWithStratification_withCNLPredictedRi.csv"
     CSV.write(savePath, inputDB_test)
     # call functions
-    maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
+    maxAE_val, MSE_val, RMSE_val, MRE_val = errorDetermination(inputDB_test[:, end-1], predictedRi_test)
+    # 1057.714, 8613.806, 92.811, 9.915%
     rSquare_val = rSquareDetermination(inputDB_test[:, end-1], predictedRi_test)
+    # 0.8824
     ## accuracy
     acc1_val = score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]))
+    # 0.8824
     #acc5_val = cross_val_score(modelRF_CNL, Matrix(inputDB_test[:, 3:end-2]), Vector(inputDB_test[:, end-1]); cv = 10)
     #avgAcc_val = avgAcc(acc5_val, 10)
 
