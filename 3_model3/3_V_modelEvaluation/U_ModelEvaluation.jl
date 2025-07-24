@@ -33,7 +33,8 @@ using Pkg
 ## import packages from Julia ##
 import Conda
 Conda.PYTHONDIR
-ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+#ENV["PYTHON"] = raw"C:\Users\T1208\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
+ENV["PYTHON"] = raw"C:\Users\user\AppData\Local\Programs\Python\Python311\python.exe"  # python 3.11
 Pkg.build("PyCall")
 Pkg.status()
 using Random
@@ -67,7 +68,7 @@ f1 = make_scorer(f1_score, pos_label=1, average="binary")
 
 ## input training set ##, 1686319 x 22 df
 # 0: 1535009; 1: 151310 = 0.5493; 5.5724
-trainDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+trainDEFSDf = CSV.read("G:\\Temp\\trainDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 trainDEFSDf[trainDEFSDf.LABEL .== 1, :]
     ## calculate weight ##
     Yy_train = deepcopy(trainDEFSDf[:, end-4])  # 0.5493; 5.5724
@@ -82,7 +83,7 @@ trainDEFSDf[trainDEFSDf.LABEL .== 1, :]
 
 ## input testing set ## 421381 x 22 df
 # 0: 383416; 1: 37965 = 0.5495; 5.5496
-testDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+testDEFSDf = CSV.read("G:\\Temp\\testDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 testDEFSDf[testDEFSDf.LABEL .== 1, :]
     ## calculate weight ##
     Yy_val = deepcopy(testDEFSDf[:, end-4])  # 0.5495; 5.5496
@@ -105,7 +106,7 @@ wholeDEFSDf[wholeDEFSDf.LABEL .== 1, :]
 ## input validation set ##
 # 10908 x 19 df
 # 0: 7173; 1: 3735 = 0.7604; 1.4602
-noTeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+noTeaDEFSDf = CSV.read("G:\\Temp\\noTeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 noTeaDEFSDf[noTeaDEFSDf.LABEL .== 1, :]
     ## calculate weight ##
     Yy_test = deepcopy(noTeaDEFSDf[:, end-1])  # 0.7604; 1.4602
@@ -121,7 +122,7 @@ noTeaDEFSDf[noTeaDEFSDf.LABEL .== 1, :]
 ## input real sample set ## with Tea
 # 29599 x 19 df
 # 1: 8187
-TeaDEFSDf = CSV.read("F:\\UvA\\F\\UvA\\app\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
+TeaDEFSDf = CSV.read("G:\\Temp\\TeaDF_dataframeTPTNModeling_0d5FinalScoreRatioDEnoFilterSTD.csv", DataFrame)
 TeaDEFSDf = TeaDEFSDf[TeaDEFSDf.LABEL .== 1, :]
     ## calculate weight ##
     Yy_test2 = deepcopy(TeaDEFSDf[:, end-1])
@@ -249,7 +250,8 @@ jl.dump(model_noRI, modelSavePath, compress = 5)
 ## deploy models for training set ##
     ## load a model ##, with DeltaRi
     # requires python 3.11 or 3.12
-    model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+    #model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+    model = jl.load("G:\\Temp\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
         #
         ## deploy model ##
         predictedTPTN_train = predict(model, Matrix(trainDEFSDf[:, rank]))
@@ -257,7 +259,7 @@ jl.dump(model_noRI, modelSavePath, compress = 5)
         train_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_train
         #
     ## save ##, ouputing trainSet df 1686319 x 23 df
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv"
     CSV.write(savePath, train_withRI)
     #
     ## load a model ##, without DeltaRi
@@ -276,10 +278,9 @@ jl.dump(model_noRI, modelSavePath, compress = 5)
 
 # ==================================================================================================
 ## evaluate predictive performance of the model with DeltaRi ##
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+inputDB_withDeltaRiTPTN = CSV.read("G:\\Temp\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
     #
     maxAE_train, MSE_train, RMSE_train = errorDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])  # 1, 0.21323664146581994, 0.46177553147153644
-    rSquare_train = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])  # -0.6894203790038584
     pTP_train = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))  # 1686319 × 2 Matrix
     f1_train = f1_score(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)  # 0.8895717113929443
     mcc_train = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampleW)  # 0.7738684612060831
@@ -287,7 +288,7 @@ inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_
     inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_train[:, 2]
     #
     ## save ##, ouputing trainSet df 1686319 x (23+2)
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_TrainDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
     CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 ## evaluate predictive performance of the model without DeltaRi ##
@@ -310,7 +311,7 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
 ## deploy models for testing set ##
     ## load a model ##, with DeltaRi
     # requires python 3.11 or 3.12
-    model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+    model = jl.load("G:\\Temp\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
         #
         ## deploy model ##
         predictedTPTN_val = predict(model, Matrix(testDEFSDf[:, rank]))
@@ -318,7 +319,7 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
         val_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_val
         #
     ## save ##, ouputing valSet df 421381 x 23 df
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv"
     CSV.write(savePath, val_withRI)
     #
     ## load a model ##, without DeltaRi
@@ -337,17 +338,16 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
 
 # ==================================================================================================
 ## evaluate predictive performance of the model with DeltaRi ##
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+inputDB_withDeltaRiTPTN = CSV.read("G:\\Temp\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
     #
     maxAE_val, MSE_val, RMSE_val = errorDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])  # 1, 0.2153965176408049, 0.4641083037835079
-    rSquare_val = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end])  # -0.692877495763629
     pTP_val = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))  # 421381 × 2 Matrix
     f1_val = f1_score(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampletestW)  # 0.8874084658561004
     mcc_val = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-5], inputDB_withDeltaRiTPTN[:, end], sample_weight=sampletestW)  # 0.7689142728578838
     inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_val[:, 1]
     inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_val[:, 2]
     ## save ##, ouputing valSet df 421381 x (23+2)
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_ValDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
     CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 ## evaluate predictive performance of the model without DeltaRi ##
@@ -369,7 +369,7 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
 ## deploy models for validation set ## (NoTea Pest, spike blank)
     ## load a model ##, with DeltaRi
     # requires python 3.11 or 3.12
-    model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+    model = jl.load("G:\\Temp\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
         #
         ## deploy model ##
         predictedTPTN_pest = predict(model, Matrix(noTeaDEFSDf[:, rank]))
@@ -377,7 +377,7 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
         pest_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_pest
         #
     ## save ##, ouputing pestSet df 10908 x 20 df
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_KNN.csv"
     CSV.write(savePath, pest_withRI)
     #
     ## load a model ##, without DeltaRi
@@ -395,17 +395,16 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
 
 # ==================================================================================================
 ## evaluate predictive performance of the model with DeltaRi ##
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+inputDB_withDeltaRiTPTN = CSV.read("G:\\Temp\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
     ##
     maxAE_pest, MSE_pest, RMSE_pest = errorDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])  # 1, 0.3534103410341034, 0.594483255469911
-    rSquare_pest = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])  # -0.47575189038599697
     pTP_pest = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))  # 10908 × 2 Matrix
     f1_pest = f1_score(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)  # 0.6526465712267591
     mcc_pest = matthews_corrcoef(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end], sample_weight=samplepestW)  # 0.2990024830957098
     inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_pest[:, 1]
     inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_pest[:, 2]
     ## save ##, ouputing pestSet df 10908 x (20+2)
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_PestDF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
     CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 ## evaluate predictive performance of the model without DeltaRi ##
@@ -427,7 +426,7 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
 ## deploy models for real sample set ## (withTea Pest)
     ## load a model ##, with DeltaRi
     # requires python 3.11 or 3.12
-    model = jl.load("F:\\UvA\\F\\UvA\\app\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
+    model = jl.load("G:\\Temp\\modelTPTNModeling_6paraKNN_noFilterWithDeltaRI.joblib")
         #
         ## deploy model ##
         predictedTPTN_pest2 = predict(model, Matrix(TeaDEFSDf[:, rank]))
@@ -435,7 +434,7 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
         pest2_withRI[!, "withDeltaRipredictTPTN"] = predictedTPTN_pest2
         #
     ## save ##, ouputing pest2Set df 8187 x 20 df
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_KNN.csv"
     CSV.write(savePath, pest2_withRI)
     #
     ## load a model ##, without DeltaRi
@@ -453,16 +452,16 @@ inputDB_withoutDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeli
 
 # ==================================================================================================
 ## evaluate predictive performance of the model with DeltaRi ##
-inputDB_withDeltaRiTPTN = CSV.read("F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
+inputDB_withDeltaRiTPTN = CSV.read("G:\\Temp\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTN_KNN.csv", DataFrame)
     #
     maxAE_pest2, MSE_pest2, RMSE_pest2 = errorDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])  # 1, 0.40356663002320753, 0.6352689430652245
-    rSquare_pest2 = rSquareDetermination(inputDB_withDeltaRiTPTN[:, end-2], inputDB_withDeltaRiTPTN[:, end])  # -1.4779055690074117
     pTP_pest2 = predict_proba(model, Matrix(inputDB_withDeltaRiTPTN[:, rank]))  # 8187 × 2 Matrix
     recall_pest2 = recall_score(Vector(inputDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputDB_withDeltaRiTPTN[:, rank])))  # 0.5964333699767925
+    recall_pest2_ = recall_score(Vector(inputDB_withDeltaRiTPTN[:, end-2]), predict(model, Matrix(inputDB_withDeltaRiTPTN[:, rank])), sample_weight=samplepest2W)  # 0.5964333699767925
     inputDB_withDeltaRiTPTN[!, "p(0)"] = pTP_pest2[:, 1]
     inputDB_withDeltaRiTPTN[!, "p(1)"] = pTP_pest2[:, 2]
     ## save ##, ouputing pest2Set df 8187 x (20+2)
-    savePath = "F:\\UvA\\F\\UvA\\app\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
+    savePath = "G:\\Temp\\dataframeTPTNModeling_Pest2DF_withDeltaRIandPredictedTPTNandpTP_KNN.csv"
     CSV.write(savePath, inputDB_withDeltaRiTPTN)
 
 ## evaluate predictive performance of the model without DeltaRi ##
